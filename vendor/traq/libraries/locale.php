@@ -61,17 +61,9 @@ class Locale
      */
     public static function load($locale)
     {
-        $file_path = APPPATH . "/locale/{$locale}.php";
-
+        $class = "\\traq\locale\\{$locale}";
         // Check if the file exists..
-        if (file_exists($file_path)) {
-            $class = "\\traq\locale\\{$locale}";
-
-            // Make sure the class isn't loaded already
-            if (!class_exists($class)) {
-                require $file_path;
-            }
-
+        if (class_exists($class)) {
             $localization = new $class();
 
             // Load plugin translation files
@@ -131,40 +123,44 @@ class Locale
      */
     public function get_string($string)
     {
+        $strings = $this->get_strings($string);
+
+        if (is_array($strings) && isset($strings[0])) {
+            return $strings[0];
+        } elseif(is_string($strings)) {
+            return $strings;
+        }
+
+        return $string;
+    }
+
+    /**
+     * Return all strings for a given key
+     *
+     * @param string $string
+     *
+     * @return array|string
+     */
+    public function get_strings($string)
+    {
         $locale = &$this->locale;
         $indexes = explode('.', $string);
 
         // Exact match?
         if (isset($locale[$string])) {
-            if(is_array($locale[$string]) && isset($locale[$string][0])) {
-                return $locale[$string][0];
-            } else {
-                return $locale[$string];
-            }
+            return $locale[$string];
         }
 
         // Loop over the indexes and find the string
-        foreach ($indexes as $index) {
-            // If this is a single string, but is also an array
-            // like "timeline" and "timeline.by_x", check if
-            // timeline[0] exists.
-            if (isset($locale[$index]) and is_array($locale[$index]) and count($indexes) === 1) {
-                return $locale[$index][0];
-            }
-            // Check if it's a single index.
-            elseif (isset($locale[$index]) and !is_array($locale[$index])) {
-                return $locale[$index];
-            }
-            // If this is an array, set it to be
-            // searched by the next index in the string.
-            elseif (isset($locale[$index]) and is_array($locale[$index])) {
+        foreach($indexes as $index) {
+            if (isset($locale[$index])) {
                 $locale = &$locale[$index];
-            }
-            // We didnt find it, return the original.
-            else {
-                return $string;
+            } else {
+                return false;
             }
         }
+
+        return $locale;
     }
 
     /**

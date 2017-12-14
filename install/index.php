@@ -141,13 +141,15 @@ post('/step/3', function(){
 
         // Fetch the install SQL.
         $replace_pairs = array('traq_' => $conn->prefix);
-        
+
         if ($conn->type === 'sqlite') {
             $replace_pairs['COLLATE utf8_unicode_ci'] = 'COLLATE NOCASE';
             $replace_pairs['AUTO_INCREMENT'] = '';
         }
 
         $install_sql = strtr(file_get_contents('./install.sql'), $replace_pairs);
+        $install_sql = preg_replace('/^-- .*$/m', '', $install_sql); // Remove comments
+
         $queries = explode(';', $install_sql);
 
         // Run the install queries.

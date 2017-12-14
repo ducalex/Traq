@@ -23,6 +23,7 @@ use avalon\core\Kernel as Avalon;
 use traq\models\Setting;
 use traq\models\Project;
 
+use traq\libraries\Locale;
 use traq\libraries\SCM;
 
 /**
@@ -60,7 +61,7 @@ function settings($setting) {
  */
 function l()
 {
-    global $locale;
+    $locale = Avalon::app()->locale ?: Locale::load(settings('locale'));
     return call_user_func_array(array($locale, 'translate'), func_get_args());
 }
 
@@ -74,7 +75,7 @@ function l()
  */
 function ldate()
 {
-    global $locale;
+    $locale = Avalon::app()->locale ?: Locale::load(settings('locale'));
     return call_user_func_array(array($locale, 'date'), func_get_args());
 }
 
@@ -206,14 +207,11 @@ function iif($condition, $true, $false = null)
  */
 function permission_actions()
 {
-    global $locale;
-
-    // Fetch the locale strings
-    $locale_strings = $locale->locale();
+    $locale = Avalon::app()->locale ?: Locale::load(settings('locale'));
 
     // Loop over them and get the permissions...
     $actions = array();
-    foreach ($locale_strings['permissions'] as $action => $string) {
+    foreach ($locale->get_strings('permissions') as $action => $string) {
         // Is this a grouped set of permissions?
         if (is_array($string)) {
             // Add them to the actions array

@@ -48,6 +48,7 @@ class AppController extends Controller
     public $project;
     public $projects;
     public $user;
+    public $locale;
     public $is_api = false;
     public $title = array();
     public $feeds = array();
@@ -56,6 +57,9 @@ class AppController extends Controller
     {
         // Set DB connection
         $this->db = Database::connection();
+
+        // Set Locale
+        $this->locale = Locale::load(settings('locale'));
 
         // Set the theme
         View::$theme = settings('theme');
@@ -184,10 +188,10 @@ class AppController extends Controller
         // If a user was found, load their language
         if ($this->user) {
             // Load user's locale
-            if ($this->user->locale != '') {
+            if ($this->user->locale != '' && $this->user->locale != settings('locale')) {
                 $user_locale = Locale::load($this->user->locale);
                 if ($user_locale) {
-                    $locale = $user_locale;
+                    $this->locale = $user_locale;
                 }
             }
 

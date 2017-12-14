@@ -61,17 +61,11 @@ class Misc extends Controller
      */
     public function action_javascript()
     {
-        global $locale;
-
         // Set the content type to javascript
         header("Content-type: text/javascript");
 
         // Set the view without the controller namespace
         $this->render['view'] = 'javascript';
-
-        // Get the locale strings and set the editor strings
-        $strings = $locale->locale();
-        View::set('editor_strings', $strings['editor']);
     }
 
     /**

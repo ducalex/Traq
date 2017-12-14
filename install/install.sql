@@ -245,8 +245,7 @@ DROP TABLE IF EXISTS `traq_priorities`;
 
 CREATE TABLE `traq_priorities` (
   `id` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(255) NOT NULL COLLATE utf8_unicode_ci,
-  
+  `name` VARCHAR(255) NOT NULL COLLATE utf8_unicode_ci
 );
 
 INSERT INTO `traq_priorities` (`id`, `name`)

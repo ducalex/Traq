@@ -35,7 +35,7 @@ function array_remove_keys(array $array, array $keys)
     $array = array_diff_key($array, array_flip($keys));
 
     // Loop over the array in case we need to recurse
-    foreach($array as &$value) {
+    foreach ($array as &$value) {
         if (is_array($value)) {
             $value = array_remove_keys($value, $keys);
         }
@@ -59,8 +59,8 @@ function array_merge_recursive2(array &$first, array &$second)
     $merged = $first;
 
     foreach ($second as $key => &$value) {
-        if (is_array($value) && isset($merged [$key]) && is_array($merged[$key])) {
-            $merged[$key] = array_merge_recursive2($merged [$key], $value);
+        if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+            $merged[$key] = array_merge_recursive2($merged[$key], $value);
         } else {
             $merged[$key] = $value;
         }

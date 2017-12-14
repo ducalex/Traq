@@ -26,20 +26,22 @@ use \traq\models\Project;
  *
  * @param string $text
  * @param bool $strip_html Disables HTML, making it safe.
+ * @param object $project Project to be used in links
  *
  * @return string
  */
-function format_text($text, $strip_html = true)
+function format_text($text, $strip_html = true, $project = null)
 {
     $text = $strip_html ? htmlspecialchars($text) : $text;
+    $project = $project ?: Avalon::app()->project;
 
     FishHook::run('function:format_text', array(&$text, $strip_html));
 
     // Ticket links
-    $text = ticket_links($text);
+    $text = ticket_links($text, $project);
 
     // Wiki links
-    $text = wiki_links($text);
+    $text = wiki_links($text, $project);
 
     return $text;
 }
@@ -51,25 +53,19 @@ function format_text($text, $strip_html = true)
  *
  * @return string
  */
-function ticket_links($text)
+function ticket_links($text, $project)
 {
     return preg_replace_callback(
         "|(?:[\w\d\-_]+)?#([\d]+)|",
         function($matches){
             $match = explode('#', $matches[0]);
 
-            // Replace project#123
-            if (isset($match[1]) and $project = Project::find('slug', $match[0])) {
-                return HTML::link("{$project->slug}#{$match[1]}", $project->href("tickets/{$match[1]}"));
+            // switch project project#123
+            if (isset($match[1])) {
+                $project = Project::find('slug', $match[0]) ?: $project;
             }
-            // Replace #123
-            elseif (isset(Avalon::app()->project->name)) {
-                return HTML::link("#{$match[1]}", Avalon::app()->project->href("tickets/{$match[1]}"));
-            }
-            // No project found, don't link it
-            else {
-                return "#{$match[1]}";
-            }
+
+            return HTML::link($matches[0], $project->href("tickets/{$match[1]}"));
         },
         $text
     );
@@ -82,12 +78,11 @@ function ticket_links($text)
  *
  * @return string
  */
-function wiki_links($text)
+function wiki_links($text, $project)
 {
     return preg_replace_callback(
         "|\[\[(?P<page>[\w\d\-_]+)(\|(?P<text>[\s\w\d\-_]+))?\]\]|",
-        function($matches){
-            $project = Avalon::app()->project;
+        function($matches) use($project) {
 
             if (!isset($matches['text'])) {
                 $matches['text'] = $matches['page'];

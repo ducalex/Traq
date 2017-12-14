@@ -76,20 +76,12 @@ class View
             self::$ob_level = ob_get_level();
         }
 
-        // Make the set variables accessible
-        foreach (self::$vars as $_var => $_val) {
-            $$_var = $_val;
-        }
-
-        // Make the vars for this view accessible
-        if (count($vars)) {
-            foreach($vars as $_var => $_val)
-                $$_var = $_val;
-        }
+        extract(self::$vars);
+        extract($vars);
 
         // Load up the view and get the contents
         ob_start();
-        include($_file);
+        include $_file;
         return ob_get_clean();
     }
 
@@ -109,7 +101,6 @@ class View
             Error::halt("View Error", "Unable to load view '{$file}'", 'HALT');
         }
 
-        unset($file);
         return $path;
     }
 

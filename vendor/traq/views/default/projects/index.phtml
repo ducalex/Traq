@@ -13,7 +13,7 @@
 				</ul>
 			</nav>
 			<div class="description">
-				<?php echo format_text($project->info); ?>
+				<?php echo format_text($project->info, true, $project); ?>
 			</div>
 			<?php FishHook::run('template:projects/index/project', array($project)); ?>
 		</li>

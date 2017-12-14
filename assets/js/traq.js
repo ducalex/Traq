@@ -32,7 +32,7 @@ var traq = {
 	show_hide_custom_fields: function(){
 		var type_id = $("#type option:selected").val();
 
-		// Toggle visibility for custom fields that aren't relveant
+		// Toggle visibility for custom fields that aren't relevant
 		// for the selected type.
 		$(".properties .custom_field").hide();
 		$(".properties .custom_field.field-for-type-0").show();
@@ -49,47 +49,28 @@ var language = {};
 // Instead of that annoying popup confirm box
 // how about a nice simple popover box.
 // Credit to arturo182
-var popover_confirm = function(parent, message, callback) {
+var popover_confirm = function(parent, message, callback_yes, callback_no) {
 	var outerDiv = $('<div/>').addClass('popover_confirm');
 	var innerDiv = $('<div/>');
+	var callback_no = callback_no || function() {};
 
 	innerDiv.append($('<button/>', { 'text' : language.yes }).click(function(){
 		$("#popover").fadeOut('fast');
-		callback();
+		callback_yes();
 		return false;
 	}));
-	innerDiv.append($('<button/>', { 'text' : language.no }).click(function(){ $("#popover").fadeOut('fast'); return false; }));
+	innerDiv.append($('<button/>', { 'text' : language.no }).click(function(){ $("#popover").fadeOut('fast'); callback_no(); return false; }));
 
 	outerDiv.append(message);
 	outerDiv.append(innerDiv);
 
 	$("#popover").stop(true, true).hide().empty().append(outerDiv);
-	$("#popover").popover(parent);
+	$("#popover").popover(parent, 'click', callback_no);
 }
 
 $(document).ready(function(){
-	$("#header h1").on('mouseenter', function(){
-		$("#project_switcher_btn").stop(true, true).fadeIn('fast');
-		$(this).off('mouseleave').on('mouseleave', function(){
-			$("#project_switcher_btn").stop(true, true).fadeOut('fast');
-		});
-	});
-
-	$("#project_switcher_btn").on('mouseenter', function(){
-		$(this).stop(true, true).show();
-		$(this).off('mouseleave').on('mouseleave', function(){
-			$(this).stop(true, true).fadeOut('fast');
-		});
-	});
-
 	$("#project_switcher_btn").on('click', function(){
-		$(this).off('mouseleave');
 		$(".project_switcher").popover($(this));
-		return false;
-	});
-
-	$(document).on('click', function(){
-		$("#project_switcher_btn").stop(true, true).fadeOut('fast');
 	});
 
 	$('[data-preview]').on('click', function(){
@@ -224,6 +205,7 @@ $(document).ready(function(){
 		var filter = $(this).attr('data-filter');
 		$('#filter-' + filter).fadeOut('fast', function(){
 			$(this).remove();
+			$('#ticket_filters').submit();
 		});
 	});
 
@@ -271,8 +253,8 @@ $(document).ready(function(){
 	$.fn.overlay = function() {
 		var element = $(this);
 		element.fadeIn();
-		element.css({left: jQuery(window).width() / 2-element.width() / 2, top: '18%'});
-		$('#overlay_blackout').css({display: 'none', opacity: 0.7, position: 'fixed', width: jQuery(document).width()+100, height: jQuery(document).height()+100, top: -100 + 'px', left: -100 + 'px' });
+		element.css({left: $(window).width() / 2-element.width() / 2, top: '18%'});
+		$('#overlay_blackout').css({display: 'none', opacity: 0.7, position: 'fixed', width: $(document).width()+100, height: $(document).height()+100, top: -100 + 'px', left: -100 + 'px' });
 		$('#overlay_blackout').fadeIn('', function() {
 			$('#overlay_blackout').bind('click', function() {
 				$('#overlay_blackout').fadeOut();
@@ -285,10 +267,6 @@ $(document).ready(function(){
 // Function to close overlay
 function close_overlay(func)
 {
-	if (func == undefined) {
-		func = function(){}
-	}
-
 	$('#overlay_blackout').fadeOut();
-	$('#overlay').fadeOut(func);
+	$('#overlay').fadeOut(func || function(){});
 }

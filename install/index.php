@@ -152,11 +152,15 @@ post('/step/3', function(){
 
         $queries = explode(';', $install_sql);
 
-        // Run the install queries.
-        foreach($queries as $query) {
-            if(!empty($query) && strlen($query) > 5) {
-                $conn->query($query);
+        try {
+            // Run the install queries.
+            foreach($queries as $query) {
+                if(!empty($query) && strlen($query) > 5) {
+                    $conn->query($query);
+                }
             }
+        } catch (Exception $e) {
+            InstallError::halt('The following SQL query failed', '<pre>'.$query.'</pre>');
         }
 
         // Insert admin account
@@ -204,7 +208,7 @@ post('/step/3', function(){
         $db_ver->save();
 
         // Config file
-        $config = '<?php' . PHP_EOL . '$db = ' . var_export($_SESSION['db'], true) . ';';
+        $config = '<?php' . PHP_EOL . 'return $db = ' . var_export($_SESSION['db'], true) . ';';
 
         // Write the config to file
         if(!file_exists('../vendor/traq/config/database.php') and is_writable('../vendor/traq/config')) {

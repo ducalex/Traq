@@ -19,7 +19,15 @@
  */
 
 // Set the content type and charset.
-header("content-type: text/css; charset: UTF-8;");
+header('Content-Type: text/css; charset: UTF-8;');
+header('Expires: '.gmdate("D, d M Y H:i:s", time() + 1800).' GMT');
+header('Pragma: cache');
+header('Cache-Control: max-age=1800');
+
+// Check for the CSS index in the request array..
+if (empty($_REQUEST['css']) && empty($_REQUEST['theme'])) {
+    exit;
+}
 
 // Check if we can gzip the page or not/
 if (extension_loaded('zlib')) {
@@ -28,48 +36,43 @@ if (extension_loaded('zlib')) {
     ob_start('ob_gzhandler');
 }
 
-// Check for the CSS index in the request array..
-if (!isset($_REQUEST['css']) and !isset($_REQUEST['theme'])) {
-    exit;
+$files = [];
+
+if (empty($_REQUEST['plugin'])) {
+    $base = __DIR__ . '/assets/css/';
+} else {
+    $plugin = basename($_REQUEST['plugin']);
+    $base = __DIR__ . "/vendor/traq/plugins/$plugin/assets/css/";
 }
 
-// Fetch the request class.
-require "./vendor/avalon/http/request.php";
-use avalon\http\Request;
-Request::init();
-
-$output = array();
-
-// assets/css files
-if (isset($_REQUEST['css'])) {
-    foreach (explode(',', $_REQUEST['css']) as $file) {
-        // Check if the file exists...
-        if (file_exists(__DIR__ . "/assets/css/{$file}.css")) {
-            // Add it to the output array.
-            $output[] = file_get_contents(__DIR__ . "/assets/css/{$file}.css");
-        }
+if ($_REQUEST['css'] === 'all') {
+    $files = glob("$base/*.css");
+} else {
+    foreach(explode(',', $_REQUEST['css']) as $file) {
+        $files[] = "$base/$file.css";
     }
-}
-
-// Set `theme_files` to `default` if it's
-// not set in the URI.
-if (!isset($_REQUEST['theme_files'])) {
-    $_REQUEST['theme_files'] = 'default';
 }
 
 // Theme CSS files
 if (isset($_REQUEST['theme'])) {
     $theme = htmlspecialchars($_REQUEST['theme']);
-    foreach (explode(',', $_REQUEST['theme_files']) as $file) {
-        // Check if the file exists...
-        if (file_exists(__DIR__ . "/vendor/traq/views/{$theme}/css/{$file}.css")) {
-            // Add it to the output array.
-            $output[] = file_get_contents(__DIR__ . "/vendor/traq/views/{$theme}/css/{$file}.css");
-        }
+    $theme_files = isset($_REQUEST['theme_files']) ? $_REQUEST['theme_files'] : 'default';
+
+    foreach(explode(',', $theme_files) as $file) {
+        $files[] = __DIR__ . "/vendor/traq/views/$theme/css/$file.css";
     }
 }
 
-$output = implode('', $output);
+// Fetch the request class.
+require 'vendor/avalon/http/request.php';
+use avalon\http\Request;
+Request::init();
+
+$files = array_filter($files, function($path) {
+    return strpos($path, '../') === false && file_exists($path);
+});
+
+$output = array_map('file_get_contents', $files);
 
 // Replace the :baseuri: token
 $output = str_replace(':baseuri:', Request::base(), $output);
@@ -77,6 +80,6 @@ $output = str_replace(':baseuri:', Request::base(), $output);
 // Remove comments and such from the output.
 $output = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $output);
 $output = preg_replace('/\s*(,|;|:|{|})\s*/', '$1', $output);
+$output = preg_replace('/\s+/', ' ', $output);
 
-// Minify the CSS.
-echo str_replace(array("\t", "\n"), '', $output);
+echo implode($output);

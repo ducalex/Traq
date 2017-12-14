@@ -19,7 +19,15 @@
  */
 
 // Set content type and charset.
-header("content-type: text/javascript; charset=UTF-8");
+header('Content-Type: text/javascript; charset: UTF-8;');
+header('Expires: '.gmdate("D, d M Y H:i:s", time() + 1800).' GMT');
+header('Pragma: cache');
+header('Cache-Control: max-age=1800');
+
+// Make sure there are files to load.
+if (empty($_REQUEST['js'])) {
+    exit;
+}
 
 // Check if we can gzip the page or not/
 if (extension_loaded('zlib')) {
@@ -28,28 +36,29 @@ if (extension_loaded('zlib')) {
     ob_start('ob_gzhandler');
 }
 
-// Make sure there are files to load.
-if (!isset($_REQUEST['js'])) {
-    exit;
-}
+$files = [];
 
-$output = array();
-
-if ($_REQUEST['js'] == 'all') {
-    foreach (scandir(__DIR__ . '/assets/js') as $file) {
-        if (substr($file, -3) == '.js') {
-            $output[] = file_get_contents(__DIR__ . "/assets/js/{$file}");
-        }
-    }
+if (empty($_REQUEST['plugin'])) {
+    $base = __DIR__ . '/assets/js/';
 } else {
-    foreach (explode(',', $_REQUEST['js']) as $file) {
-        // Make sure the file exists...
-        if (file_exists(__DIR__ . "/assets/js/{$file}.js")) {
-            // Add it to the output array.
-            $output[] = file_get_contents(__DIR__ . "/assets/js/{$file}.js");
-        }
+    $plugin = basename($_REQUEST['plugin']);
+    $base = __DIR__ . "/vendor/traq/plugins/$plugin/assets/js/";
+}
+
+if ($_REQUEST['js'] === 'all') {
+    $files = glob("$base/*.js");
+} else {
+    foreach(explode(',', $_REQUEST['js']) as $file) {
+        $files[] = "$base/$file.js";
     }
 }
+
+$files = array_filter($files, function($path) {
+    // or realpath($path) === $path ?
+    return strpos($path, '../') === false && file_exists($path);
+});
+
+$output = array_map('file_get_contents', $files);
 
 // Display all the files.
 echo implode("\n/* -------------------- */\n", $output);

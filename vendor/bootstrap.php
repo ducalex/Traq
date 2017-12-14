@@ -58,17 +58,18 @@ Error::register();
 require_once APPPATH . '/config/routes.php';
 
 // Load common functions and version file
-require APPPATH . '/common.php';
-require APPPATH . '/version.php';
+require_once APPPATH . '/common.php';
+require_once APPPATH . '/version.php';
 
 // Check for the database config file
 if (!file_exists(APPPATH . '/config/database.php')) {
     (new Request)::redirectTo('install');
 }
+
 // Include config and connect
 else {
     require APPPATH . '/config/database.php';
-    Database::init($db);
+    Database::factory($db, 'main');
 }
 
 // Load the plugins

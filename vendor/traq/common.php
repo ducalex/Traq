@@ -19,10 +19,8 @@
  */
 
 use avalon\core\Kernel as Avalon;
-
 use traq\models\Setting;
 use traq\models\Project;
-
 use traq\libraries\Locale;
 use traq\libraries\SCM;
 
@@ -129,23 +127,6 @@ function theme_select_options()
 }
 
 /**
- * Formats the plugin directory name into
- * a class name.
- *
- * @param string $name
- *
- * @return string
- */
- function get_plugin_name($name)
- {
-     $bits = explode('_', $name);
-     foreach ($bits as $k => $v) {
-         $bits[$k] = ucfirst($v);
-     }
-     return implode('', $bits);
- }
-
-/**
  * Checks if the given regex matches the request
  *
  * @param string $uri
@@ -246,26 +227,6 @@ function scm_select_options()
         $options[] = array('label' => $name, 'value' => $scm);
     }
     return $options;
-}
-
-/**
- * Checks if the specified field is a project or not.
- *
- * @param mixed $find Value [or column] to search for.
- * @param mixed $field Column [or value].
- *
- * @return object
- *
- * @author Jack P.
- * @copyright Copyright (c) Jack P.
- * @package Traq
- */
-function is_project($find, $field = 'slug') {
-    if ($project = Project::find($field, $find)) {
-        return $project;
-    } else {
-        return false;
-    }
 }
 
 /**

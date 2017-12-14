@@ -33,23 +33,6 @@ class Database
     private static $initiated = array();
 
     /**
-     * Connects to the database.
-     *
-     * @return object
-     */
-    public static function init($db)
-    {
-        require SYSPATH . '/database/model.php';
-
-        // Define the DB_PREFIX constant
-        define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');
-
-        static::factory($db, 'main');
-
-        return static::$connections['main'];
-    }
-
-    /**
      * Create a new database connection based off the passed
      * config array and the specified name.
      *

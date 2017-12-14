@@ -59,7 +59,7 @@ class AppController extends Controller
         // Set DB connection
         $this->db = Database::connection();
 
-        // Set Locale
+        // Set locale
         $this->locale = Locale::load(settings('locale'));
 
         // Set the theme
@@ -73,23 +73,26 @@ class AppController extends Controller
         $this->title(settings('title'));
 
         // Load helpers
-        Load::helper('html', 'errors', 'form', 'js', 'formats', 'time_ago', 'uri', 'string',
+        Load::helper('html', 'errors', 'form', 'formats', 'time_ago', 'uri', 'string',
             'subscriptions', 'timeline', 'formatting', 'tickets');
 
         // Get the user info
-        $this->_get_user();
+        $this->user = $this->_get_user();
 
-        // Set the theme, title and pass the app object to the view.
-        View::set('traq', $this);
+        // Set user locale if needed
+        if ($user->locale !== settings('locale') && $locale = Locale::load($user->locale)) {
+            $this->locale = $locale;
+        }
 
         // Check if we're on a project page and get the project info
-        if (isset(Router::$params['project_slug'])
-        and $this->project = is_project(Router::$params['project_slug'])) {
-            if ($this->user->permission($this->project->id, 'view')) {
+        if (isset(Router::$params['project_slug'])) {
+            $this->project = Project::find('slug', Router::$params['project_slug']);
+
+            if ($this->project == false) {
+                $this->show_404();
+            } elseif ($this->user->permission($this->project->id, 'view')) {
                 // Add project name to page title
                 $this->title($this->project->name);
-
-                // Send the project object to the view
                 View::set('project', $this->project);
             } else {
                 $this->show_no_permission();
@@ -98,16 +101,19 @@ class AppController extends Controller
 
         // Fetch all projects and make sure the user has permission
         // to access the project then pass them to the view.
-        $this->projects = array();
         foreach (Project::select()->order_by('displayorder', 'ASC')->exec()->fetch_all() as $project) {
             // Check if the user has access to view the project...
             if ($this->user->permission($project->id, 'view')) {
                 $this->projects[] = $project;
             }
         }
-        View::set('projects', $this->projects);
 
-        View::set('app', $this);
+        View::set(array(
+            'current_user' => $this->user,
+            'projects' => $this->projects,
+            'traq' => $this,
+            'app' => $this,
+        ));
     }
 
     /**
@@ -149,6 +155,27 @@ class AppController extends Controller
     }
 
     /**
+     * Used to display the 404 page.
+     */
+    public function show_404()
+    {
+        header("HTTP/1.0 404 Not Found");
+        $this->render['view'] = 'error/404';
+        $this->render['action'] = false;
+        View::set('request', $_SERVER['REQUEST_URI']);
+    }
+
+    /**
+     * Used to display the generic error page.
+     */
+    public function show_error($title, $message, $code = null)
+    {
+        $this->render['view'] = 'error/generic';
+        $this->render['action'] = false;
+        View::set(compact('title', 'message', 'code'));
+    }
+
+    /**
      * Does the checking for the session cookie and fetches the users info.
      *
      * @author Jack P.
@@ -159,48 +186,31 @@ class AppController extends Controller
     {
         // Check if the session cookie is set, if so, check if it matches a user
         // and set set the user info.
-        if (isset($_COOKIE['_traq']) and $user = User::find('login_hash', $_COOKIE['_traq'])) {
-            $this->user = $user;
+        if (isset($_COOKIE['_traq'])) {
+            $user = User::find('login_hash', $_COOKIE['_traq']);
         }
         // Check if the API key is set
-        else {
-            // Get API key
-            $api_key = API::get_key();
-
-            if ($api_key) {
-                $this->user = User::find('api_key', $api_key);
-
-                // Set is_api and JSON view extension
-                $this->is_api = true;
-                Router::$extension = '.json';
-                $this->render['view'] = $this->render['view'] . ".json";
-            }
+        elseif ($api_key = API::get_key()) {
+            $user = User::find('api_key', $api_key);
+            // Set is_api and JSON view extension
+            $this->is_api = true;
+            Router::$extension = '.json';
         }
 
-        // If a user was found, load their language
-        if ($this->user) {
-            // Load user's locale
-            if ($this->user->locale != '' && $this->user->locale != settings('locale')) {
-                $user_locale = Locale::load($this->user->locale);
-                if ($user_locale) {
-                    $this->locale = $user_locale;
-                }
-            }
-
-            define("LOGGEDIN", true);
-        }
-        // Otherwise just set the user info to guest.
-        else {
-            $this->user = new User(array(
+        // Guest
+        if (empty($user)) {
+            $user = new User(array(
                 'id' => settings('anonymous_user_id'),
+                'locale' => settings('locale'),
                 'username' => l('guest'),
-                'group_id' => 3
+                'group_id' => 3,
             ));
             define("LOGGEDIN", false);
+        } else {
+            define("LOGGEDIN", true);
         }
 
-        // Set the current_user variable in the views.
-        View::set('current_user', $this->user);
+        return $user;
     }
 
     /**

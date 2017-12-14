@@ -11,16 +11,13 @@
 		var e = $(this);
 
 		// Set default position
-		if (!position) {
-			position = 'right';
-		}
+		var position = position || 'right';
 
 		// Check if the tooltip container exists...
 		if (!$('#sexytooltip').length) {
 			$('body').append('<div id="sexytooltip"></div>');
 		}
-		else
-		{
+		else {
 			$('#sexytooltip').stop(true, true).hide();
 			$('#sexytooltip').removeClass('sexytooltip-right sexytooltip-top');
 		}
@@ -44,7 +41,7 @@
 		else if (position == 'top') {
 			tip.addClass('sexytooltip-top').css({
 				left: e.offset().left + 'px',
-				top: (e.offset().top - e.height() - parseInt(e.css('padding-top')) - parseInt(e.css('padding-bottom')) - parseInt(tip.css('padding-top')) - parseInt(tip.css('padding-bottom')) -5) + 'px'
+				top: (e.offset().top - e.height() - tip.height()) + 'px'
 			});
 		}
 		

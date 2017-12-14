@@ -355,12 +355,12 @@ class CustomField extends Model
         if ($this->is_valid()) {
             // Defaults
             $defaults = array(
-                'values'          => "NULL",
+                'values'          => null,
                 'multiple'        => 0,
-                'default_value'   => "NULL",
-                'regex'           => "NULL",
-                'min_length'      => "NULL",
-                'max_length'      => "NULL",
+                'default_value'   => null,
+                'regex'           => null,
+                'min_length'      => null,
+                'max_length'      => null,
                 'is_required'     => 0,
                 'ticket_type_ids' => array()
             );

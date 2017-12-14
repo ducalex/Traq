@@ -64,8 +64,8 @@ class CustomFields extends AppController
             // Loop over properties
             foreach (CustomField::properties() as $property) {
                 // Check if it's set and not empty
-                if (isset(Request::$post[$property])) {
-                    $data[$property] = Request::$post[$property];
+                if (Request::post($property) !== null) {
+                    $data[$property] = Request::post($property);
                 }
             }
 
@@ -78,9 +78,7 @@ class CustomFields extends AppController
             }
 
             // Is required?
-            if (!isset(Request::$post['is_required'])) {
-                $data['is_required'] = 0;
-            }
+            $data['is_required'] = Request::post('is_required') ? 1 : 0;
 
             // Project ID
             $data['project_id'] = $this->project->id;
@@ -124,8 +122,8 @@ class CustomFields extends AppController
             // Loop over properties
             foreach (CustomField::properties() as $property) {
                 // Check if it's set and not empty
-                if (isset(Request::$post[$property])) {
-                    $data[$property] = Request::$post[$property];
+                if (Request::post($property) !== null) {
+                    $data[$property] = Request::post($property);
                 }
             }
 

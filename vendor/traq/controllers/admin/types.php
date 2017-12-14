@@ -104,7 +104,7 @@ class Types extends AppController
             if ($this->is_api) {
                 $type->changelog = Request::post('changelog', $type->changelog);
             } else {
-                $type->changelog = isset(Request::$post['changelog']) ? Request::$post['changelog'] : 0;
+                $type->changelog = Request::post('changelog', 0);
             }
 
             // Check if the data is valid

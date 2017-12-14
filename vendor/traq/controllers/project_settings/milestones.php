@@ -66,9 +66,9 @@ class Milestones extends AppController
                 'slug'         => Request::post('slug'),
                 'codename'     => Request::post('codename'),
                 'info'         => Request::post('info'),
-                'due'          => Request::post('due') != '' ? Request::post('due') : 'NULL',
+                'due'          => Request::post('due') ?: null,
                 'project_id'   => $this->project->id,
-                'displayorder' => Request::post('displayorder') == '' ? 0 : Request::post('displayorder')
+                'displayorder' => Request::post('displayorder') ?: 0
             ));
 
             // Check if the data is valid
@@ -111,11 +111,9 @@ class Milestones extends AppController
                 'slug'         => Request::post('slug', $milestone->slug),
                 'codename'     => Request::post('codename', $milestone->codename),
                 'info'         => Request::post('info', $milestone->info),
-                'due'          => Request::post('due') != '' ? Request::post('due') : 'NULL',
+                'due'          => Request::post('due') ?: null,
                 'status'       => Request::post('status', $milestone->status),
-                'displayorder' => Request::post('displayorder', $milestone->displayorder) == ''
-                    ? 0
-                    : Request::post('displayorder', $milestone->displayorder)
+                'displayorder' => Request::post('displayorder', $milestone->displayorder) ?: 0
             ));
 
             // Make sure the data is valid
@@ -161,7 +159,7 @@ class Milestones extends AppController
         // Check if the form has been submitted
         if (Request::method() == 'post') {
             // Move tickets
-            $this->db->update('tickets')->set(array('milestone_id' => Request::$post['milestone']))->where('milestone_id', $id)->exec();
+            $this->db->update('tickets')->set(array('milestone_id' => Request::post('milestone')))->where('milestone_id', $id)->exec();
 
             // Delete milestone
             $milestone->delete();

@@ -106,7 +106,7 @@ class Statuses extends AppController
             if ($this->is_api) {
                 $status->changelog = Request::post('changelog', $status->changelog);
             } else {
-                $status->changelog = isset(Request::$post['changelog']) ? Request::$post['changelog'] : 0;
+                $status->changelog = Request::post('changelog', 0);
             }
 
             // Check if the data is valid.

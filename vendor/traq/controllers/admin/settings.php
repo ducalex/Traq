@@ -43,7 +43,7 @@ class Settings extends AppController
 
         // Check if the form has been submitted.
         if (Request::method() == 'post') {
-            $_settings = Request::$post['settings'];
+            $_settings = Request::post('settings');
 
             $errors = array();
 
@@ -62,7 +62,7 @@ class Settings extends AppController
             // Check for errors
             if (empty($errors)) {
                 foreach ($_settings as $_setting => $_value) {
-                    $this->db->update('settings')->set(array('value' => $_value))->where('setting', $_setting)->exec();
+                    Database::connection()->update('settings')->set(array('value' => $_value))->where('setting', $_setting)->exec();
                 }
 
                 Request::redirect(Request::requestUri());

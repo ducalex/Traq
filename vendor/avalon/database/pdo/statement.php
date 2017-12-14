@@ -34,7 +34,7 @@ use avalon\database\PDO;
  */
 class Statement
 {
-    private $connection_name;
+    private $connection;
     private $statement;
     private $_model;
     private $results = [];
@@ -51,7 +51,7 @@ class Statement
     public function __construct($statement, $connection_name = 'main')
     {
         $this->statement = $statement;
-        $this->connection_name = $connection_name;
+        $this->connection = Database::connection($connection_name);
     }
 
     /**

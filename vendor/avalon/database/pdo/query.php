@@ -34,7 +34,7 @@ use avalon\database\PDO;
  */
 class Query
 {
-    private $connection_name;
+    private $connection;
     private $type;
     private $cols;
     private $table;
@@ -56,8 +56,6 @@ class Query
      */
     public function __construct($type, $data = null, $connection_name = 'main')
     {
-        $this->connection_name = $connection_name;
-
         if ($type == 'SELECT') {
             $this->cols = (is_array($data) ? $data : array('*'));
         } else if ($type == 'INSERT INTO') {
@@ -66,9 +64,9 @@ class Query
             $this->table = $data;
         }
 
+        $this->connection = Database::connection($connection_name);
+        $this->prefix = $this->connection->prefix;
         $this->type = $type;
-        $this->prefix = $this->_conn()->prefix;
-        return $this;
     }
 
     /**
@@ -179,14 +177,13 @@ class Query
     {
         // Check if this is a mass add
         if (is_array($column)) {
-            // Loop though the columns and add them
             foreach($column as $where) {
-                $this->where($where[0], $where[1], (isset($where[2]) ? $where[2] : '='));
+                call_user_func_array([$this, 'where'], $where);
             }
         }
         // Just one, add it.
         else {
-            $this->where[] = array($column, $cond, $value === null ? 'NULL' : $value);
+            $this->where[] = array($column, $cond, $value);
         }
 
         return $this;
@@ -213,7 +210,7 @@ class Query
      */
     public function exec()
     {
-        $result = $this->_conn()->prepare($this->_assemble());
+        $result = $this->connection->prepare($this->_assemble());
 
         if ($this->type != 'INSERT') {
             foreach ($this->where as $where) {
@@ -222,6 +219,26 @@ class Query
         }
 
         return $result->_model($this->_model)->exec();
+    }
+
+    /**
+     * Shortcut to ->exec()->fetch()
+     *
+     * @return object
+     */
+    public function fetch()
+    {
+        return $this->exec()->fetch();
+    }
+
+    /**
+     * Shortcut to ->exec()->fetch_all()
+     *
+     * @return array
+     */
+    public function fetch_all()
+    {
+        return $this->exec()->fetch_all();
     }
 
     /**
@@ -346,22 +363,12 @@ class Query
     private function _process_value($value)
     {
         if ($value === "NOW()") {
-            return $this->_conn()->quote(gmdate("Y-m-d H:i:s"));
-        } elseif ($value === "NULL") {
+            return $this->connection->quote(gmdate("Y-m-d H:i:s"));
+        } elseif ($value === null) {
             return 'NULL';
         } else {
-            return $this->_conn()->quote($value);
+            return $this->connection->quote($value);
         }
-    }
-
-    /**
-     * Private function to return the database connection.
-     *
-     * @return object
-     */
-    private function _conn()
-    {
-        return Database::connection($this->connection_name);
     }
 
     /**

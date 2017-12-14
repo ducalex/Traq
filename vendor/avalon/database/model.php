@@ -296,15 +296,7 @@ class Model
      * @return array
      */
     public static function fetch_all() {
-        $rows = array();
-        $fetched = static::db()->select(static::$_properties)->from(static::$_name)->exec()->fetch_all();
-
-        foreach ($fetched as $row) {
-            $rows[] = new static($row, false);
-            unset($row);
-        }
-
-        return $rows;
+        return static::select(static::$_properties)->exec()->fetch_all();
     }
 
     public function is_valid() {
@@ -438,7 +430,6 @@ class Model
             foreach($fields as $field) {
                 $data[$field] = $this->_data[$field];
             }
-            unset($fields, $field);
             return $data;
         }
     }
@@ -471,7 +462,7 @@ class Model
      * @return string
      */
     public static function _class() {
-        return get_class(new static());
+        return get_called_class();
     }
 
     /**
@@ -480,12 +471,12 @@ class Model
     private function _timestamps() {
         // Created at field
         if ($this->_is_new() and in_array('created_at', static::$_properties) and !isset($this->_data['created_at'])) {
-            $this->_data['created_at'] = "NOW()";
+            $this->_data['created_at'] = Time::gmt();
         }
 
         // Updated at field
         if (!$this->_is_new() and in_array('updated_at', static::$_properties)) {
-            $this->updated_at = "NOW()";
+            $this->updated_at = Time::gmt();
         }
     }
 

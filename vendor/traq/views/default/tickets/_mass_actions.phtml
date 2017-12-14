@@ -1,4 +1,4 @@
-<?php if (current_user()->permission($project->id, 'perform_mass_actions')) { ?>
+<?php if ($current_user->permission($project->id, 'perform_mass_actions')) { ?>
 <div class="content" id="mass_actions">
 	<form action="<?php echo Request::base($project->href('tickets/mass_actions'))?>" method="post">
 		<?php echo Form::hidden('tickets', '')?>
@@ -11,7 +11,7 @@
 			</div>
 			<?php } ?>
 			<div class="properties group">
-				<?php if (current_user()->permission($project->id, 'ticket_properties_change_type')) { ?>
+				<?php if ($current_user->permission($project->id, 'ticket_properties_change_type')) { ?>
 				<div class="field">
 					<?php echo Form::label(l('type'), 'type'); ?>
 					<?php echo Form::select(
@@ -24,7 +24,7 @@
 					); ?>
 				</div>
 				<?php } ?>
-				<?php if (current_user()->permission($project->id, 'ticket_properties_change_assigned_to')) { ?>
+				<?php if ($current_user->permission($project->id, 'ticket_properties_change_assigned_to')) { ?>
 				<div class="field">
 					<?php echo Form::label(l('assigned_to'), 'assigned_to'); ?>
 					<?php echo Form::select(
@@ -40,7 +40,7 @@
 					); ?>
 				</div>
 				<?php } ?>
-				<?php if (current_user()->permission($project->id, 'ticket_properties_change_milestone')) { ?>
+				<?php if ($current_user->permission($project->id, 'ticket_properties_change_milestone')) { ?>
 				<div class="field">
 					<?php echo Form::label(l('milestone'), 'milestone'); ?>
 					<?php echo Form::select(
@@ -50,7 +50,7 @@
 					); ?>
 				</div>
 				<?php } ?>
-				<?php if (current_user()->permission($project->id, 'ticket_properties_change_version')) { ?>
+				<?php if ($current_user->permission($project->id, 'ticket_properties_change_version')) { ?>
 				<div class="field">
 					<?php echo Form::label(l('version'), 'version'); ?>
 					<?php echo Form::select(
@@ -66,7 +66,7 @@
 					); ?>
 				</div>
 				<?php } ?>
-				<?php if (current_user()->permission($project->id, 'ticket_properties_change_component')) { ?>
+				<?php if ($current_user->permission($project->id, 'ticket_properties_change_component')) { ?>
 				<div class="field">
 					<?php echo Form::label(l('component'), 'component'); ?>
 					<?php echo Form::select(
@@ -82,7 +82,7 @@
 					); ?>
 				</div>
 				<?php } ?>
-				<?php if (current_user()->permission($project->id, 'ticket_properties_change_severity')) { ?>
+				<?php if ($current_user->permission($project->id, 'ticket_properties_change_severity')) { ?>
 				<div class="field">
 					<?php echo Form::label(l('severity'), 'severity'); ?>
 					<?php echo Form::select(
@@ -95,7 +95,7 @@
 					); ?>
 				</div>
 				<?php } ?>
-				<?php if (current_user()->permission($project->id, 'ticket_properties_change_priority')) { ?>
+				<?php if ($current_user->permission($project->id, 'ticket_properties_change_priority')) { ?>
 				<div class="field">
 					<?php echo Form::label(l('priority'), 'priority'); ?>
 					<?php echo Form::select(
@@ -108,7 +108,7 @@
 					); ?>
 				</div>
 				<?php } ?>
-				<?php if (current_user()->permission($project->id, 'ticket_properties_change_status')) { ?>
+				<?php if ($current_user->permission($project->id, 'ticket_properties_change_status')) { ?>
 				<div class="field">
 					<?php echo Form::label(l('status'), 'status'); ?>
 					<?php echo Form::select(

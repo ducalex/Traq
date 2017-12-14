@@ -45,7 +45,7 @@
 			</nav>
 			<div id="page">
 
-				<?php if (current_user()->password_ver == 'sha1') : ?>
+				<?php if ($current_user->password_ver == 'sha1') : ?>
 				<div id="password-change-prompt">
 					<div class="error" style="text-align: center;">
 						<h3><?=l('password_change_prompt')?></h3>

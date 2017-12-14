@@ -6,7 +6,7 @@
 <table id="tickets" class="ticket_listing list">
 	<thead>
 		<tr>
-<?php if (current_user()->permission($project->id, 'perform_mass_actions')) { ?>
+<?php if ($current_user->permission($project->id, 'perform_mass_actions')) { ?>
 			<th class="mass_actions"><?php echo Form::checkbox('all_tickets', 1, array('id' => "select_all_tickets"))?></th>
 <?php } ?>
 	<?php foreach ($columns as $column) { ?>
@@ -20,7 +20,7 @@
 	<tbody>
 	<?php foreach ($tickets as $ticket) { ?>
 		<tr class="priority_<?php echo $ticket->priority_id; ?>">
-<?php if (current_user()->permission($project->id, 'perform_mass_actions')) { ?>
+<?php if ($current_user->permission($project->id, 'perform_mass_actions')) { ?>
 				<td class="mass_actions"><?php echo Form::checkbox('tickets[]', $ticket->ticket_id, array('id' => "mass_action_ticket_{$ticket->ticket_id}"))?></td>
 <?php } ?>
 			<?php foreach ($columns as $column) { ?>

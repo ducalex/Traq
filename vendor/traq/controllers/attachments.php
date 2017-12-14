@@ -96,7 +96,7 @@ class Attachments extends AppController
         $this->attachment = Attachment::find(Router::$params[0]);
 
         // Check if the user has permission
-        if (!current_user()->permission($this->attachment->ticket->project_id, "{$action}_attachments")) {
+        if (!$this->user->permission($this->attachment->ticket->project_id, "{$action}_attachments")) {
             // oh noes! display the no permission page.
             $this->show_no_permission();
             return false;

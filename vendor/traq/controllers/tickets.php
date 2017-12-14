@@ -942,7 +942,7 @@ class Tickets extends AppController
         }
 
         // Check if the user has permission
-        if (!current_user()->permission($this->project->id, $action)) {
+        if (!$this->user->permission($this->project->id, $action)) {
             // oh noes! display the no permission page.
             $this->show_no_permission();
             return false;

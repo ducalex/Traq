@@ -95,7 +95,7 @@ class TicketHistory extends AppController
     public function _check_permission($action)
     {
         // Check if the user has permission
-        if (!current_user()->permission($this->project->id, "{$action}_ticket_history")) {
+        if (!$this->user->permission($this->project->id, "{$action}_ticket_history")) {
             // oh noes! display the no permission page.
             $this->show_no_permission();
             return false;

@@ -53,11 +53,9 @@ class ProjectRole extends Model
         }
 
         // Set errors to be accessible
-        if (count($errors) > 0) {
-            $this->errors = $errors;
-        }
+        $this->errors = $errors ?: $this->errors;
 
-        return !count($errors);
+        return empty($errors);
     }
 
     /**

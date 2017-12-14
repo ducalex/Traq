@@ -48,8 +48,8 @@ class Questions extends \traq\controllers\admin\AppController
         $questions = json_decode(settings('security_questions'), true);
 
         // Add an empty question
-        if (!count($questions)) {
-            $questions[] = array('question' => '', 'answers' => '');
+        if (empty($questions)) {
+            $questions = array(array('question' => '', 'answers' => ''));
         }
 
         // Check if the form has been submitted
@@ -72,7 +72,7 @@ class Questions extends \traq\controllers\admin\AppController
             }
 
             // Save and redirect
-            if (!count($errors)) {
+            if (empty($errors)) {
                 $this->db->update('settings')->set(array('value' => json_encode($updated_questions)))->where('setting', 'security_questions')->exec();
                 Request::redirect(Request::requestUri());
             }

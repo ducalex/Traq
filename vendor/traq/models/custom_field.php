@@ -324,7 +324,7 @@ class CustomField extends Model
 
         // Set errors and return
         $this->errors = $errors;
-        return !count($errors) > 0;
+        return empty($errors);
     }
 
     /**

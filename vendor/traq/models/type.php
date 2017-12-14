@@ -69,7 +69,7 @@ class Type extends Model
         }
 
         $this->errors = $errors;
-        return !count($errors);
+        return empty($errors);
     }
 
     /**

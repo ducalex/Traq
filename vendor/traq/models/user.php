@@ -331,7 +331,7 @@ class User extends Model
             $this->errors = $this->errors;
         }
 
-        return !count($this->errors) > 0;
+        return empty($this->errors);;
     }
 
     /**

@@ -96,7 +96,7 @@ class Tickets extends AppController
         }
 
         // Any filters stored in the session?
-        if (!count($filter_query->filters())
+        if (empty($filter_query->filters())
         and isset($_SESSION['ticket_filters'])
         and isset($_SESSION['ticket_filters'][$this->project->id])) {
             foreach (explode('&', $_SESSION['ticket_filters'][$this->project->id]) as $filter_value) {
@@ -752,7 +752,7 @@ class Tickets extends AppController
         $tickets = json_decode(Request::post('tickets'), true);
 
         // Make sure there are some tickets
-        if (!is_array($tickets) and !count($tickets)) {
+        if (empty($tickets)) {
             Request::redirectTo($this->project->href('tickets'));
         }
 

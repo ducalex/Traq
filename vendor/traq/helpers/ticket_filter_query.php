@@ -89,7 +89,7 @@ class TicketFilterQuery
     {
         $query_values = array();
 
-        if (!count($values)) {
+        if (empty($values)) {
             return;
         }
 
@@ -229,13 +229,13 @@ class TicketFilterQuery
     {
         $sql = array();
 
-        if (count($this->custom_field_sql)) {
+        if (!empty($this->custom_field_sql)) {
             $sql[] = "JOIN `" . Database::connection()->prefix . "custom_field_values` AS `fields` ON (" . implode(' AND ', $this->custom_field_sql) . ")";
         }
 
         $sql[] = " WHERE `project_id` = {$this->project->id}";
 
-        if (count($this->sql)) {
+        if (!empty($this->sql)) {
             $sql[] = "AND " . implode(" AND ", $this->sql);
         }
 

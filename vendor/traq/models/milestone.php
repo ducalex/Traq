@@ -154,7 +154,7 @@ class Milestone extends Model
         }
 
         $this->errors = $errors;
-        return !count($errors) > 0;
+        return empty($errors);
     }
 
     /**

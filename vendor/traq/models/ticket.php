@@ -472,7 +472,7 @@ class Ticket extends Model
 
         // Merge errors
         $this->errors = array_merge($errors, $this->errors);
-        return !count($this->errors) > 0;
+        return empty($this->errors);;
     }
 
     /**

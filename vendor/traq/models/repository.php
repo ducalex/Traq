@@ -81,6 +81,6 @@ class Repository extends Model
         // added via the SCM::_before_save_info() method.
         $this->errors = array_merge($errors, $this->errors);
 
-        return !count($this->errors) > 0;
+        return empty($this->errors);;
     }
 }

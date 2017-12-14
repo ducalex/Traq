@@ -60,9 +60,9 @@ class Settings extends AppController
             }
 
             // Check for errors
-            if (!count($errors)) {
+            if (empty($errors)) {
                 foreach ($_settings as $_setting => $_value) {
-                    Database::connection()->update('settings')->set(array('value' => $_value))->where('setting', $_setting)->exec();
+                    $this->db->update('settings')->set(array('value' => $_value))->where('setting', $_setting)->exec();
                 }
 
                 Request::redirect(Request::requestUri());

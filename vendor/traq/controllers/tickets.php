@@ -165,7 +165,7 @@ class Tickets extends AppController
 
         // Paginate tickets
         $pagination = new Pagination(
-            (isset(Request::$request['page']) ? Request::$request['page'] : 1), // Page
+            Request::post('page', 1), // Page
             settings('tickets_per_page'), // Per page
             $rows->exec()->row_count() // Row count
         );
@@ -198,10 +198,10 @@ class Tickets extends AppController
         }
 
         // Set columns from form
-        if (Request::method() == 'post' and isset(Request::$post['update_columns'])) {
+        if (Request::post('update_columns')) {
             $columns = $_SESSION['columns'] = array_values(Request::post('columns', array()));
-        } elseif(!empty(Request::$request['columns'])) {
-            $columns = explode(',', Request::$request['columns']);
+        } elseif(Request::req('columns')) {
+            $columns = explode(',', Request::req('columns'));
         } elseif(!empty($_SESSION['columns'])) {
             $columns = $_SESSION['columns'];
         } else {
@@ -403,8 +403,8 @@ class Tickets extends AppController
             $ticket->set($data);
 
             // Custom fields, FUN!
-            if (isset(Request::$post['custom_fields'])) {
-                $this->process_custom_fields($ticket, Request::$post['custom_fields']);
+            if (Request::post('custom_fields')) {
+                $this->process_custom_fields($ticket, Request::post('custom_fields'));
             }
 
             // Check if the ticket data is valid...
@@ -593,8 +593,8 @@ class Tickets extends AppController
         }
 
         // Custom fields, FUN!
-        if (isset(Request::$post['custom_fields'])) {
-            $this->process_custom_fields($ticket, Request::$post['custom_fields']);
+        if (Request::post('custom_fields')) {
+            $this->process_custom_fields($ticket, Request::post('custom_fields'));
         }
 
         // Update the ticket
@@ -651,11 +651,11 @@ class Tickets extends AppController
         // Has the form been submitted?
         if (Request::method() == 'post') {
             // Set the ticket body
-            $ticket->body = Request::$post['body'];
+            $ticket->body = Request::post('body');
 
             // Save and redirect
             if ($ticket->save()) {
-                Request::redirect(Request::base($ticket->href()));
+                Request::redirectTo($ticket->href());
             }
         }
 
@@ -675,7 +675,7 @@ class Tickets extends AppController
         // Step 2
         if (Request::post('step') == 2) {
             $next_step = 3;
-            $new_project = Project::find(Request::$post['project_id']);
+            $new_project = Project::find(Request::post('project_id'));
             View::set('new_project', $new_project);
         }
         // Step 3
@@ -829,28 +829,24 @@ class Tickets extends AppController
     public function action_update_filters()
     {
         $query_string = array();
-
+        $filters = Request::post('filters', array());
+        
         // Add filter
-        if (isset(Request::$post['add_filter'])) {
-            $new_filter = Request::$post['new_filter'];
-
-            // Make sure the filter index exists
-            if (!isset(Request::$post['filters'][$new_filter])) {
-                Request::$post['filters'][$new_filter] = array('values' => array());
-            }
-
+        if ($new_filter = Request::post('new_filter')) {
             // Add the blank value
-            Request::$post['filters'][$new_filter] = array(
+            $filters[$new_filter] = array(
                 'prefix' => '',
                 'values' => array()
             );
         }
 
-        foreach (Request::post('filters', array()) as $name => $filter) {
+        foreach ($filters as $name => $filter) {
             // Don't bother if this isn't a valid filter.
             if (!in_array($name, array_keys(ticket_filters_for($this->project)))) {
                 continue;
             }
+            
+            if (!isset($filter['values'])) $filter['values'] = array();
 
             // Process filters
             switch ($name) {

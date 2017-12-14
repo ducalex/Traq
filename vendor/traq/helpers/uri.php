@@ -34,13 +34,10 @@ function create_slug($uri)
     $uri = strtolower($uri);
 
     // Remove unwanted crap
-    $uri = preg_replace('/[^a-z0-9_\s-.]/', '', $uri);
+    $uri = preg_replace('/[^-\s_a-z0-9\.]/', '', $uri);
 
     // Clean dashes and whitespace
-    $uri = preg_replace("/[\s-]+/", "-", $uri);
-
-    // Convert whitespace and underscores to dashes
-    $uri = preg_replace('/[\s_]/', '', $uri);
+    $uri = preg_replace('/[-\s_]+/', '-', $uri);
 
     // Trim the crap
     $uri = trim($uri, '-');

@@ -60,7 +60,7 @@ class Groups extends AppController
         // Check if the form has been submitted.
         if (Request::method() == 'post') {
             // Set the groups name.
-            $group->set('name', Request::$post['name']);
+            $group->set('name', Request::post('name'));
 
             // Make sure the data is valid.
             if ($group->is_valid()) {
@@ -70,7 +70,7 @@ class Groups extends AppController
                 if ($this->is_api) {
                     return \API::response(1, array('group' => $group));
                 } else {
-                    Request::redirect(Request::base('/admin/groups'));
+                    Request::redirectTo('/admin/groups');
                 }
             }
         }
@@ -94,7 +94,7 @@ class Groups extends AppController
         // Check if the form has been submitted.
         if (Request::method() == 'post') {
             // Set the groups name
-            $group->set('name', Request::$post['name']);
+            $group->set('name', Request::post('name'));
 
             // Make sure the data is valid.
             if ($group->is_valid()) {
@@ -104,7 +104,7 @@ class Groups extends AppController
                 if ($this->is_api) {
                     return \API::response(1, array('group' => $group));
                 } else {
-                    Request::redirect(Request::base('/admin/groups'));
+                    Request::redirectTo('/admin/groups');
                 }
             }
         }
@@ -128,7 +128,7 @@ class Groups extends AppController
         if ($this->is_api) {
             return \API::response(1);
         } else {
-            Request::redirect(Request::base('/admin/groups'));
+            Request::redirectTo('/admin/groups');
         }
     }
 }

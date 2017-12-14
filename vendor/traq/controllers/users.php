@@ -78,13 +78,13 @@ class Users extends AppController
         // Check if the form has been submitted
         if (Request::method() == 'post') {
             // Try to find the user in the database and verify their password
-            if ($user = User::find('username', Request::$post['username'])
-            and $user->verify_password(Request::$post['password'])) {
+            if ($user = User::find('username', Request::post('username'))
+            and $user->verify_password(Request::post('password'))) {
                 // User found and verified, set the cookie and redirect them
                 // to the index page if no "redirect" page was set.
                 if ($user->is_activated()) {
                     setcookie('_traq', $user->login_hash, time() + (2 * 4 * 7 * 24 * 60 * 60 * 60), '/');
-                    Request::redirect(isset(Request::$post['redirect']) ? Request::$post['redirect'] : Request::base());
+                    Request::redirect(Request::post('redirect', Request::base()));
                 }
                 // Tell the user to activate
                 else {
@@ -125,10 +125,10 @@ class Users extends AppController
         if (Request::method() == 'post') {
             // Build the data array
             $data = array(
-                'username' => Request::$post['username'],
-                'name'     => Request::$post['name'],
-                'password' => Request::$post['password'],
-                'email'    => Request::$post['email']
+                'username' => Request::post('username'),
+                'name'     => Request::post('name'),
+                'password' => Request::post('password'),
+                'email'    => Request::post('email')
             );
 
             // Create a model with the data
@@ -206,7 +206,7 @@ class Users extends AppController
             // Check if the form has been submitted
             if (Request::method() == 'post') {
                 // Generate key
-                if ($user = User::find('username', Request::$post['username'])) {
+                if ($user = User::find('username', Request::post('username'))) {
                     // Generate reset key
                     $key = random_hash();
 
@@ -222,7 +222,7 @@ class Users extends AppController
                             settings('title'), // Installation title
                             $user->name,       // Users name
                             $user->username,   // Users username
-                            "http://" . $_SERVER['HTTP_HOST'] . Request::base("/login/resetpassword/{$key}"), // Reset password URL
+                            Request::base("/login/resetpassword/{$key}", true), // Reset password URL
                             $_SERVER['REMOTE_ADDR'] // IP of reset request
                         )
                     );

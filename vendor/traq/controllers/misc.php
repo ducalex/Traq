@@ -90,28 +90,24 @@ class Misc extends Controller
         header("Content-type: application/json");
 
         // Get the users, and loop over them
-        $users = User::select('username')->where('username', str_replace('*', '%', Request::$request['term']) . "%", 'LIKE')->exec()->fetch_all();
+        $users = User::select('username')->where('username', str_replace('*', '%', Request::req('term')) . "%", 'LIKE')->exec()->fetch_all();
         $options = array();
         foreach ($users as $user) {
             // Add the user to the optionls array
             $options[] = $user->username;
         }
 
-        // Make sure there are some options
-        if (count($options)) {
-            // Output in javascript array format
-            return '["' . implode('","', $options) . '"]';
-        }
+        return json_encode($options);
     }
 
     public function action_preview_text()
     {
         $this->render['view'] = 'preview_text';
-        View::set('data', format_text(Request::$request['data']));
+        View::set('data', format_text(Request::req('data')));
     }
 
     public function action_format_text()
     {
-        return format_text(Request::$request['data']);
+        return format_text(Request::req('data'));
     }
 }

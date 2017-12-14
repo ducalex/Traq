@@ -70,7 +70,7 @@ class Permissions extends AppController
             $global_defaults = Permission::defaults(0, 0, $type);
 
             // Loop over group/role and get id and permissions
-            foreach (Request::$post['perm'] as $type_id => $permissions) {
+            foreach (Request::post('perm') as $type_id => $permissions) {
                 // Loop over permissions for id and value
                 foreach ($permissions as $permission_id => $value) {
                     // Fetch permission

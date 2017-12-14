@@ -98,9 +98,9 @@ class Usercp extends AppController
 
         if (Request::method() == 'post') {
             $data = array(
-                'old_password'     => Request::$post['password'],
-                'new_password'     => Request::$post['new_password'],
-                'confirm_password' => Request::$post['confirm_password']
+                'old_password'     => Request::post('password'),
+                'new_password'     => Request::post('new_password'),
+                'confirm_password' => Request::post('confirm_password')
             );
 
             FishHook::add('controller:users::usercp/password/save', array(&$data));

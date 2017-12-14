@@ -36,8 +36,8 @@ use traq\models\CustomField;
  */
 function ticket_sort_url_for($column) {
     // Get current order
-    if (isset(Request::$request['order_by'])) {
-        $order = explode('.', Request::$request['order_by']);
+    if (Request::req('order_by')) {
+        $order = explode('.', Request::req('order_by'));
     } else {
         return Request::requestUri() . (strlen($_SERVER['QUERY_STRING']) ? '&amp;' : '?') . "order_by={$column}.asc";
     }
@@ -404,12 +404,7 @@ function ticket_filter_options_for($filter, $project_id = null) {
 function ticketlist_sort_indicator($column)
 {
     // Default
-    $order = 'priority_id.ASC';
-
-    // Check if order_by is set, and use it if it is
-    if (isset(Request::$request['order_by'])) {
-        $order = Request::$request['order_by'];
-    }
+    $order = Request::req('order_by', 'priority_id.ASC');
 
     // Split column and order
     $order = explode('.', $order);
@@ -449,11 +444,7 @@ function ticket_history_sorting_options()
  */
 function ticket_sort_order($fallback)
 {
-    if (isset(Request::$request['order_by'])) {
-        return Request::$request['order_by'];
-    } else {
-        return $fallback;
-    }
+    return Request::req('order_by', $fallback);
 }
 
 /**

@@ -326,12 +326,7 @@ class User extends Model
             $this->errors['email'] = l('errors.users.email_in_use');
         }
 
-        // Check if we're valid or not...
-        if (count($this->errors) > 0) {
-            $this->errors = $this->errors;
-        }
-
-        return empty($this->errors);;
+        return empty($this->errors);
     }
 
     /**

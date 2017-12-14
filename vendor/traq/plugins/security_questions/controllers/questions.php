@@ -57,7 +57,7 @@ class Questions extends \traq\controllers\admin\AppController
         if (Request::method() == 'post') {
             // Process questions
             $updated_questions = array();
-            foreach (Request::$post['questions'] as $id => $question) {
+            foreach (Request::post('questions', array()) as $id => $question) {
                 // Check fields
                 foreach ($question as $field => $value) {
                     if (empty($value)) {

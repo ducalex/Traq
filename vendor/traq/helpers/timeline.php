@@ -66,7 +66,7 @@ function timeline_filters($filter = null)
     );
 
     // Return events for specific filter
-    if ($filter) {
+    if (isset($filters[$filter])) {
         return $filters[$filter];
     }
 

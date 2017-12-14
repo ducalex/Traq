@@ -55,9 +55,9 @@ class TicketTasks extends AppController
         $this->render['layout'] = false;
 
         // Task data
-        $id        = isset(Request::$request['id']) ? Request::$request['id'] : 0;
-        $completed = isset(Request::$request['completed']) ? (Request::$request['completed'] == "true" ? true : false) : false;
-        $task      = isset(Request::$request['task']) ? Request::$request['task'] : '';
+        $id        = Request::post('id', 0);
+        $completed = Request::post('completed') === 'true';
+        $task      = Request::post('task', '');
 
         return View::render('ticket_tasks/_form_bit', array('id' => $id, 'completed' => $completed, 'task' => $task));
     }

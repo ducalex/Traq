@@ -79,7 +79,7 @@ class Users extends AppController
                 if ($this->is_api) {
                     return API::response(1, array('user' => $user));
                 } else {
-                    Request::redirect(Request::base('/admin/users'));
+                    Request::redirectTo('/admin/users');
                 }
             }
         }
@@ -111,15 +111,15 @@ class Users extends AppController
             ));
 
             // Check if we're changing their password.
-            if (!empty(Request::$post['password'])) {
+            if (Request::post('password')) {
                 // Update their password.
-                $user->set('password', Request::$post['password']);
+                $user->set('password', Request::post('password'));
             }
 
             // Check if the users data is valid.
             if ($user->is_valid()) {
                 // Again check if we're changin their password.
-                if (!empty(Request::$post['password'])) {
+                if (Request::post('password')) {
                     // Process the password.
                     $user->prepare_password();
                 }
@@ -131,7 +131,7 @@ class Users extends AppController
                 if ($this->is_api) {
                     return API::response(1, array('user' => $user));
                 } else {
-                    Request::redirect(Request::base('/admin/users'));
+                    Request::redirectTo('/admin/users');
                 }
             }
         }
@@ -155,7 +155,7 @@ class Users extends AppController
         if ($this->is_api) {
             return API::response(1);
         } else {
-            Request::redirect(Request::base('/admin/users'));
+            Request::redirectTo('/admin/users');
         }
     }
 
@@ -165,9 +165,8 @@ class Users extends AppController
     public function action_mass_actions()
     {
         // Make sure there are some users...
-        if (!isset(Request::$post['users']) || empty(Request::$post['users'])) {
-            Request::redirect(Request::base('/admin/users'));
-            exit;
+        if (!Request::post('users')) {
+            Request::redirectTo('/admin/users');
         }
 
         // Get anonymous user ID
@@ -179,7 +178,7 @@ class Users extends AppController
         $delete_comments = Request::post('delete_comments') == 1 ? true : false;
 
         // Loop over users
-        foreach (Request::$post['users'] as $user_id) {
+        foreach (Request::post('users') as $user_id) {
             $user = User::find($user_id);
 
             // Delete tickets?
@@ -207,6 +206,6 @@ class Users extends AppController
             }
         }
 
-        Request::redirect(Request::base('/admin/users'));
+        Request::redirectTo('/admin/users');
     }
 }

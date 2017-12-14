@@ -148,7 +148,7 @@ class Projects extends AppController
         $events = timeline_events();
 
         // Check if filters are set
-        if (isset(Request::$post['filters']) or isset($_SESSION['timeline_filters'])) {
+        if (Request::post('filters') or isset($_SESSION['timeline_filters'])) {
             // Fetch filters
             $filters = array_keys(Request::post('filters') ?: $_SESSION['timeline_filters']);
             $events = array();

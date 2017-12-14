@@ -67,21 +67,14 @@ class Pagination
             // Limit pages
             $this->limit = ($this->page-1 > 0 ? $this->page-1 : 0) * $per_page;
 
-            // Get correct request URI with page number
-            if (!isset(Request::$request['page'])) {
-                $request_uri = Request::requestUri() . (strlen($_SERVER['QUERY_STRING']) ? '&amp;' : '?') . "page={$this->page}";
-            } else {
-                $request_uri = Request::requestUri();
-            }
-
             // Next page URL
             if ($this->next_page <= $this->total_pages) {
-                $this->next_page_url = str_replace("page=" . $this->page, "page=" . $this->next_page, $request_uri);
+                $this->next_page_url = Request::base(Request::getUri().'?' . http_build_query(['page' => $this->next_page] + $_GET));
             }
 
             // Previous page URL
             if ($this->prev_page > 0) {
-                $this->prev_page_url = str_replace("page=" . $this->page, "page=" . $this->prev_page, $request_uri);
+                $this->prev_page_url = Request::base(Request::getUri().'?' . http_build_query(['page' => $this->prev_page] + $_GET));
             }
         }
     }

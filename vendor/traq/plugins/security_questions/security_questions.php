@@ -104,7 +104,7 @@ class SecurityQuestions extends \traq\libraries\Plugin
         $question  = $questions[$_SESSION['question_id']];
         $answers   = explode('|', $question['answers']);
 
-        if (!in_array(Request::$post['answer'], $answers)) {
+        if (!in_array(Request::post('answer'), $answers)) {
             $model->_add_error('answer', l('errors.security_questions.answer_is_wrong'));
         }
      }

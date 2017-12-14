@@ -40,16 +40,13 @@ class API
      */
     public static function get_key()
     {
-        // Check request
-        if (isset(Request::$request['access_token']) and isset(Request::$request['access_token'][5])) {
-            return Request::$request['access_token'];
-        }
-        // Check header
-        elseif (isset($_SERVER['HTTP_ACCESS_TOKEN']) and isset($_SERVER['HTTP_ACCESS_TOKEN'][5])) {
-            return $_SERVER['HTTP_ACCESS_TOKEN'];
-        }
-        // Set, but not >= 5 characters
-        elseif (isset(Request::$request['access_token']) or isset($_SERVER['HTTP_ACCESS_TOKEN'])) {
+        $code = Request::req('access_token', @$_SERVER['HTTP_ACCESS_TOKEN']);
+
+        if (empty($code)) {
+            return null;
+        } elseif (strlen($code) > 5) {
+            return $code;
+        } else {
             return false;
         }
 

@@ -47,7 +47,7 @@ class Members extends AppController
     public function action_new()
     {
         // Get the user
-        $user = User::find('username', Request::$post['username']);
+        $user = User::find('username', Request::post('username'));
 
         // Check the username...
         $errors = array();
@@ -57,7 +57,7 @@ class Members extends AppController
             $errors['username'] = l('errors.users.doesnt_exist');
         }
         // Username entered?
-        elseif (!isset(Request::$post['username']) or Request::$post['username'] == '') {
+        elseif (Request::post('username') == '') {
             $errors['username'] = l('errors.users.username_blank');
         }
         // Already a project member?
@@ -77,7 +77,7 @@ class Members extends AppController
             $user_role = new UserRole(array(
                 'project_id' => $this->project->id,
                 'user_id' => $user->id,
-                'project_role_id' => Request::$post['role']
+                'project_role_id' => Request::post('role')
             ));
             $user_role->save();
 
@@ -87,8 +87,8 @@ class Members extends AppController
 
     public function action_save()
     {
-        if (Request::method() == 'post') {
-            foreach (Request::$post['role'] as $role_id => $value) {
+        if (is_array(Request::post('role'))) {
+            foreach (Request::post('role') as $role_id => $value) {
                 $role = UserRole::find($role_id);
                 $role->project_role_id = $value;
                 $role->save();

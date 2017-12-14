@@ -244,11 +244,11 @@ class AppController extends Controller
         // Was the page requested via ajax?
         if ($this->render['view'] and Request::isAjax() and Router::$extension == null) {
             // Is this page being used as an overlay?
-            if (isset(Request::$request['overlay'])) {
+            if (Request::req('overlay')) {
                 $extension = '.overlay';
             }
             // a popover?
-            elseif (isset(Request::$request['popover'])) {
+            elseif (Request::post('popover')) {
                 $extension = '.popover';
             }
             // Neither, just regular javascript
@@ -262,7 +262,9 @@ class AppController extends Controller
         }
 
         if (Router::$extension) {
-            header('Content-type: application/' . trim(Router::$extension, '.'));
+            if ($mime = mime_type_for(Router::$extension)) {
+                header('Content-type: ' . $mime);
+            }
             if (!empty($this->render['view']) and strpos($this->render['view'], Router::$extension) === false) {
                 $this->render['view'] .= Router::$extension;
             }

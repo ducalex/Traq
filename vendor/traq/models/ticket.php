@@ -389,18 +389,18 @@ class Ticket extends Model
         $changes = array_merge($changes, $this->_changes);
 
         // Any changes, or perhaps a comment?
-        if (count($changes) > 0 or !empty(Request::$post['comment'])) {
+        if (!empty($changes) or Request::post('comment') != '') {
             $this->_save_queue[] = new TicketHistory(array(
                 'user_id' => $user->id,
                 'ticket_id' => $this->id,
                 'changes' => count($changes) > 0 ? json_encode($changes) : '',
-                'comment' => isset(Request::$post['comment']) ? Request::$post['comment'] : ''
+                'comment' => Request::post('comment', '')
             ));
 
-            if (!$this->_is_closing and !$this->_is_reopening) {
+            if (!$this->_is_closing and !$this->_is_reopening and !isset($data['project_id'])) {
                 // Changes (and possibly a comment)
                 // But not when moving the ticket.
-                if (count($changes) and !isset($data['project_id'])) {
+                if (!empty($changes)) {
                     $this->_save_queue[] = new Timeline(array(
                         'project_id' => $this->project_id,
                         'owner_id'   => $this->id,
@@ -410,7 +410,7 @@ class Ticket extends Model
                     ));
                 }
                 // No changes but definitely a comment
-                elseif (!count($changes) and !empty(Request::$post['comment']) and !isset($data['project_id'])) {
+                elseif (Request::post('comment') != '') {
                     $this->_save_queue[] = new Timeline(array(
                         'project_id' => $this->project_id,
                         'owner_id' => $this->id,
@@ -472,7 +472,7 @@ class Ticket extends Model
 
         // Merge errors
         $this->errors = array_merge($errors, $this->errors);
-        return empty($this->errors);;
+        return empty($this->errors);
     }
 
     /**

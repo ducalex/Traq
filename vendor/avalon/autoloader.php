@@ -31,9 +31,8 @@ namespace avalon;
  */
 class Autoloader
 {
-    private static $vendorLocation;
-    private static $classes = array();
-    private static $namespaces = array();
+    private static $aliases = array();
+    private static $prefixes = array();
 
     /**
      * Registers the class as the autoloader.
@@ -50,7 +49,7 @@ class Autoloader
      */
     public static function aliasClasses($classes)
     {
-        foreach ($classes as $original => $alias) {
+        foreach($classes as $original => $alias) {
             static::aliasClass($original, $alias);
         }
     }
@@ -63,7 +62,7 @@ class Autoloader
      */
     public static function aliasClass($original, $alias)
     {
-        static::$classes[$alias] = ltrim($original, '\\');
+        static::$aliases[$alias] = ltrim($original, '\\');
     }
 
     /**
@@ -73,7 +72,7 @@ class Autoloader
      */
     public static function registerNamespaces(array $namespaces)
     {
-        foreach ($namespaces as $vendor => $location) {
+        foreach($namespaces as $vendor => $location) {
             static::registerNamespace($vendor, $location);
         }
     }
@@ -83,10 +82,17 @@ class Autoloader
      *
      * @param string $vendor
      * @param string $location
+     * @param bool $overwrite
      */
-    public static function registerNamespace($vendor, $location)
+    public static function registerNamespace($vendor, $location, $overwrite = false)
     {
-        static::$namespaces[$vendor] = $location;
+        $vendor = trim($vendor, '\\');
+
+        if (!isset(static::$prefixes[$vendor]) || $overwrite) {
+            static::$prefixes[$vendor] = array();
+        }
+
+        static::$prefixes[$vendor][] = $location;
     }
 
     /**
@@ -96,7 +102,7 @@ class Autoloader
      */
     public static function vendorLocation($location)
     {
-        static::$vendorLocation = $location;
+        static::registerNamespace('', $location, true);
     }
 
     /**
@@ -108,67 +114,23 @@ class Autoloader
      */
     public static function load($class)
     {
-        $class = ltrim($class, '\\');
-        $vendor = explode('\\', $class);
-        $vendor = $vendor[0];
+        $class = $prefix = ltrim($class, '\\');
 
         // Aliased classes
-        if (isset(static::$classes[$class])) {
-            $file = static::filePath(static::$classes[$class]);
-
-            if (file_exists($file) and !class_exists(static::$classes[$class])) {
-                require $file;
-            }
-
-            if (class_exists(static::$classes[$class])) {
-                class_alias(static::$classes[$class], $class);
-            }
+        if (isset(static::$aliases[$class])) {
+            return class_alias(static::$aliases[$class], $class); // This will recurse the autoloader if needed
         }
-        // Registered namespace
-        elseif (isset(static::$namespaces[$vendor])) {
-            $namespace = explode('\\', $class);
-            unset($namespace[0]);
-            $namespace = implode('\\', $namespace);
 
-            require static::$namespaces[$vendor] . static::filePath($namespace, false);
-        }
-        // Everything else
-        else {
-            $file = static::filePath($class);
-            if (file_exists($file)) {
-                require $file;
+        do {
+            $prefix = substr($class, 0, $pos = strrpos($prefix, '\\'));
+            $filename = strtolower(preg_replace(['#[_\\\\]#', '/(?<=[a-z])([A-Z])/'], ['/', '_\\1'], '/'.substr($class, $pos).'.php'));
+            if (isset(static::$prefixes[$prefix])) {
+                foreach(static::$prefixes[$prefix] as $path) {
+                    if (file_exists($path.$filename)) {
+                        return require $path.$filename;
+                    }
+                }
             }
-        }
-    }
-
-    /**
-     * Converts the class into the file path.
-     *
-     * @param string $class
-     *
-     * @return string
-     */
-    public static function filePath($class, $prependVendor = true)
-    {
-        return ($prependVendor ? static::$vendorLocation :'') . static::lowercase(str_replace(array('\\', '_'), DIRECTORY_SEPARATOR, "/{$class}.php"));
-    }
-
-    /**
-     * Lowercases the string to camcel_case.
-     *
-     * @param string $string
-     *
-     * @return string
-     */
-    private static function lowercase($string) {
-        $string = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $string));
-
-        // There are certain things we don't want under_scored
-        // such as mysql.
-        $undo = array(
-            'my_sql' => 'mysql'
-        );
-
-        return str_replace(array_keys($undo), array_values($undo), $string);
+        } while($prefix);
     }
 }

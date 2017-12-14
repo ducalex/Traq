@@ -58,20 +58,15 @@ class Database
      *
      * @return object
      */
-    public static function factory(array $config, $name)
+    public static function factory(array $config, $name = 'main')
     {
         // Make sure the connection name is available
-        if (isset(static::$connections[$name])) {
+        if (static::initiated($name)) {
             throw new Exception("Database connection name '{$name}' already initiated");
         }
 
         // Prepend 'DB_' to the driver name
         $class_name = "\\avalon\\database\\{$config['driver']}";
-
-        // Load the driver class
-        if (!class_exists($class_name)) {
-            require SYSPATH . '/database/' . strtolower($config['driver']) . '.php';
-        }
 
         // Create the connection and mark it as initiated.
         static::$connections[$name] = new $class_name($config, $name);
@@ -101,6 +96,6 @@ class Database
      */
     public static function initiated($name = 'main')
     {
-        return isset(static::$initiated[$name]) ? static::$initiated[$name] : false;
+        return !empty(static::$initiated[$name]);
     }
 }

@@ -19,32 +19,37 @@
  */
 
 // Define the paths needed
-define("SYSPATH", dirname(__FILE__) . '/avalon');
-define("APPPATH", dirname(__FILE__) . '/traq');
-define("DOCROOT", dirname(dirname(__FILE__)));
+define("SYSPATH", __DIR__ . '/avalon');
+define("APPPATH", __DIR__ . '/traq');
+define("DOCROOT", __DIR__ . '/..');
 
 // Load the framework
 require SYSPATH . '/base.php';
 use avalon\Database;
-use avalon\core\Load;
-
-// Setup the autoloader
 use avalon\Autoloader;
-Autoloader::vendorLocation(__DIR__);
+use avalon\core\Load;
+use avalon\core\Error;
+use traq\models\Plugin;
+use traq\libraries\Locale;
+
+// Setup the autoloader and global vendor directory
+Autoloader::registerNamespace('\\', __DIR__);
+Autoloader::register();
 
 // Alias classes so we dont need to
 // have "use ...." in all files.
 Autoloader::aliasClasses(array(
+    'avalon\core\Kernel' => 'Avalon',
     'avalon\http\Router' => 'Router',
     'avalon\output\View' => 'View',
     'avalon\http\Request' => 'Request',
 
     // Helpers
-    'avalon\helpers\Time' => 'Time'
-));
+    'avalon\helpers\Time' => 'Time',
 
-// Register the autoloader
-Autoloader::register();
+    // Traq helpers
+    'traq\helpers\API' => 'API',
+));
 
 // Fetch the routes
 require_once APPPATH . '/config/routes.php';
@@ -55,9 +60,7 @@ require APPPATH . '/version.php';
 
 // Check for the database config file
 if (!file_exists(APPPATH . '/config/database.php')) {
-    // No config file, redirect to installer
-    new Request;
-    header("Location: " . Request::base('install'));
+    (new Request)::redirectTo('install');
 }
 // Include config and connect
 else {
@@ -66,21 +69,13 @@ else {
 }
 
 // Load the plugins
-$plugins = Database::connection()->select('file')->from('plugins')->where('enabled', '1')->exec()->fetch_all();
-foreach ($plugins as $plugin) {
-    // Plugin file plath
-    $path = APPPATH . "/plugins/{$plugin['file']}/{$plugin['file']}.php";
+foreach(Plugin::select('file')->where('enabled', '1')->fetch_all() as $plugin) {
+    // Add plugin file path to our loaders
+    Autoloader::registerNamespace('traq\plugins', APPPATH . '/plugins/' . $plugin->file);
+    Load::register_path(APPPATH . '/plugins/' . $plugin->file);
 
-    // Check if the file exists
-    if (file_exists($path)) {
-        require $path;
-
-        // Register the path to check for controllers and views
-        Load::register_path(APPPATH . "/plugins/{$plugin['file']}");
-
-        // Initiate the plugin
-        $plugin = "\\traq\plugins\\" . get_plugin_name($plugin['file']);
-        $plugin = $plugin::init();
+    if ($plugin->is_valid()) {
+        ($plugin->get_class())::init();
     }
 }
-unset($plugins, $plugin);
+unset($plugin);

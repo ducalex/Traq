@@ -23,6 +23,7 @@
 
 namespace traq\controllers;
 
+use avalon\core\Kernel as Avalon;
 use avalon\core\Controller;
 use avalon\core\Load;
 use avalon\Database;
@@ -46,7 +47,7 @@ use traq\helpers\API;
 class AppController extends Controller
 {
     public $project;
-    public $projects;
+    public $projects = array();
     public $user;
     public $locale;
     public $is_api = false;
@@ -68,19 +69,12 @@ class AppController extends Controller
         // Call the controller class constructor
         parent::__construct();
 
-        // Fix plugin view location
-        if (strpos(Router::$controller, "\\traq\\plugins") !== false) {
-            $this->render['view'] = str_replace("controllers/", '', $this->render['view']);
-        }
-
         // Set the title
         $this->title(settings('title'));
 
         // Load helpers
         Load::helper('html', 'errors', 'form', 'js', 'formats', 'time_ago', 'uri', 'string',
             'subscriptions', 'timeline', 'formatting', 'tickets');
-
-        class_alias("\\traq\\helpers\\API", "API");
 
         // Get the user info
         $this->_get_user();
@@ -163,8 +157,6 @@ class AppController extends Controller
      */
     private function _get_user()
     {
-        global $locale;
-
         // Check if the session cookie is set, if so, check if it matches a user
         // and set set the user info.
         if (isset($_COOKIE['_traq']) and $user = User::find('login_hash', $_COOKIE['_traq'])) {

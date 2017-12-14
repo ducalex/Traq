@@ -21,7 +21,7 @@
 namespace avalon\core;
 
 /**
- * Avalons loader class.
+ * Avalon's loader class.
  *
  * @author Jack P.
  * @package Avalon
@@ -88,11 +88,11 @@ class Load
 
         // App library
         if (file_exists(APPPATH . '/libs/' . $file_name . '.php')) {
-            require APPPATH . '/libs/' . $file_name . '.php';
+            require_once APPPATH . '/libs/' . $file_name . '.php';
         }
         // Avalon library
         elseif (file_exists(SYSPATH . '/libs/' . $file_name . '.php')) {
-            require SYSPATH . '/libs/' . $file_name . '.php';
+            require_once SYSPATH . '/libs/' . $file_name . '.php';
         }
         // Not found
         else {
@@ -142,11 +142,11 @@ class Load
 
         // App helper
         if (file_exists(APPPATH . '/helpers/' . $file_name . '.php')) {
-            require APPPATH . '/helpers/' . $file_name . '.php';
+            require_once APPPATH . '/helpers/' . $file_name . '.php';
         }
         // Avalon helper
         elseif (file_exists(SYSPATH . '/helpers/' . $file_name . '.php')) {
-            require SYSPATH . '/helpers/' . $file_name . '.php';
+            require_once SYSPATH . '/helpers/' . $file_name . '.php';
         }
         // Not found
         else {

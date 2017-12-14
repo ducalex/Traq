@@ -53,16 +53,11 @@ class FishHook
      * @param string $hook
      * @param array $params Parameters to be passed to the plugins method.
      */
-    public static function run($hook, $params = array())
+    public static function run($hook, array $params = array())
     {
         // Make sure the hook index exists
         if (!isset(static::$_plugins[$hook])) {
             return false;
-        }
-
-        // Make sure $params is an array
-        if (!is_array($params)) {
-            throw new Exception('Paramters to be passed to addon methods need to be wrapped in an array.');
         }
 
         // Run the hook

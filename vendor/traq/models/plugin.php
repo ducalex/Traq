@@ -39,12 +39,16 @@ class Plugin extends Model
         'enabled'
     );
 
+    public function get_class()
+    {
+        $bits = explode('_', $this->_data['file']);
+        $bits = array_map('ucfirst', $bits);
+        return '\\traq\\plugins\\' . implode($bits);
+    }
+
     public function is_valid()
     {
         // Make sure the file field isnt blank
-        if (empty($this->_data['file'])) {
-            return false;
-        }
-        return true;
+        return !empty($this->_data['file']) && class_exists($this->get_class());
     }
 }

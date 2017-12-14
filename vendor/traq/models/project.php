@@ -44,6 +44,7 @@ class Project extends Model
         'enable_wiki',
         'default_ticket_type_id',
         'default_ticket_sorting',
+        'default_ticket_columns',
         'displayorder',
         'private_key'
     );
@@ -67,6 +68,10 @@ class Project extends Model
     protected static $_filters_before = array(
         'create' => array('_before_create'),
         'save' => array('_before_save')
+    );
+
+    protected static $_filters_after = array(
+        'construct' => array('_after_construct')
     );
 
     /**
@@ -191,7 +196,7 @@ class Project extends Model
         }
 
         $this->errors = $errors;
-        return !count($errors) > 0;
+        return empty($errors);
     }
 
     /**
@@ -208,7 +213,7 @@ class Project extends Model
     protected function _before_create()
     {
         $this->_data['private_key'] = random_hash();
-        $this->_create_slug();
+        $this->_before_save();
     }
 
     /**
@@ -216,7 +221,20 @@ class Project extends Model
      */
     protected function _before_save()
     {
+        $this->_data['extra'] = json_encode($this->_data['extra']);
+        $this->_data['default_ticket_columns'] = implode(',', $this->_data['default_ticket_columns']);
         $this->_create_slug();
+    }
+
+    public function _after_construct()
+    {
+        if (!empty($this->_data['default_ticket_columns'])) {
+            $this->_data['default_ticket_columns'] = explode(',', $this->_data['default_ticket_columns']);
+        } else {
+            $this->_data['default_ticket_columns'] = ticket_columns();
+        }
+
+        $this->_data['extra'] = empty($this->_data['extra']) ? array() : json_decode($this->_data['extra'], true);
     }
 
     /**
@@ -241,9 +259,9 @@ class Project extends Model
             }
 
             // Delete repositories
-            /*foreach ($this->repositories->exec()->fetch_all() as $repo) {
+            foreach ($this->repositories->exec()->fetch_all() as $repo) {
                 $repo->delete();
-            }*/
+            }
 
             // Delete components
             foreach ($this->components->exec()->fetch_all() as $component) {

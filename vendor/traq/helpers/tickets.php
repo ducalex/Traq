@@ -170,7 +170,7 @@ function custom_field_filters_for($project)
  */
 function ticket_filters_for($project)
 {
-    static $filters;
+    static $filters = array();
 
     if (count($filters)) {
         return $filters;

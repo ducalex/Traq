@@ -188,6 +188,7 @@ class enUS extends \traq\libraries\Locale
             'default_ticket_type'    => "Default ticket type",
             'ticket_history_sorting' => "Ticket history sorting",
             'default_ticket_sorting' => "Default ticket sorting",
+            'default_ticket_columns' => "Default ticket columns",
             'oldest_first' => "Oldest First",
             'newest_first' => "Newest First",
             'ticket_types' => "Ticket types",

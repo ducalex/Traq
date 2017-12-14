@@ -34,17 +34,9 @@ var traq = {
 
 		// Toggle visibility for custom fields that aren't relveant
 		// for the selected type.
-		$(".properties .custom_field").each(function(){
-			var field = $(this);
-
-			// Hide the field
-			field.hide();
-
-			// Check if it is for 0 (all) or the selected type ID and show it.
-			if (field.hasClass('field-for-type-0') || field.hasClass('field-for-type-' + type_id)) {
-				field.show();
-			}
-		});
+		$(".properties .custom_field").hide();
+		$(".properties .custom_field.field-for-type-0").show();
+		$(".properties .custom_field.field-for-type-" + type_id).show();
 	}
 };
 
@@ -106,9 +98,6 @@ $(document).ready(function(){
 			$('#overlay').overlay();
 		});
 	});
-
-	// Add the editor interface to all text areas, like a boss.
-	$('textarea.editor').likeaboss();
 
 	// Add a confirm-on-click event to call elements
 	// with the data-confirm attribute.
@@ -301,12 +290,5 @@ function close_overlay(func)
 	}
 
 	$('#overlay_blackout').fadeOut();
-	$('#overlay').fadeOut(function(){ func(); });
-}
-
-// Search box
-function do_search() {
-	var project_slug = $('#search input[name="project_slug"]').val();
-	var query = $('#search input[name="search"]').val();
-	window.location.href = traq.base + project_slug + "/tickets?search=" + query;
+	$('#overlay').fadeOut(func);
 }

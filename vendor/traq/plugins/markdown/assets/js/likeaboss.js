@@ -118,13 +118,14 @@ var likeABoss = {
 				return tag.open + val + tag.close;
 			}
 		},
-		'code': {open: '    ',
+		'code': {open: '`````\n', close: '`````\n',
 			func: function(tag, selection) {
-				if (selection.indexOf('\n') != -1) {
-					selection = selection.replace(/\n/g, '\n' + tag.open);
+				selection = selection || 'Code here\n';
+				if (selection.indexOf('\n') == -1) {
+					return '`' + selection + '`';
 				}
 				
-				return tag.open + selection;
+				return tag.open + selection + tag.close;
 			}
 		},
 	},
@@ -267,3 +268,12 @@ var likeABoss = {
 		});
 	}
 })(jQuery);
+
+
+$(document).ready(function(){
+    // Add the editor interface to all text areas, like a boss.
+    $('textarea.editor').likeaboss();
+    $('[data-overlay]').on('click', function() {
+        $('textarea.editor').likeaboss();
+    });
+});

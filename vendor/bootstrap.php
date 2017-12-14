@@ -21,7 +21,7 @@
 // Define the paths needed
 define("SYSPATH", __DIR__ . '/avalon');
 define("APPPATH", __DIR__ . '/traq');
-define("DOCROOT", __DIR__ . '/..');
+define("DOCROOT", dirname(__DIR__));
 
 // Load the framework
 require SYSPATH . '/base.php';
@@ -50,6 +50,9 @@ Autoloader::aliasClasses(array(
     // Traq helpers
     'traq\helpers\API' => 'API',
 ));
+
+// Register the exception handler
+Error::register();
 
 // Fetch the routes
 require_once APPPATH . '/config/routes.php';

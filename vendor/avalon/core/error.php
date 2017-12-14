@@ -31,22 +31,31 @@ namespace avalon\core;
  */
 class Error
 {
+    public static function register()
+    {
+        set_exception_handler(function($e) {
+            $message = preg_replace('/(\(\d+\))\:.+$/m', '$1', $e); // Remove argument display for safety
+            $message = str_replace(DOCROOT, '', $message); // Remove full path for safety
+            \avalon\core\Error::halt(get_class($e), $message);
+        });
+    }
+
     public static function halt($title, $message = '')
     {
         @ob_end_clean();
 
-        $body = array();
-        $body[] = "<blockquote style=\"font-family:'Helvetica Neue', Arial, Helvetica, sans-serif;background:#fbe3e4;color:#8a1f11;padding:0.8em;margin-bottom:1em;border:2px solid #fbc2c4;\">";
+        $message = nl2br(htmlentities($message));
 
-        if (!$title !== null) {
-            $body[] = "  <h1 style=\"margin: 0;\">{$title}</h1>";
+        $body = "<blockquote style=\"font-family:'Helvetica Neue', Arial, Helvetica, sans-serif;background:#fbe3e4;color:#8a1f11;padding:0.8em;margin-bottom:1em;border:2px solid #fbc2c4;\">";
+
+        if ($title !== null) {
+            $body .= "  <h1 style=\"margin: 0;\">{$title}</h1>";
         }
 
-        $body[] = "  {$message}";
-        $body[] = "  <div style=\"margin-top:8px;\"><small>Powered by Avalon</small></div>";
-        $body[] = "</blockquote>";
+        $body .= "  {$message}";
+        $body .= "  <div style=\"margin-top:8px;\"><small>Powered by Avalon</small></div>";
+        $body .= "</blockquote>";
 
-        echo implode(PHP_EOL, $body);
-        exit;
+        die($body);
     }
 }

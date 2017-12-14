@@ -1,0 +1,1 @@
+<?php echo API::response(0, compact('title', 'code', 'message')); ?>

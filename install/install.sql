@@ -158,6 +158,10 @@ VALUES
   (0,'usergroup',0,'create_wiki_page',0),
   (0,'usergroup',0,'edit_wiki_page',0),
   (0,'usergroup',0,'delete_wiki_page',0),
+  (0,'usergroup',0,'scm_browse_repositories',1),
+  (0,'usergroup',0,'scm_manage_repositories',0),
+  (0,'usergroup',0,'scm_http_client_write',0),
+  (0,'usergroup',0,'scm_http_client_read',0),
   (0,'usergroup',3,'create_tickets',0),
   (0,'usergroup',3,'comment_on_tickets',0),
   (0,'usergroup',3,'update_tickets',0),
@@ -208,6 +212,10 @@ VALUES
   (0,'role',0,'create_wiki_page',0),
   (0,'role',0,'edit_wiki_page',0),
   (0,'role',0,'delete_wiki_page',0),
+  (0,'role',0,'scm_browse_repositories',0),
+  (0,'role',0,'scm_manage_repositories',0),
+  (0,'role',0,'scm_http_client_write',0),
+  (0,'role',0,'scm_http_client_read',0),
   (0,'role',1,'project_settings',1),
   (0,'role',1,'delete_timeline_events',1),
   (0,'role',1,'delete_tickets',1),
@@ -219,7 +227,11 @@ VALUES
   (0,'role',1,'perform_mass_actions',1),
   (0,'role',1,'create_wiki_page',1),
   (0,'role',1,'edit_wiki_page',1),
-  (0,'role',1,'delete_wiki_page',1);
+  (0,'role',1,'delete_wiki_page',1),
+  (0,'role',1,'scm_browse_repositories', 1),
+  (0,'role',1,'scm_manage_repositories', 0),
+  (0,'role',1,'scm_http_client_write', 0),
+  (0,'role',1,'scm_http_client_read', 0);
 
 
 -- Dump of table traq_plugins
@@ -344,11 +356,12 @@ DROP TABLE IF EXISTS `traq_repositories`;
 CREATE TABLE `traq_repositories` (
   `id` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `project_id` INTEGER NOT NULL,
-  `slug` VARCHAR(255) NOT NULL DEFAULT '',
+  `slug` VARCHAR(255) NOT NULL DEFAULT '' COLLATE utf8_unicode_ci,
   `type` VARCHAR(255) NOT NULL,
   `location` VARCHAR(255) DEFAULT NULL,
   `username` VARCHAR(255) DEFAULT NULL,
   `password` VARCHAR(255) DEFAULT NULL,
+  `serve` INTEGER DEFAULT NULL,
   `extra` TEXT,
   `is_default` INTEGER DEFAULT NULL
 );

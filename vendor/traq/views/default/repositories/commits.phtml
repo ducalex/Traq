@@ -1,0 +1,60 @@
+<?= View::render('repositories/_nav') ?>
+<div class="content">
+	<div style="float:right;">
+		<?php 
+		if ($repository->serve) {
+			$can_read = $current_user->permission($repository->project->id, 'scm_http_client_read');
+			$can_write = $current_user->permission($repository->project->id, 'scm_http_client_write');
+			if ($can_read || $can_write) {
+				echo 'Clone URL: ' . Form::text('', ['value' => Request::base(trim($repository->href(),'/').'.'.$repository->type, true), 'readonly' => true]);
+				if ($can_read) {
+					echo ' <span title="You can read">R</span> ';
+				}
+				if ($can_write) {
+					echo ' <span title="You can write">W</span> ';
+				}
+			}
+		}
+		?>
+	</div>
+<?= View::render('repositories/_title') ?>
+<form action="<?= Request::base($repository->href('compare')) ?>">
+	<table class="list commits" id="commits">
+		<thead>
+			<tr>
+				<th class=""></th>
+				<th class=""><?= l('revision') ?></th>
+				<th class="date"><?= l('date') ?></th>
+				<th class="location"><?= l('author') ?></th>
+				<th class="location"><?= l('comment') ?></th>
+				<th class="actions"><?= l('actions') ?></th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach($revisions as $id => $commit) { ?>
+			<tr class="<?= $commit->is_merge ? 'commit-merge':''?> <?= $commit->is_first ? 'commit-first ':''?>">
+				<td class="nowrap"><?= Form::checkbox('rev[]', $commit->id) ?></td>
+				<td class="nowrap"><span title="<?= $commit->full_id ?>"><?= $commit->id ?></span></td>
+				<td class="nowrap"><?= time_ago($commit->date, false, true) ?></td>
+				<td class="nowrap">
+					<img src="<?= '//www.gravatar.com/avatar/' . md5($commit->email) . '?s=16' ?>">
+					<?= $commit->user ? HTML::link(strshorten($commit->user->name, 25), $commit->user->href()) : htmlentities(strshorten($commit->author, 25)) ?>
+				</td>
+				<td>
+					<?= HTML::link($commit->subject, $repository->href('commit/'.$commit->id), array('data-overlay----' => true)) ?>
+					<?php if (trim($commit->message) != trim($commit->subject)) {
+						echo '<code title="'.htmlentities($commit->message, ENT_QUOTES).'">...</code>';
+					} ?>
+				</td>
+				<td class="nowrap">
+					<?= HTML::link(l('diff'), $repository->href('diff/'.$commit->id), array('class' => 'button_page')) ?>
+					<?= HTML::link(lcfirst(l('browse')), $repository->href('browse/'.$commit->id), array('class' => 'button_folder')) ?>
+					<?= HTML::link(l('zip'), $repository->href('zip/'.$commit->id), array('class' => 'button_compress')) ?>
+				</td>
+			</tr>
+		<?php } ?>
+		</tbody>
+	</table>
+</form>
+</div><style></style>
+<?= View::render('layouts/_pagination') ?>

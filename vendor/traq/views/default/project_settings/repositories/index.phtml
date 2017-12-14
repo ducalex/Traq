@@ -11,17 +11,23 @@
 			<tr>
 				<th class="fixed_repo_slug"><?php echo l('slug'); ?></th>
 				<th class="type"><?php echo l('type'); ?></th>
+				<th class="default"><?php echo l('default'); ?></th>
+				<th class="serve"><?php echo l('serve'); ?></th>
+				<th class="location"><?php echo l('location'); ?></th>
 				<th class="actions"><?php echo l('actions'); ?></th>
 			</tr>
 		</thead>
 		<tbody>
 		<?php foreach ($repos->exec()->fetch_all() as $repo) { ?>
 			<tr>
-				<td><?php echo HTML::link($repo->slug, $project->href("settings/repositories/{$repo->slug}/edit"), array('data-overlay' => true)); ?></td>
+				<td><?php echo HTML::link($repo->slug, $project->href("settings/repositories/{$repo->id}/edit"), array('data-overlay' => true)); ?></td>
 				<td><?php echo $scm_types[$repo->type]; ?></td>
+				<td><?php echo $repo->is_default ? l('yes') : l('no'); ?></td>
+				<td><?php echo $repo->serve ? l('yes') : l('no'); ?></td>
+				<td><?php echo htmlentities($repo->location); ?></td>
 				<td>
-					<?php echo HTML::link(l('edit'), $project->href("settings/repositories/{$repo->slug}/edit"), array('title' => l('edit'), 'class' => 'button_edit', 'data-overlay' => true)); ?>
-					<?php echo HTML::link(l('delete'), $project->href("settings/repositories/{$repo->slug}/delete"), array('title' => l('delete'), 'class' => 'button_delete', 'data-confirm' => l('confirm.delete_x', $repo->slug))); ?>
+					<?php echo HTML::link(l('edit'), $project->href("settings/repositories/{$repo->id}/edit"), array('title' => l('edit'), 'class' => 'button_edit', 'data-overlay' => true)); ?>
+					<?php echo HTML::link(l('delete'), $project->href("settings/repositories/{$repo->id}/delete"), array('title' => l('delete'), 'class' => 'button_delete', 'data-confirm' => l('confirm.delete_x', $repo->slug))); ?>
 				</td>
 			</tr>
 		<?php } ?>

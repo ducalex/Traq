@@ -74,11 +74,18 @@ Router::add('/' . RTR_PROJSLUG . '/wiki/(?P<slug>[a-zA-Z0-9\-\_/]+)/_revisions',
 Router::add('/' . RTR_PROJSLUG . '/wiki/(?P<slug>[a-zA-Z0-9\-\_/]+)/_revisions/(\d+)', 'traq::controllers::Wiki.revision/$2,$3');
 Router::add('/' . RTR_PROJSLUG . '/wiki/(?P<slug>[a-zA-Z0-9\-\_/]+)', 'traq::controllers::Wiki.view');
 
+// SCM routes
+Router::add('/' . RTR_PROJSLUG . '/repository', 'traq::controllers::Repositories.commits');
+Router::add('/' . RTR_PROJSLUG . '/repository/(?P<slug>[a-zA-Z0-9\-\_\.]+)\.(git|svn|repo|hg)(/.+)?', 'traq::controllers::Repositories.serve/$4');
+Router::add('/' . RTR_PROJSLUG . '/repository/(?P<slug>[a-zA-Z0-9\-\_\.]+)', 'traq::controllers::Repositories.commits');
+Router::add('/' . RTR_PROJSLUG . '/repository/(?P<slug>[a-zA-Z0-9\-\_\.]+)/(browse|diff|zip|commits|compare)', 'traq::controllers::Repositories.$3');
+Router::add('/' . RTR_PROJSLUG . '/repository/(?P<slug>[a-zA-Z0-9\-\_\.]+)/(browse|commit|diff|zip|commits)/(?P<revision>[a-zA-Z0-9\-\._]+)(?<path>/.+)?', 'traq::controllers::Repositories.$3/$4,$5');
+
 // Project settings routes
 Router::add('/' . RTR_PROJSLUG . '/settings', 'traq::controllers::ProjectSettings::Options.index');
 Router::add('/' . RTR_PROJSLUG . '/settings/(milestones|components|members|repositories)', 'traq::controllers::ProjectSettings::$2.index');
 Router::add('/' . RTR_PROJSLUG . '/settings/(milestones|components|members|repositories)/new', 'traq::controllers::ProjectSettings::$2.new');
-Router::add('/' . RTR_PROJSLUG . '/settings/(milestones|components|members)/([0-9]+)/(edit|delete)', 'traq::controllers::ProjectSettings::$2.$4/$3');
+Router::add('/' . RTR_PROJSLUG . '/settings/(milestones|components|members|repositories)/([0-9]+)/(edit|delete)', 'traq::controllers::ProjectSettings::$2.$4/$3');
 Router::add('/' . RTR_PROJSLUG . '/settings/custom_fields', 'traq::controllers::ProjectSettings::CustomFields.index');
 Router::add('/' . RTR_PROJSLUG . '/settings/custom_fields/new', 'traq::controllers::ProjectSettings::CustomFields.new');
 Router::add('/' . RTR_PROJSLUG . '/settings/custom_fields/([0-9]+)/(edit|delete)', 'traq::controllers::ProjectSettings::CustomFields.$3/$2');

@@ -1,0 +1,19 @@
+<div style="float:right;">
+	<?= HTML::link(l('commits'), $repository->href("commits/$target"), ['class' => 'button_revisions']) ?>
+	| <?= HTML::link(l('browse'), $repository->href("browse/$target"), ['class' => 'button_folder']) ?>
+	| <?= HTML::link(l('zip'), $repository->href("zip/$target"), ['class' => 'button_compress']) ?>
+	| <?= l('navigate') ?>: <?= Form::select('branch', [l('branches') => $nav_branches, l('tags') => $nav_tags, l('commits') => $nav_commits], ['value' => $target, 'id' => 'branch_selector']) ?>
+</div>
+<nav class="tabs">
+	<ul>
+		<?php foreach($repositories as $repo) { ?>
+		<li<?= iif($repository === $repo, ' class="active"')?>><?= HTML::link(l('repository').': '.$repo->slug, $repo->href()) ?></li>
+		<?php } ?>
+	</ul>
+</nav>
+<script>$('#branch_selector').change(function() {
+	if (this.value) {
+		window.location = '<?= Request::base($repository->href('commits')) ?>/' + this.value;
+	}
+})
+</script>

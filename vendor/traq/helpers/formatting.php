@@ -20,6 +20,8 @@
 
 use \avalon\core\Kernel as Avalon;
 use \traq\models\Project;
+use \traq\models\Repository;
+use \traq\libraries\SCM;
 
 /**
  * Formats the supplied text.
@@ -42,6 +44,9 @@ function format_text($text, $strip_html = true, $project = null)
 
     // Wiki links
     $text = wiki_links($text, $project);
+
+    // SCM links
+    $text = scm_links($text, $project);
 
     return $text;
 }
@@ -92,4 +97,33 @@ function wiki_links($text, $project)
         },
         $text
     );
+}
+
+/**
+ * Links to the corresponding commit (pattern from default repository. for git it will be 7 chars hex, for svn it is r123)
+ *
+ * @param string $text
+ *
+ * @return string
+ */
+function scm_links($text, $project)
+{
+    $repository = Repository::select()->where('project_id', $project->id)->where('is_default', 1)->exec()->fetch();
+
+    if ($repository && $scm = SCM::factory($repository->type, $repository)) {
+        return preg_replace_callback(
+            '!\b'.$scm::link_pattern.'\b!',
+            function($match) use($repository, $scm) {
+                //if ($revision = $scm->revision($match[2])) {
+                //    $match[2] = HTML::link($match[2], $repository->href("commit/{$match[2]}"), ['title' => $revision->subject]);
+                // This is best until we have caching allowing us to get content fast
+                if ($scm->revision_exists($match[1])) {
+                    return HTML::link($match[1], $repository->href("commit/{$match[1]}"));
+                }
+                return $match[1];
+            },
+            $text
+        );
+    }
+    return $text;
 }

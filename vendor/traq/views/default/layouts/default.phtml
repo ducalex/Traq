@@ -14,9 +14,8 @@
 				<h1><?php echo (isset($project)) ? HTML::link($project->name, $project->slug) : HTML::link(settings('title'), null); ?></h1>
 				<?php echo View::render('layouts/_project_switcher'); ?>
 				<?php if (isset($project)) { ?>
-				<form onsubmit="do_search();return false;" id="search">
-					<input type="hidden" name="project_slug" value="<?php echo $project->slug; ?>" />
-					<input type="search" name="search" placeholder="<?php echo l('search'); ?>" />
+				<form action="<?php echo Request::base($project->slug.'/tickets') ?>"  id="search">
+					<input type="search" name="search" placeholder="<?= l('search') ?>" />
 				</form>
 				<?php } ?>
 			</header>
@@ -30,7 +29,10 @@
 					<?php if($current_user->permission($project->id, 'create_tickets')) { ?>
 					<li<?php echo iif(active_nav('/:slug/tickets/new(.*)'), ' class="active"')?>><?php echo HTML::link(l('new_ticket'), $project->href('tickets/new')); ?></li>
 					<?php } ?>
-					<li<?php echo iif(active_nav('/:slug/changelog'), ' class="active"')?>><?php echo HTML::link(l('changelog'), $project->href('changelog')); ?></li>
+					<li<?php echo iif(active_nav('/:slug/changelog'), ' class="active"')?>><?= HTML::link(l('changelog'), $project->href('changelog')) ?></li>
+					<?php if($current_user->permission($project->id, 'scm_browse_repositories')) { ?>
+					<li<?php echo iif(active_nav('/:slug/repository(.*)'), ' class="active"')?>><?= HTML::link(l('repository'), $project->href("repository")) ?></li>
+					<?php } ?>
 					<?php if ($project->enable_wiki) { ?>
 					<li<?php echo iif(active_nav('/:slug/wiki(.*)'), ' class="active"')?>><?php echo HTML::link(l('wiki'), $project->href("wiki")); ?></li>
 					<?php } ?>
@@ -59,7 +61,7 @@
 			<footer id="footer">
 				<?php echo l('copyright', TRAQ_VER, date("Y")); ?>
 			</footer>
-			<!-- <?php echo round((microtime(true) - START_TIME), 2); ?>s, <?php echo round((memory_get_peak_usage() - START_MEM) / pow(1024, 2), 3); ?>mb -->
+			<!-- <?php echo round((microtime(true) - START_TIME), 2); ?>s, <?php echo round(memory_get_peak_usage() / pow(1024, 2), 3); ?>MB -->
 		</div>
 	</body>
 </html>

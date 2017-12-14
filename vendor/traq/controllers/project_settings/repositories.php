@@ -42,6 +42,10 @@ class Repositories extends AppController
         parent::__construct();
         View::set('scm_types', scm_types());
         $this->title(l('repositories'));
+
+        if (!$this->user->permission($this->project->id, 'scm_manage_repositories')) {
+            return $this->show_no_permission();
+        }
     }
 
     /**
@@ -60,31 +64,84 @@ class Repositories extends AppController
     {
         $repo = new Repository(array('type' => 'git'));
 
-        // Check if the form has been submitted.
         if (Request::method() == 'post') {
-            // Set the information
-            $repo->set(array(
-                'slug'       => Request::$post['slug'],
-                'type'       => Request::$post['type'],
-                'location'   => Request::$post['location'],
-                'project_id' => $this->project->id
-            ));
-
-            // Get the SCM class
-            $scm = SCM::factory($repo->type, $repo);
-
-            // Runs its before save info method
-            $scm->_before_save_info($repo, true);
-
-            // Check if data is good
-            if ($repo->is_valid()) {
-                // Save and redirect
-                $repo->save();
-                Request::redirectTo($this->project->href('settings/repositories'));
-            }
+            $this->_save($repo);
         }
 
         // Pass the repo info to the view.
         View::set('repo', $repo);
+    }
+
+    /**
+     * delete repository page.
+     */
+    public function action_delete($id)
+    {
+        $this->title(l('delete'));
+
+        // Fetch the milestone
+        $repo = Repository::find($id);
+
+        if ($repo->project_id !== $this->project->id) {
+            return $this->show_no_permission();
+        }
+
+        // Delete milestone
+        $repo->delete();
+
+        // Redirect
+        if ($this->is_api) {
+            return \API::response(1);
+        }
+
+        Request::redirectTo($this->project->href("settings/repositories"));
+    }
+
+    /**
+     * Edit repository page.
+     */
+    public function action_edit($id)
+    {
+        $this->title(l('edit'));
+
+        $repo = Repository::find($id);
+
+        if ($repo->project_id !== $this->project->id) {
+            return $this->show_no_permission();
+        }
+
+        if (Request::method() == 'post') {
+            $this->_save($repo);
+        }
+
+        // Pass the repo info to the view.
+        View::set('repo', $repo);
+    }
+
+    private function _save($repo)
+    {
+        // Set the information
+        $repo->set(array(
+            'slug'       => Request::post('slug', $repo->slug),
+            'type'       => Request::post('type', $repo->type),
+            'location'   => Request::post('location', $repo->location),
+            'is_default' => Request::post('is_default', 0),
+            'project_id' => $this->project->id,
+            'extra'      => Request::post('extra', $repo->extra),
+            'serve'      => Request::post('serve', $repo->serve),
+        ));
+
+        // Get the SCM class
+        $scm = SCM::factory($repo->type, $repo);
+
+        // Runs its before save info method
+        $scm->_before_save_info($repo, false);
+
+        // Check if data is good
+        if (!$repo->is_valid() || !$repo->save()) {
+            View::set('errors', $repo->errors);
+        } else {
+            Request::redirectTo($this->project->href('settings/repositories'));
+        }
     }
 }

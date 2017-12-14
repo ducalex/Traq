@@ -1,0 +1,60 @@
+<?php
+$mode = !!Request::req('split');
+$format = [
+	0 => [ // Unified
+		'name' => 'unified',
+		' ' => '<tr class="%s"><td class="diff-equal" colspan=2>%s</td></tr>',
+		'-' => '<tr class="%s"><td class="diff-sub" colspan=2>%s</td></tr>',
+		'+' => '<tr class="%s"><td class="diff-add" colspan=2>%s</td></tr>',
+		'@' => '<tr class="%s"><td class="diff-info" colspan=2>%s</td></tr>',
+		'*' => '<tr class="%s"><td class="diff-void" colspan=2>%s</td></tr>',
+	],
+	1 => [ // Split
+		'name' => 'split',
+		' ' => '<tr class="%s"><td class="diff-equal">%s</td><td class="diff-equal">%s</td></tr>',
+		'-' => '<tr class="%s"><td class="diff-sub">%s</td><td class="diff-void"></td></tr>',
+		'+' => '<tr class="%s"><td class="diff-void"></td><td class="diff-add">%s</td></tr>',
+		'@' => '<tr class="%s"><td class="diff-info" colspan=2>%s</td></tr>',
+		'*' => '<tr class="%s"><td class="diff-void" colspan=2>%s</td></tr>',
+	]
+];
+?>
+<div class="diff-view-changeset diff-style-<?=$format[$mode]['name']?>">
+<?php if (empty($commit_diff)) { ?>
+	No changes
+<?php } else { ?>
+	<table class="diff-files">
+		<?php foreach($commit_diff as $diff) {
+			$name = $diff['file_b'] == '/dev/null' ? $diff['file_a'] : $diff['file_b'];
+			echo '<tr>';
+			echo '<td class="'.$diff['status'].'">' . strtoupper(l("diff_{$diff['status']}")) . '</td>';
+			echo '<td><a href="#' . sha1($diff['diff']) . '">' . htmlentities($name) . '</a></td>';
+			echo '<td>'.HTML::link('view', $repository->href("browse/$target/$name")).'</td>';
+			echo '<td>'.HTML::link('log', $repository->href("commits/$default_branch/$name")).'</td>';
+			echo '</tr>';
+		} ?>
+	</table>
+	<?php foreach($commit_diff as $diff) { ?>
+		<div class="diff-view-file" id="<?= sha1($diff['diff']) ?>">
+			<div class="diff-file-header">
+				<?= htmlentities($diff['diff']) ?>
+				<div style="float:right;"><a style="color:white;" href="?<?=http_build_query(['split' => !$mode] + $_GET)?>"><?=$format[!$mode]['name']?></a></div>
+			</div>
+			<table class="diff-file-code">
+				<tr class="diff-split-header"><th>a: <?= htmlentities($diff['file_a']) ?></th><th>b: <?= htmlentities($diff['file_b']) ?></th></tr>
+				<?php
+				$base_class = 'diff-header';
+				$lines = explode("\n", $diff['content']);
+				foreach($lines as $i => $line) {
+					if ($line[0] === '@') $base_class = 'diff-line';
+					$class = $base_class;
+					if ($line[0] !== @$lines[$i-1][0]) $class .= ' diff-top';
+					if ($line[0] !== @$lines[$i+1][0]) $class .= ' diff-bottom';
+					printf($format[$mode][$line[0]] ?: $format[$mode]['*'], $class, htmlentities($line), htmlentities($line));
+				}
+			?>
+		</table>
+	</div>
+	<?php } ?>
+<?php } ?>
+</div>

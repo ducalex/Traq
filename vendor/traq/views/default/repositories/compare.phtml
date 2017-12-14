@@ -1,0 +1,35 @@
+<?= View::render('repositories/_nav') ?>
+<div class="content">
+	<?= View::render('repositories/_title') ?>
+	<div class="box">
+		<dl style="width:50%;float:left;">
+			<dt><?= Form::label(l('revision')) ?> 1</dt>
+			<dd><?= $commit1->full_id ?></dd>
+			<dt><?= Form::label(l('parents')) ?></dt>
+			<dd><?php foreach($commit1->parents as $p) echo HTML::link($p, $repository->href("commit/$p")) . ' '; ?></dd>
+			<dt><?= Form::label(l('author')) ?></dt>
+			<dd><?= $commit1->author ?> &lt;<?= $commit1->email ?>&gt;</dd>
+			<dt><?= Form::label(l('date')) ?></dt>
+			<dd><?= $commit1->date ?></dd>
+			<dt><?= Form::label(l('comment')) ?></dt>
+			<dd><?= nl2br(htmlentities($commit1->message)); ?></dd>
+		</dl>
+		<dl style="width:50%;float:right;">
+			<dt><?= Form::label(l('revision')) ?> 2</dt>
+			<dd><?= $commit2->full_id ?></dd>
+			<dt><?= Form::label(l('parents')) ?></dt>
+			<dd><?php foreach($commit2->parents as $p) echo HTML::link($p, $repository->href("commit/$p")) . ' '; ?></dd>
+			<dt><?= Form::label(l('author')) ?></dt>
+			<dd><?= $commit2->author ?> &lt;<?= $commit2->email ?>&gt;</dd>
+			<dt><?= Form::label(l('date')) ?></dt>
+			<dd><?= $commit2->date ?></dd>
+			<dt><?= Form::label(l('comment')) ?></dt>
+			<dd><?= nl2br(htmlentities($commit2->message)); ?></dd>
+		</dl>
+		<div class="clearfix"></div>
+		<dl>
+			<dt><?= l('changes') ?></dt>
+			<dd><?= View::render('repositories/_diff') ?></dd>
+		</dl>
+	</div>
+</div>

@@ -1,0 +1,37 @@
+<?= View::render('repositories/_nav') ?>
+<div class="content">
+	<?= View::render('repositories/_title') ?>
+	<table class="list">
+	<thead>
+		<tr>
+			<th style="width:30%"><?= l('name') ?></th>
+			<th style="width:2% "></th>
+			<th style="width:10%"><?= l('size') ?></th>
+			<th style="width:10%"><?= l('date') ?></th>
+			<th style="width:8% "><?= l('revision') ?></th>
+			<th style="width:40%"><?= l('comment') ?></th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php 
+		if (trim($path, '/')) { // Show up navigation link if we're not at the root
+			echo '<tr><td>'.HTML::link('..', $repository->href("browse/$target/".trim(dirname('/'.$path), '/')), ['class' => 'button_folder']).'</td></tr>';
+		}
+
+		foreach($files as $name => $meta) {
+			$icon = ($meta->type === 'tree') ? 'button_folder' : 'button_page';
+			$link = HTML::link($name, $repository->href("browse/$target/$name"), ['class' => $icon]);
+			$date = time_ago($meta->revision->date, false, true);
+			$commit_link = HTML::link($meta->revision->id, $repository->href("commit/{$meta->revision->id}"));
+			$history_link = HTML::link(' ', $repository->href("commits/$target/$name"), ['class' => 'button_revisions', 'title' => 'Revision history']);
+			$subject = htmlentities(strshorten($meta->revision->subject, 70));
+			$comment = htmlentities($meta->revision->message, ENT_QUOTES);
+			echo "<tr><td class='nowrap'>{$link}</td><td>{$history_link}</td><td>{$meta->size}</td><td class='nowrap'>{$date}</td><td>{$commit_link}</td><td title='{$comment}'>{$subject}</td></tr>";
+		} ?>
+	</tbody>
+	</table>
+
+	<?php if (isset($content)) { ?>
+	<pre class="<?= $language ?> line-numbers"><code><?= htmlentities($content); ?></code></pre>
+	<?php } ?>
+</div>

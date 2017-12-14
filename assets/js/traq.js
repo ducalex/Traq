@@ -241,6 +241,24 @@ $(document).ready(function(){
 
 		$(this).find('option').prop('selected', true);
 	});
+
+	// SCM commit selector for comparison
+	$('#commits input[type=checkbox]').change(function() {
+		var checked = $('#commits input[type=checkbox]:checked');
+		var unchecked = $('#commits input[type=checkbox]:not(:checked)');
+		var element = this;
+
+		if (checked.length == 2) {
+			unchecked.hide();
+			popover_confirm(
+				$(element).parent(), 'Compare ' + checked[0].value + ' to ' + checked[1].value + ' ?',
+				function() {$('form').submit()},
+				function() {unchecked.show();element.checked = false;}
+			);
+		} else {
+			unchecked.show();
+		}
+	})
 });
 
 /*!

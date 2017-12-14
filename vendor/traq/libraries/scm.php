@@ -37,14 +37,9 @@ class SCM
      */
     public static function factory($name, &$info = array())
     {
-        $file_path = APPPATH . "/libraries/scm/adapters/{$name}.php";
-        if (file_exists($file_path)) {
-            $class = "\\traq\\libraries\\scm\\adapters\\" . ucfirst($name);
+        $class = "\\traq\\libraries\\scm\\adapters\\" . ucfirst($name);
 
-            if (!class_exists($class)) {
-                require $file_path;
-            }
-
+        if (class_exists($class)) {
             return new $class($info);
         }
 
@@ -61,7 +56,7 @@ class SCM
      */
     public function _before_save_info(&$repo, $is_new = false)
     {
-        throw new Exception("Method " . get_class($this) . "::" . __FUNCTION__ . "() not implemented");
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
     }
 
     /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -102,25 +97,13 @@ class SCM
     }
 
     /**
-     * Runs the specified command.
-     *
-     * @param string $cmd
-     *
-     * @return string
-     */
-    protected function _shell($cmd)
-    {
-        return shell_exec("\"{$this->_binary}\" {$cmd}");
-    }
-
-    /**
      * Returns the default/main branch of the repository.
      *
      * @return string
      */
     public function default_branch()
     {
-        throw new Exception("Method " . get_class($this) . "::" . __FUNCTION__ . "() not implemented");
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
     }
 
     /**
@@ -130,7 +113,7 @@ class SCM
      */
     public function branches()
     {
-        throw new Exception("Method " . get_class($this) . "::" . __FUNCTION__ . "() not implemented");
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
     }
 
     /**
@@ -140,7 +123,7 @@ class SCM
      */
     public function tags()
     {
-        throw new Exception("Method " . get_class($this) . "::" . __FUNCTION__ . "() not implemented");
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
     }
 
     /**
@@ -151,9 +134,9 @@ class SCM
      *
      * @return array
      */
-    public function file_info($path = null, $revision = null)
+    public function file_info($path, $revision = null)
     {
-        throw new Exception("Method " . get_class($this) . "::" . __FUNCTION__ . "() not implemented");
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
     }
 
     /**
@@ -164,7 +147,37 @@ class SCM
      */
     public function revision($revision, $path = null)
     {
-        throw new Exception("Method " . get_class($this) . "::" . __FUNCTION__ . "() not implemented");
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
+    }
+
+    /**
+     * Check if the revision exists.
+     *
+     * @param string $revision Revision identifier.
+     */
+    public function revision_exists($revision)
+    {
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
+    }
+
+    /**
+     * Fetches the revision count.
+     *
+     * @param string $revision Revision identifier.
+     * @param string $path Directory path for the revision.
+     */
+    public function revision_count($revision, $path = null)
+    {
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
+    }
+
+    /**
+     * Client backend (for git clone or svn checkout)
+     *
+     */
+    public function http_serve_backend($path)
+    {
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
     }
 
     /**
@@ -174,9 +187,9 @@ class SCM
      *
      * @return array
      */
-    public function revisions($path = null)
+    public function revisions($branch = null, $path = null)
     {
-        throw new Exception("Method " . get_class($this) . "::" . __FUNCTION__ . "() not implemented");
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
     }
 
     /**
@@ -187,6 +200,48 @@ class SCM
      */
     public function list_dir($path, $revision = null)
     {
-        throw new Exception("Method " . get_class($this) . "::" . __FUNCTION__ . "() not implemented");
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
+    }
+
+    /**
+     * Read a file for the path and revision.
+     *
+     * @param string $path Directory path.
+     * @param string $revision Revision identifier.
+     */
+    public function read_file($path, $revision = null)
+    {
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
+    }
+
+    /**
+     * Return a patch in unified diff format of the specified revision
+     *
+     * @param string $revision Revision identifier.
+     */
+    public function patch($revision)
+    {
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
+    }
+
+    /**
+     * Return a diff between two revisions
+     *
+     * @param string $revision Revision identifier.
+     */
+    public function diff($revision1, $revision2)
+    {
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
+    }
+
+    /**
+     * Return an archive/checkout of the specified revision
+     *
+     * @param string $revision Revision identifier.
+     * @param string $format archive format
+     */
+    public function archive($revision, $format = 'zip')
+    {
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
     }
 }

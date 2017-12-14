@@ -54,9 +54,11 @@ class enUS extends \traq\libraries\Locale
             'information'      => "Information",
             'milestones'       => "Milestones",
             'components'       => "Components",
+            'repositories'     => "Repositories",
             'project_settings' => "Project Settings",
             'name'             => "Name",
             'slug'             => "Slug",
+            'location'         => "Location",
             'codename'         => "Codename",
             'open'             => "Open",
             'closed'           => "Closed",
@@ -108,6 +110,7 @@ class enUS extends \traq\libraries\Locale
             'profile'          => "Profile",
             'ascending'        => "Ascending",
             'descending'       => "Descending",
+            'date'             => "Date",
 
             // AdminCP
             'admin.theme_select_option' => "{1} (v{2} by {3})",
@@ -184,6 +187,8 @@ class enUS extends \traq\libraries\Locale
             'edit_milestone'   => "Edit Milestone",
             'new_component'    => "New Component",
             'edit_component'   => "Edit Component",
+            'new_repository'   => "New Repository",
+            'edit_repository'  => "Edit Repository",
             'display_order'    => "Display Order",
             'default_ticket_type'    => "Default ticket type",
             'ticket_history_sorting' => "Ticket history sorting",
@@ -203,6 +208,7 @@ class enUS extends \traq\libraries\Locale
             'type'                  => "Type",
             'component'             => "Component",
             'milestone'             => "Milestone",
+            'repository'            => "Repository",
             'description'           => "Description",
             'updates'               => "Updates",
             'severity'              => "Severity",
@@ -298,6 +304,24 @@ class enUS extends \traq\libraries\Locale
             'revisions'    => "Revisions",
             'revision_x'   => "Revision {1}",
 
+            // SCM
+            'revision'     => "Revision",
+            'commit'       => "Commit",
+            'commits'      => "Commits",
+            'changes'      => "Changes",
+            'hash'         => "Hash",
+            'parent'       => "Parent",
+            'parents'      => "Parents",
+            'navigate'     => "Navigate",
+            'browse'       => "Browse",
+            'branch'       => "Branch",
+            'branches'     => "Branches",
+            'tag'          => "Tag",
+            'tags'         => "Tags",
+            'diff_new'     => "New file",
+            'diff_rename'  => "Renamed",
+            'diff_deleted' => "Deleted",
+            'diff_changed' => "Changed",
             // Pagination
             'previous' => "Previous",
             'next'     => "Next",
@@ -387,6 +411,14 @@ class enUS extends \traq\libraries\Locale
                     'create_wiki_page' => "Create page",
                     'edit_wiki_page'   => "Edit page",
                     'delete_wiki_page' => "Delete page"
+                ),
+
+                // Repositories
+                'repositories' => array(
+                    'scm_manage_repositories' => "Manage repositories",
+                    'scm_browse_repositories' => "Browse repositories",
+                    'scm_http_client_read'   => "Read client access over HTTP",
+                    'scm_http_client_write'  => "Write client access over HTTP",
                 )
             ),
 
@@ -436,6 +468,8 @@ class enUS extends \traq\libraries\Locale
             'help.custom_fields.values'     => "Options for select, one per line.",
             'help.custom_fields.multiple'   => "Allows multiple options to be selected.",
             'help.ticket_creation_delay'    => "Seconds users must wait before creating a new ticket.",
+            'help.scm.location'             => "Repository path (example: /local/path/to/git/base)",
+            'help.scm.serve'                => "Repository path (example: /local/path/to/git/base)",
 
             // Ticket property hints
             'help.milestone' => "The version in which the ticket should be completed for.",
@@ -506,7 +540,7 @@ class enUS extends \traq\libraries\Locale
                 'regex_blank'                  => "You need to enter a regex value",
                 'values_blank'                 => "You need to enter some values",
                 'email_validation_required'    => "You need to validate your email, check your inbox",
-                'you_must_wait_x'      => "You must wait {1}",
+                'you_must_wait_x'              => "You must wait {1}",
 
                 // Custom fields
                 'custom_fields' => array(

@@ -42,18 +42,53 @@ class Repository extends Model
         'username',
         'password',
         'extra',
-        'is_default'
+        'is_default',
+        'serve'
+    );
+
+    protected static $_belongs_to = array(
+        'project',
     );
 
     protected static $_has_many = array(
         'changesets' => array('model' => 'RepoChangeset')
     );
 
-    /**
-     * Checks if the data is valid.
-     *
-     * @return bool
-     */
+    protected static $_filters_before = array(
+        'save' => array('_before_save'),
+        'create' => array('_before_save'),
+    );
+
+    protected static $_filters_after = array(
+        'construct' => array('_after_construct')
+    );
+
+
+    protected function _before_save()
+    {
+        if (!$this->_is_new && $this->_data['is_default']) {
+            static::db()->update('repositories')
+                        ->set(array('is_default' => 0))
+                        ->where('project_id', $this->project->id)
+                        ->where('id', $this->id, '!=')
+                        ->exec();
+        }
+        $this->_data['extra'] = json_encode($this->_data['extra']);
+    }
+
+
+    public function _after_construct()
+    {
+        $this->_data['extra'] = empty($this->_data['extra']) ? array() : json_decode($this->_data['extra'], true);
+    }
+
+
+    public function href($commit = null)
+    {
+        return $this->project->href("repository/{$this->slug}/$commit");
+    }
+
+
     public function is_valid()
     {
         $errors = array();
@@ -81,6 +116,6 @@ class Repository extends Model
         // added via the SCM::_before_save_info() method.
         $this->errors = array_merge($errors, $this->errors);
 
-        return empty($this->errors);;
+        return empty($this->errors);
     }
 }

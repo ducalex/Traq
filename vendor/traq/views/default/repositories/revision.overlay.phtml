@@ -1,0 +1,17 @@
+<h3><?php echo htmlspecialchars($commit->subject); ?></h3>
+<div class="box">
+<dl>
+	<dt><?php echo Form::label(l('hash')); ?></dt>
+	<dd><?php echo $commit->hash; ?></dd>
+	<dt><?php echo Form::label(l('author')); ?></dt>
+	<dd><?php echo $commit->author; ?></dd>
+	<dt><?php echo Form::label(l('email')); ?></dt>
+	<dd><?php echo $commit->email; ?></dd>
+	<dt><?php echo Form::label(l('date')); ?></dt>
+	<dd><?php echo $commit->date; ?></dd>
+	<dt><?php echo Form::label(l('comment')); ?></dt>
+	<dd><?php echo nl2br(htmlentities($commit->message)); ?></dd>
+	<dt><?php echo Form::label(l('changes')); ?></dt>
+	<dd><pre><?php echo htmlentities(implode("\n", array_keys($commit->diff))); ?></code></pre></dd>
+</dl>
+</div>

@@ -109,9 +109,9 @@ class Tickets extends AppController
                 }
             }
         } else {
-            $_SESSION['ticket_filters'][$this->project->id] = Request::$query;
+           // $_SESSION['ticket_filters'][$this->project->id] = Request::$query;
         }
-
+        
         // Send filters to the view
         View::set('filters', $filter_query->filters());
 
@@ -175,7 +175,6 @@ class Tickets extends AppController
         }
 
         View::set(compact('pagination'));
-        unset($all_rows);
 
         // Add to tickets array
         foreach($rows->exec()->fetch_all() as $row) {
@@ -200,26 +199,18 @@ class Tickets extends AppController
 
         // Set columns from form
         if (Request::method() == 'post' and isset(Request::$post['update_columns'])) {
-            $new_columns = array();
-            foreach (Request::$post['columns'] as $column) {
-                $new_columns[] = $column;
-            }
-            $_SESSION['columns'] = Request::$request['columns'] = $new_columns;
+            $columns = $_SESSION['columns'] = array_values(Request::post('columns', array()));
+        } elseif(!empty(Request::$request['columns'])) {
+            $columns = explode(',', Request::$request['columns']);
+        } elseif(!empty($_SESSION['columns'])) {
+            $columns = $_SESSION['columns'];
+        } else {
+            $columns = $this->project->default_ticket_columns;
         }
 
-        // Get columns
-        $columns = array();
-        if (isset($_SESSION['columns']) or isset(Request::$request['columns'])) {
-            // Loop over customs from session or request
-            foreach ((isset($_SESSION['columns']) ? $_SESSION['columns'] : explode(',', Request::$request['columns'])) as $column) {
-                // Make sure it's a valid column
-                if (in_array($column, $allowed_columns)) {
-                    $columns[] = $column;
-                }
-            }
-        }
-        // Use default columns
-        else {
+        $columns = \array_intersect($columns, $allowed_columns);
+
+        if (empty($columns)) {
             $columns = ticket_columns();
         }
 
@@ -237,6 +228,11 @@ class Tickets extends AppController
         // Fetch the ticket from the database and send it to the view.
         $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
 
+        // Does ticket exist?
+        if (!$ticket) {
+            return $this->show_404();
+        }
+
         // Ticket history
         $ticket_history = $ticket->history;
 
@@ -251,11 +247,6 @@ class Tickets extends AppController
         }
 
         $ticket_history = $ticket_history->exec()->fetch_all();
-
-        // Does ticket exist?
-        if (!$ticket) {
-            return $this->show_404();
-        }
 
         // Atom feed
         $this->feeds[] = array(Request::requestUri() . ".atom", l('x_x_history_feed', $this->project->name, $ticket->summary));

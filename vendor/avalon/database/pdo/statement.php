@@ -37,6 +37,9 @@ class Statement
     private $connection_name;
     private $statement;
     private $_model;
+    private $results = [];
+    private $count = 0;
+    private $cursor = 0;
 
     /**
      * PDO Statement constructor.
@@ -49,7 +52,6 @@ class Statement
     {
         $this->statement = $statement;
         $this->connection_name = $connection_name;
-        return $this;
     }
 
     /**
@@ -72,18 +74,11 @@ class Statement
      */
     public function fetch_all()
     {
-        $result = $this->statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->cursor = 0;
         $rows = array();
 
-        if ($this->_model !== null) {
-            foreach ($result as $row) {
-                $model = $this->_model;
-                $rows[] = new $model($row, false);
-            }
-        } else {
-            foreach ($result as $row) {
-                $rows[] = $row;
-            }
+        while($row = $this->fetch()) {
+            $rows[] = $row;
         }
 
         return $rows;
@@ -100,11 +95,11 @@ class Statement
      */
     public function fetch($style = \PDO::FETCH_ASSOC, $orientation = \PDO::FETCH_ORI_NEXT, $offset = 0)
     {
-        if ($this->row_count() == 0) {
+        if (!isset($this->results[$this->cursor])) {
             return false;
         }
 
-        $result = $this->statement->fetch($style, $orientation, $offset);
+        $result = $this->results[$this->cursor++];
 
         if ($this->_model !== null) {
             $model = $this->_model;
@@ -153,13 +148,14 @@ class Statement
      */
     public function exec()
     {
-        $result = $this->statement->execute();
-
-        if ($result) {
-            return $this;
+        $this->statement->execute();
+        if ($this->statement->columnCount() > 0) {
+            $this->results = $this->statement->fetchAll(\PDO::FETCH_ASSOC);
+            $this->count = count($this->results);
         } else {
-            Database::connection($this->connection_name)->halt($this->statement->errorInfo());
+            $this->count = $this->statement->rowCount();
         }
+        return $this;
     }
 
     /**
@@ -169,6 +165,6 @@ class Statement
      */
     public function row_count()
     {
-        return $this->statement->rowCount();
+        return $this->count;
     }
 }

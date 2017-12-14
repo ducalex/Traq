@@ -141,7 +141,7 @@ class Projects extends AppController
      */
     public function action_timeline()
     {
-        $rows = array();
+        $days = array();
 
         // Filters
         $filters = array_keys(timeline_filters());
@@ -149,15 +149,12 @@ class Projects extends AppController
 
         // Check if filters are set
         if (isset(Request::$post['filters']) or isset($_SESSION['timeline_filters'])) {
-            $filters = array();
+            // Fetch filters
+            $filters = array_keys(Request::post('filters') ?: $_SESSION['timeline_filters']);
             $events = array();
 
-            // Fetch filters
-            $timeline_filters = (isset(Request::$post['filters']) ? Request::$post['filters'] : $_SESSION['timeline_filters']);
-
             // Process filters
-            foreach ($timeline_filters as $filter => $value) {
-                $filters[] = $filter;
+            foreach ($filters as $filter) {
                 $events = array_merge($events, timeline_filters($filter));
             }
 
@@ -168,77 +165,41 @@ class Projects extends AppController
         // Atom feed
         $this->feeds[] = array(Request::requestUri() . ".atom", l('x_timeline_feed', $this->project->name));
 
-        // Fetch the different days with a nicely formatted
-        // query for everyone to read easily, unlike the one
-        // from 2.x and earlier, that were, well, you know,
-        // completely ugly and looked hackish.
-        $query = "
-            SELECT
-            DISTINCT
-                YEAR(created_at) AS 'year',
-                MONTH(created_at) AS 'month',
-                DAY(created_at) AS 'day',
-                created_at
-
-            FROM " . $this->db->prefix . "timeline
-            WHERE project_id = '{$this->project->id}'
-            AND `action` IN ('" . implode("','", $events) . "')
-
-            GROUP BY
-                YEAR(created_at),
-                MONTH(created_at),
-                DAY(created_at)
-
+        $db = Database::connection();
+        $days_query = $db->prepare("
+            SELECT DISTINCT DATE(`created_at`) as `date`
+            FROM {$db->prefix}timeline
+            WHERE project_id = {$this->project->id} AND `action` IN ('" . implode("','", $events) . "')
             ORDER BY created_at DESC
-        ";
+        ")->exec()->fetch_all();
 
         // Pagination
-        $pagination = new Pagination(
-            (isset(Request::$request['page']) ? Request::$request['page'] : 1), // Page
-            settings('timeline_days_per_page'), // Per page
-            Database::connection()->query($query)->rowCount() // Row count
-        );
+        $pagination = new Pagination(Request::request('page', 1), settings('timeline_days_per_page'), count($days_query));
 
         // Limit?
         if ($pagination->paginate) {
-            $days_query = Database::connection()->query($query . " LIMIT {$pagination->limit}, " . $pagination->per_page);
-        } else {
-            $days_query = Database::connection()->query($query);
+            $days_query = array_slice($days_query, $pagination->limit, $pagination->per_page);
         }
-
-        View::set(compact('pagination'));
 
         // Loop through the days and get their activity
         foreach ($days_query as $info) {
-            // Construct the array for the day
-            $day = array(
-                'created_at' => $info['created_at'],
-                'activity' => array()
-            );
-
-            // Get the date, without the time
-            $date = explode(' ', $info['created_at']);
-            $date = $date[0];
-
             // Fetch the activity for this day
             $fetch_activity = Timeline::select()
                 ->where('project_id', $this->project->id)
-                ->where('created_at', "{$date} %", "LIKE")
+                ->where('created_at', "{$info['date']} %", "LIKE")
                 ->custom_sql("AND `action` IN ('" . implode("','", $events) . "')")
                 ->order_by('created_at', 'DESC');
 
-            foreach ($fetch_activity->exec()->fetch_all() as $row) {
-                // Push it to the days activity array.
-                $day['activity'][] = $row;
-            }
-
             // Push the days data to the
             // rows array,
-            $rows[] = $day;
+            $days[] = array(
+                'created_at' => $info['date'],
+                'activity' => $fetch_activity->exec()->fetch_all()
+            );
         }
 
         // Send the days and events to the view.
-        View::set(array('days' => $rows, 'filters' => $filters, 'events' => $events));
+        View::set(compact('days', 'filters', 'events', 'pagination'));
     }
 
     /**

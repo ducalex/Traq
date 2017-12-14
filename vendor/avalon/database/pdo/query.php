@@ -175,18 +175,18 @@ class Query
      *
      * @return object
      */
-    public function where($columm, $value = null, $cond = '=')
+    public function where($column, $value = null, $cond = '=')
     {
         // Check if this is a mass add
-        if (is_array($columm)) {
+        if (is_array($column)) {
             // Loop though the columns and add them
-            foreach($columm as $where) {
+            foreach($column as $where) {
                 $this->where($where[0], $where[1], (isset($where[2]) ? $where[2] : '='));
             }
         }
         // Just one, add it.
         else {
-            $this->where[] = array($columm, $cond, $value === null ? 'NULL' : $value);
+            $this->where[] = array($column, $cond, $value === null ? 'NULL' : $value);
         }
 
         return $this;

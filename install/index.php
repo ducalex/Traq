@@ -102,7 +102,7 @@ post('/step/2', function(){
                 $_SESSION['db'] = array(
                     'driver' => 'pdo',
                     'type'   => 'sqlite',
-                    'path'   => $_POST['path']
+                    'path'   => ($_POST['path'][0] == '/') ? $_POST['path'] : realpath('..').'/'.$_POST['path']
                 );
                 break;
         }
@@ -140,8 +140,14 @@ post('/step/3', function(){
         $conn = Database::factory($_SESSION['db'], 'main');
 
         // Fetch the install SQL.
-        $install_sql = file_get_contents('./install.sql');
-        $install_sql = str_replace('traq_', $_SESSION['db']['prefix'], $install_sql);
+        $replace_pairs = array('traq_' => $conn->prefix);
+        
+        if ($conn->type === 'sqlite') {
+            $replace_pairs['COLLATE utf8_unicode_ci'] = 'COLLATE NOCASE';
+            $replace_pairs['AUTO_INCREMENT'] = '';
+        }
+
+        $install_sql = strtr(file_get_contents('./install.sql'), $replace_pairs);
         $queries = explode(';', $install_sql);
 
         // Run the install queries.
@@ -196,21 +202,11 @@ post('/step/3', function(){
         $db_ver->save();
 
         // Config file
-        $config = array();
-        $config[] = '<?php';
-        $config[] = '$db = array(';
-        foreach ($_SESSION['db'] as $key => $val) {
-            $config[] = '    \'' . $key . '\' => "' . $val . '",';
-        }
-        $config[] = ');';
-        $config = implode(PHP_EOL, $config);
+        $config = '<?php' . PHP_EOL . '$db = ' . var_export($_SESSION['db'], true) . ';';
 
         // Write the config to file
         if(!file_exists('../vendor/traq/config/database.php') and is_writable('../vendor/traq/config')) {
-            $handle = fopen('../vendor/traq/config/database.php', 'w+');
-            fwrite($handle, $config);
-            fclose($handle);
-            $config_created = true;
+            $config_created = file_put_contents('../vendor/traq/config/database.php', $config);
         }
         // Tell the user how to create the config file
         else {

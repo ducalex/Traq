@@ -41,24 +41,22 @@ class PDO extends Driver
     protected $last_query;
 
     public $prefix;
+    public $type;
 
     /**
      * PDO wrapper constructor.
      *
      * @param array $config Database config array
      */
-    public function __construct($config, $name)
+    public function __construct(array $config, $name)
     {
-        if (!is_array($config)) {
-            Error::halt('PDO Error', 'Database config must be an array.');
-        }
-
         // Lowercase the database type
         $config['type'] = strtolower($config['type']);
-
+        
         try {
             $this->connection_name = $name;
             $this->prefix = isset($config['prefix']) ? $config['prefix'] : '';
+            $this->type = $config['type'];
 
             // Check if a DSN is already specified
             if (isset($config['dsn'])) {
@@ -66,7 +64,7 @@ class PDO extends Driver
             }
             // SQLite
             elseif ($config['type'] == 'sqlite') {
-                $dsn = strtolower("sqlite:" . $config['path']);
+                $dsn = "sqlite:{$config['path']}";
             }
             // Something else...
             else {
@@ -80,10 +78,9 @@ class PDO extends Driver
                 $dsn,
                 isset($config['username']) ? $config['username'] : null,
                 isset($config['password']) ? $config['password'] : null,
-                isset($config['options']) ? $config['options'] : array()
+                (isset($config['options']) ? $config['options'] : []) + [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
             );
 
-            unset($dsn);
         } catch (\PDOException $e) {
             $this->halt($e->getMessage());
         }
@@ -112,8 +109,7 @@ class PDO extends Driver
         $this->query_count++;
         $this->last_query = $query;
 
-        $rows = $this->connection->query($query);
-        return $rows;
+        return $this->connection->query($query);
     }
 
     /**
@@ -126,6 +122,7 @@ class PDO extends Driver
      */
     public function prepare($query, array $options = array())
     {
+        $this->query_count++;
         $this->last_query = $query;
         return new Statement($this->connection->prepare($query, $options), $this->connection_name);
     }

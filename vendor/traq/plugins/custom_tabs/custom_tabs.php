@@ -91,17 +91,21 @@ class CustomTabs extends \traq\libraries\Plugin
      */
     public static function __install()
     {
-        Database::connection()->query("
-            DROP TABLE IF EXISTS `custom_tabs`;
-            CREATE TABLE `" . Database::connection()->prefix . "custom_tabs` (
-              `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+        $conn = Database::connection();
+
+        $auto_increment = $conn->type === 'sqlite' ? '' : 'AUTO_INCREMENT';
+
+        $conn->query("DROP TABLE IF EXISTS `{$conn->prefix}custom_tabs`");
+        $conn->query("
+            CREATE TABLE `{$conn->prefix}custom_tabs` (
+              `id` INTEGER NOT NULL $auto_increment,
               `label` varchar(255) NOT NULL DEFAULT '',
               `url` varchar(255) NOT NULL DEFAULT '',
-              `project_id` int(11) NOT NULL,
+              `project_id` INTEGER NOT NULL,
               `groups` varchar(255) NOT NULL DEFAULT '',
-              `display_order` int(11) NOT NULL,
+              `display_order` INTEGER NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+            )
         ");
     }
 

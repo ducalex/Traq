@@ -1,7 +1,7 @@
-<form action="<?php echo Request::base($project->href('tickets/update_filters')); ?>" method="post">
-	<fieldset id="ticket_filters">
-		<legend><a href="#"><?php echo l('filters'); ?></a></legend>
-		<div id="ticket_filters_content"<?php echo (isset($_COOKIE['hide_filters']) and $_COOKIE['hide_filters']) == 1 ? ' style="display:none;"' : ''; ?>>
+<form action="<?php echo Request::base($project->href('tickets/update_filters')); ?>" method="post" id="ticket_filters">
+	<fieldset>
+		<legend><a href="#"><?php echo l('filters'); ?></a> (<?php echo count($filters) ?>)</legend>
+		<div id="ticket_filters_content"<?php echo (!empty($_COOKIE['hide_filters']) && empty($_GET['search'])) ? ' style="display:none;"' : ''; ?>>
 			<table>
 				<tbody>
 				<?php foreach ($filters as $filter => $info) { ?>

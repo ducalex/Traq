@@ -1,6 +1,6 @@
 <form action="<?php echo Request::requestUri(); ?>" method="post">
 	<fieldset id="ticket_columns">
-		<legend><a href="#" onclick="$('#ticket_columns_content').slideToggle(); return false;"><?php echo l('columns'); ?></a></legend>
+		<legend><a href="#" onclick="$('#ticket_columns_content').slideToggle(); return false;"><?php echo l('columns'); ?></a> (<?php echo count($columns) ?>)</legend>
 		<div id="ticket_columns_content">
 		<?php foreach (ticketlist_allowed_columns() as $column) { ?>
 			<?php echo Form::checkbox("columns[{$column}]", $column, array('checked' => in_array($column, $columns))); ?>

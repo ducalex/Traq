@@ -30,18 +30,15 @@
  * @package Avalon
  * @subpackage Helpers
  */
-function array_remove_keys($array, $keys)
+function array_remove_keys(array $array, array $keys)
 {
-    // Loop over the array
-    foreach ($array as $key => $value) {
-        // Check if we want to remove it...
-        if (!is_numeric($key) and in_array($key, $keys)) {
-            unset($array[$key]);
-            continue;
-        }
+    $array = array_diff_key($array, array_flip($keys));
 
-        // Filter the value if it's an array also
-        $array[$key] = is_array($value) ? array_remove_keys($value, $keys) : $value;
+    // Loop over the array in case we need to recurse
+    foreach($array as &$value) {
+        if (is_array($value)) {
+            $value = array_remove_keys($value, $keys);
+        }
     }
 
     return $array;
@@ -57,7 +54,7 @@ function array_remove_keys($array, $keys)
  *
  * @return array
  */
-function array_merge_recursive2(&$first, &$second)
+function array_merge_recursive2(array &$first, array &$second)
 {
     $merged = $first;
 
@@ -81,30 +78,12 @@ function array_merge_recursive2(&$first, &$second)
  */
 function to_array($data)
 {
-    // Is it an object with a __toArray() method?
-    if (is_object($data) and method_exists($data, '__toArray')) {
-        // Hell yeah, we don't need to do anything.
-        return $data->__toArray();
-    }
-    // Just an object, take its variables!
-    elseif (is_object($data)) {
-        // Create an array
-        $array = array();
-
-        // Loop over the classes variables
-        foreach (get_class_vars($data) as $var => $val) {
-            // And steal them! MY PRECIOUS!
-            $array[$var] = $val;
-        }
-
-        // And return the array.
-        return $array;
+    if (is_object($data)) {
+        return method_exists($data, '__toArray') ? $data->__toArray() : get_class_vars($data);
     }
     // Array containing other things?
     elseif (is_array($data)) {
-        foreach ($data as $k => $v) {
-            $data[$k] = to_array($v);
-        }
+        return array_map('to_array', $data);
     }
 
     return $data;

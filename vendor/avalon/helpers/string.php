@@ -31,9 +31,15 @@
 function strshorten($string, $length = 20, $append = '...')
 {
     // Check if it's longer than the length
-    if (isset($string[$length-1])) {
-        return trim(mb_substr($string, 0, $length)) . '...';
+    if (function_exists('mb_strlen')) {
+        if (mb_strlen($string) > $length) {
+            return trim(mb_substr($string, 0, $length)) . '...';
+        }
     } else {
-        return $string;
+        if (strlen($string) > $length) {
+            return trim(substr($string, 0, $length)) . '...';
+        }
     }
+
+    return $string;
 }

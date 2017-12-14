@@ -39,9 +39,7 @@ function time_from_now_ago($original, $detailed = true, $include_from_now_ago = 
  */
 function time_ago($original, $detailed = true, $include_ago = true)
 {
-    if (!is_numeric($original)) {
-        $original == Time::to_unix($original);
-    }
+    $original = Time::to_unix($original);
 
     $datetime = ldate("l, jS F Y @ g:ia P", $original); //Time::date('Y-m-d H:i:s', $original);
     $time_ago = $include_ago ? l('time.ago', time_difference_in_words($original, $detailed)) : time_difference_in_words($original, $detailed);
@@ -60,11 +58,9 @@ function time_ago($original, $detailed = true, $include_ago = true)
  */
 function time_from_now($original, $detailed = true, $include_from_now = true)
 {
-    if (!is_numeric($original)) {
-        $original == Time::to_unix($original);
-    }
+    $original = Time::to_unix($original);
 
-    $datetime = Time::date('l, jS F Y @ g:ia P', $original);
+    $datetime = ldate('l, jS F Y @ g:ia P', $original);
     $time_ago = $include_from_now ? l('time.from_now', time_difference_in_words($original, $detailed)) : time_difference_in_words($original, $detailed);
     return "<span title=\"{$datetime}\">{$time_ago}</span>";
 }
@@ -79,12 +75,7 @@ function time_from_now($original, $detailed = true, $include_from_now = true)
  */
 function time_difference_in_words($original, $detailed = true)
 {
-    // Check what kind of format we're dealing with, timestamp or datetime
-    // and convert it to a timestamp if it is in datetime form.
-    if (!is_numeric($original)) {
-        $original = Time::to_unix($original);
-    }
-
+    $original = Time::to_unix($original);
     $now = time(); // Get the time right now...
 
     // Time chunks...
@@ -99,27 +90,20 @@ function time_difference_in_words($original, $detailed = true)
     );
 
     // Get the difference
-    $difference = $now > $original ? ($now - $original) : ($original - $now);
+    $difference = abs($original - $now);
 
     // Loop around, get the time from
-    for ($i = 0, $c = count($chunks); $i < $c; $i++) {
-        $seconds = $chunks[$i][0];
-        $name = $chunks[$i][1];
-        $names = $chunks[$i][2];
-        if(0 != $count = floor($difference / $seconds)) break;
+    foreach($chunks as $i => list($seconds, $name, $names)) {
+        if ($count = floor($difference / $seconds)) break;
     }
 
     // Format the time from
-    //$from = $count . " " . (1 == $count ? $name : $names);
     $from = l("time.x_{$name}", $count);
 
     // Get the detailed time from if the detaile variable is true
-    if ($detailed && $i + 1 < $c) {
-        $seconds2 = $chunks[$i + 1][0];
-        $name2 = $chunks[$i + 1][1];
-        $names2 = $chunks[$i + 1][2];
-        if (0 != $count2 = floor(($difference - $seconds * $count) / $seconds2)) {
-            //$from = $from . " and " . $count2 . " " . (1 == $count2 ? $name2 : $names2);
+    if ($detailed && isset($chunks[++$i])) {
+        list($seconds2, $name2, $names2) = $chunks[$i];
+        if ($count2 = floor(($difference - $seconds * $count) / $seconds2)) {
             $from = l('time.x_and_x', $from, l("time.x_{$name2}", $count2));
         }
     }

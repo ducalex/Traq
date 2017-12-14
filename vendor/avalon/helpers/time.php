@@ -39,11 +39,7 @@ class Time
      */
     public static function date($format = "Y-m-d H:i:s", $time = null)
     {
-        $time = ($time !== null ? $time : time());
-
-        if (!is_numeric($time)) {
-            $time = static::to_unix($time);
-        }
+        $time = is_null($time) ? time() : static::to_unix($time);
 
         return date($format, $time);
     }
@@ -84,18 +80,7 @@ class Time
             return $original;
         }
 
-        // YYYY-MM-DD HH:MM:SS
-        if (preg_match("/(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+) (?P<hour>\d+):(?P<minute>\d+):(?P<second>\d+)/", $original, $match)) {
-            return mktime($match['hour'], $match['minute'], $match['second'], $match['month'], $match['day'], $match['year']);
-        }
-        // YYYY-MM-DD
-        elseif (preg_match("/(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)/", $original, $match)) {
-            return mktime(0, 0, 0, $match['month'], $match['day'], $match['year']);
-        }
-        // Fail
-        else {
-            return strtotime($original);
-        }
+        return strtotime($original);
     }
 
     /**
@@ -121,14 +106,9 @@ class Time
      */
     public static function difference_in_words($original, $detailed = true)
     {
-        // Check what kind of format we're dealing with, timestamp or datetime
-        // and convert it to a timestamp if it is in datetime form.
-        if (!is_numeric($original)) {
-            $original = static::to_unix($original);
-        }
-
+        $original = Time::to_unix($original);
         $now = time(); // Get the time right now...
-
+    
         // Time chunks...
         $chunks = array(
             array(60 * 60 * 24 * 365, 'year', 'years'),
@@ -139,31 +119,22 @@ class Time
             array(60, 'minute', 'minutes'),
             array(1, 'second', 'seconds'),
         );
-
+    
         // Get the difference
-        if ($original < time()) {
-            $difference = ($now - $original);
-        } else {
-            $difference = ($original - $now);
-        }
-
+        $difference = abs($original - $now);
+    
         // Loop around, get the time from
-        for ($i = 0, $c = count($chunks); $i < $c; $i++) {
-            $seconds = $chunks[$i][0];
-            $name = $chunks[$i][1];
-            $names = $chunks[$i][2];
-            if(0 != $count = floor($difference / $seconds)) break;
+        foreach($chunks as $i => list($seconds, $name, $names)) {
+            if ($count = floor($difference / $seconds)) break;
         }
 
         // Format the time from
         $from = $count . " " . (1 == $count ? $name : $names);
 
         // Get the detailed time from if the detaile variable is true
-        if ($detailed && $i + 1 < $c) {
-            $seconds2 = $chunks[$i + 1][0];
-            $name2 = $chunks[$i + 1][1];
-            $names2 = $chunks[$i + 1][2];
-            if (0 != $count2 = floor(($difference - $seconds * $count) / $seconds2)) {
+        if ($detailed && isset($chunks[++$i])) {
+            list($seconds2, $name2, $names2) = $chunks[$i];
+            if ($count2 = floor(($difference - $seconds * $count) / $seconds2)) {
                 $from = $from . " and " . $count2 . " " . (1 == $count2 ? $name2 : $names2);
             }
         }

@@ -40,16 +40,10 @@ function to_json($data, $options = array())
     $options = array_merge($defaults, $options);
 
     // Convert the data to an array, if possible..
-    if (!is_array($data)) {
-        $data = to_array($data);
-    }
-
-    foreach ($data as $k => $v) {
-        $data[$k] = to_array($v);
-    }
+    $data = to_array($data);
 
     // Remove the parts we don't want...
-    if (isset($options['hide']) and is_array($data)) {
+    if (!empty($options['hide'])) {
         $data = array_remove_keys($data, $options['hide']);
     }
 
@@ -69,9 +63,7 @@ function to_json($data, $options = array())
 function mime_type_for($extension)
 {
     // Remove the first dot from the extension
-    if ($extension[0] == '.') {
-        $extension = substr($extension, 1);
-    }
+    $extension = ltrim($extension, '.');
 
     // Mime Types, because, you know....
     $mime_types = array(
@@ -79,7 +71,13 @@ function mime_type_for($extension)
         'css'  => 'text/css',
         'js'   => 'text/javascript',
         'rss'  => 'application/rss+xml',
+        'atom' => 'application/atom+xml',
         'xml'  => 'application/xml',
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'gif'  => 'image/gif',
+        'zip'  => 'application/zip',
+        'gz'   => 'application/gzip',
     );
 
     // Check if it's in the allowed mime types array
@@ -98,7 +96,8 @@ function mime_type_for($extension)
         'py',  // Python
         'h',   // Header file
         'c',   // C file
-        'cpp'  // C++ file
+        'cpp',  // C++ file
+        'diff',  // Diff file
     );
 
     // Check if its in the plain text array

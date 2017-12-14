@@ -49,8 +49,6 @@ class API
         } else {
             return false;
         }
-
-        return null;
     }
     /**
      * Returns a JSON formatted response.

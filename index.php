@@ -21,7 +21,7 @@
 define('START_TIME', microtime(true));
 define('START_MEM',  memory_get_usage());
 
-require dirname(__FILE__) . '/vendor/bootstrap.php';
+require __DIR__ . '/vendor/bootstrap.php';
 
 use avalon\core\Kernel as Avalon;
 

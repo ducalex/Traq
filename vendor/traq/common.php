@@ -89,27 +89,19 @@ function locale_select_options()
 {
     $options = array();
 
-    foreach (scandir(APPPATH . '/locale') as $file) {
-        if (substr($file, -4) == '.php') {
-            // Clean the name and set the class
-            $name = substr($file, 0, -4);
-            $class = "\\traq\locale\\{$name}";
+    foreach (glob(APPPATH . '/locale/*.php')  as $file) {
+        // Clean the name and set the class
+        $name = basename($file, '.php');
+        $class = "\\traq\locale\\{$name}";
 
-            // Make sure the locale class
-            // isn't already loaded
-            if ($name != settings('locale') and $name != Avalon::app()->user->locale) {
-                require APPPATH . '/locale/' . $file;
-            }
+        // Get the info
+        $info = $class::info();
 
-            // Get the info
-            $info = $class::info();
-
-            // Add it to the options
-            $options[] = array(
-                'label' => "{$info['name']} ({$info['language_short']}{$info['locale']})",
-                'value' => substr($file, 0, -4)
-            );
-        }
+        // Add it to the options
+        $options[] = array(
+            'label' => "{$info['name']} ({$info['language_short']}{$info['locale']})",
+            'value' => $name
+        );
     }
 
     return $options;
@@ -125,18 +117,12 @@ function theme_select_options()
 {
     $options = array();
 
-    foreach (scandir(APPPATH . '/views') as $file) {
-        $path = APPPATH . '/views/' . $file;
-
-        // Make sure this is a directory
-        // and theres an _theme.php file
-        if (is_dir($path) and file_exists($path . '/_theme.php')) {
-            $info = require ($path . '/_theme.php');
-            $options[] = array(
-                'label' => l('admin.theme_select_option', $info['name'], $info['version'], $info['author']),
-                'value' => $file
-            );
-        }
+    foreach (glob(APPPATH . '/views/*/_theme.php') as $file) {
+        $info = require $file;
+        $options[] = array(
+            'label' => l('admin.theme_select_option', $info['name'], $info['version'], $info['author']),
+            'value' => basename($file, '.php')
+        );
     }
 
     return $options;
@@ -237,13 +223,10 @@ function scm_types()
 {
     static $scms = array();
 
-    if (count($scms) == 0) {
-        foreach (scandir(APPPATH . "/libraries/scm/adapters") as $file) {
-            if (substr($file, -3) == 'php') {
-                $name = str_replace('.php', '', $file);
-                $scm = SCM::factory($name);
-                $scms[$name] = $scm->name();
-            }
+    if (empty($scms)) {
+        foreach (glob(APPPATH . "/libraries/scm/adapters/*.php") as $file) {
+            $name = basename($file, '.php');
+            $scms[$name] = SCM::factory($name)->name();
         }
     }
 
@@ -292,8 +275,7 @@ function is_project($find, $field = 'slug') {
  */
 function random_hash()
 {
-    $chars = "qwertyuiopasdfghjklzxcvbnm[];',./{}|:<>?1234567890!@#$%^&*()";
-    return sha1(time() . rand(0, 1000) . $chars[rand(0, count($chars))] . microtime());
+    return sha1(uniqid('', true).uniqid('', true));
 }
 
 /**
@@ -309,13 +291,7 @@ function get_percent($min, $max)
 {
     // Make sure we don't divide by zero
     // and end the entire universe
-    if ($min == 0 and $max == 0) return 0;
+    if ($max == 0) return 0;
 
-    // We're good, calcuate it like a boss,
-    // toss out the crap we dont want.
-    $calculate = ($min/$max*100);
-    $split = explode('.',$calculate);
-
-    // Return it like a pro.
-    return $split[0];
+    return intval($min / $max * 100);
 }

@@ -67,10 +67,8 @@ if (!file_exists(APPPATH . '/config/database.php')) {
 }
 
 // Include config and connect
-else {
-    require APPPATH . '/config/database.php';
-    Database::factory($db, 'main');
-}
+require APPPATH . '/config/database.php';
+Database::factory($db, 'main');
 
 // Load the plugins
 foreach(Plugin::select('file')->where('enabled', '1')->fetch_all() as $plugin) {

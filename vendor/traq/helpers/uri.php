@@ -45,3 +45,4 @@ function create_slug($uri)
     // We're done here.
     return $uri;
 }
+

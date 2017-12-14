@@ -115,7 +115,7 @@ class Router
     private static function setRoute($route)
     {
         $value = explode('.', $route['value']);
-        $method = explode('/', implode('.', array_slice($value, 1)));
+        $method = explode('/', implode('.', array_slice($value, 1)), 2);
         $vars = isset($method[1]) ? explode(',', $method[1]) : array();
 
         static::$controller = str_replace('::', '\\', '\\'.$value[0]);

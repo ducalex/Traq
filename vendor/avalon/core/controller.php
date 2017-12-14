@@ -55,22 +55,20 @@ class Controller
 
     public function __shutdown()
     {
-        // Don't render the layout for json content
-        if (Router::$extension == 'json') {
+        // Don't render the layout for json or xml content
+        if (Router::$extension) {
             $this->render['layout'] = false;
         }
 
         // Render the view
         $content = '';
         if ($this->render['view']) {
-            Body::append(View::render($this->render['view']));
+            $content = View::render($this->render['view']);
         }
 
         // Are we wrapping the view in a layout?
         if ($this->render['layout']) {
-            $content = Body::content();
-            Body::clear();
-            Body::append(View::render("layouts/{$this->render['layout']}", array('content' => $content)));
+            Body::append(View::render("layouts/{$this->render['layout']}", compact('content')));
         } else {
             Body::append($content);
         }

@@ -165,16 +165,15 @@ class Projects extends AppController
         // Atom feed
         $this->feeds[] = array(Request::requestUri() . ".atom", l('x_timeline_feed', $this->project->name));
 
-        $db = Database::connection();
-        $days_query = $db->prepare("
+        $days_query = $this->db->prepare("
             SELECT DISTINCT DATE(`created_at`) as `date`
-            FROM {$db->prefix}timeline
+            FROM {$this->db->prefix}timeline
             WHERE project_id = {$this->project->id} AND `action` IN ('" . implode("','", $events) . "')
             ORDER BY created_at DESC
         ")->exec()->fetch_all();
 
         // Pagination
-        $pagination = new Pagination(Request::request('page', 1), settings('timeline_days_per_page'), count($days_query));
+        $pagination = new Pagination(Request::req('page', 1), settings('timeline_days_per_page'), count($days_query));
 
         // Limit?
         if ($pagination->paginate) {

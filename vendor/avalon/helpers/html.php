@@ -19,20 +19,6 @@
  */
 
 /**
- * Shortcut to the HTML::link method.
- *
- * @param string $url The URL.
- * @param string $label The label.
- * @param array $attributes Options for the URL code (class, title, etc).
- *
- * @return string
- */
-function link_to($label, $uri, array $attributes = array())
-{
-    return HTML::link($label, $uri, $attributes);
-}
-
-/**
  * HTML Helper
  *
  * @author Jack P.
@@ -50,7 +36,8 @@ class HTML
      */
     public static function css_link($path, $media = 'screen')
     {
-        return '<link rel="stylesheet" href="'.str_replace('&', '&amp;', $path).'" media="'.$media.'" />'.PHP_EOL;
+        $options = static::build_attributes(array('rel' => 'stylesheet', 'href' => $path, 'media' => $media));
+        return "<link $options>\n";
     }
 
     /**
@@ -62,7 +49,21 @@ class HTML
      */
     public static function js_inc($path)
     {
-        return '<script src="'.str_replace('&', '&amp;', $path).'" type="text/javascript"></script>'.PHP_EOL;
+        $options = static::build_attributes(array('src' => $path));
+        return "<script $options></script>\n";
+    }
+
+    /**
+     * Returns the code to include a JavaScript file.
+     *
+     * @param string $file The path to the JavaScript file.
+     *
+     * @return string
+     */
+    public static function feed_link($path)
+    {
+        $options = static::build_attributes(array('rel' => 'alternate', 'href' => $path, 'type' => 'application/atom+xml'));
+        return "<link $options>\n";
     }
 
     /**
@@ -80,8 +81,7 @@ class HTML
             $label = $url;
         }
 
-        $url = Request::base(ltrim($url, '/'));
-        $attributes['href'] = str_replace('&', '&amp;', $url);
+        $attributes['href'] = Request::base(ltrim($url, '/'));
         $options = static::build_attributes($attributes);
 
         return "<a {$options}>{$label}</a>";
@@ -101,7 +101,7 @@ class HTML
             if (in_array($attr, array('id', 'checked', 'disabled')) and $val === false) {
                 continue;
             }
-            $options[] = "{$attr}=\"{$val}\"";
+            $options[] = $attr.'="'.htmlentities($val).'"';
         }
         return implode(' ', $options);
     }

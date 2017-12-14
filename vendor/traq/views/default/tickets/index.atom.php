@@ -22,12 +22,11 @@ foreach ($tickets as $ticket) {
 // Make feed
 $feed = new Atom(array(
     'title' => l('x_ticket_feed', $project->name),
-    'link' => "http://" . $_SERVER['HTTP_HOST'] . Request::base(),
-    'feed_link' => "http://" . $_SERVER['HTTP_HOST'] . Request::requestUri(),
+    'link' => Request::base('', true),
+    'feed_link' => Request::base(Request::requestUri()),
     'updated' => $entries[0]['updated'],
     'entries' => $entries,
 ));
 
 // Output feed
-header("Content-type: text/plain");
 print($feed->build());

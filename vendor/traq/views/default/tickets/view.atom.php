@@ -24,7 +24,7 @@ foreach (array_reverse($updates) as $update) {
         'title' => l('update_x', count($entries)+1),
         'id' => "tickets:{$ticket->ticket_id}:update:{$update->id}",
         'updated' => Time::date("c", $update->created_at),
-        'link' => "http://" . $_SERVER['HTTP_HOST'] . Request::base($ticket->href()),
+        'link' => Request::base($ticket->href(), true),
         'author' => array(
             'name' => $update->user->name
         ),
@@ -39,12 +39,11 @@ foreach (array_reverse($updates) as $update) {
 $entries = array_reverse($entries);
 $feed = new Atom(array(
     'title' => l('x_x_history_feed', $project->name, $ticket->summary),
-    'link' => "http://" . $_SERVER['HTTP_HOST'] . Request::base(),
-    'feed_link' => "http://" . $_SERVER['HTTP_HOST'] . Request::requestUri(),
+    'link' => Request::base('', true),
+    'feed_link' => Request::base(Request::requestUri(), true),
     'updated' => $entries[0]['updated'],
     'entries' => $entries,
 ));
 
 // Output feed
-header("Content-type: text/plain");
 print($feed->build());

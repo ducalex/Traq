@@ -20,19 +20,19 @@ foreach ($days as $day) {
             $entry['author'] = array(
                 'name' => $row->user->name
             );
-            $entry['link'] = "http://" . $_SERVER['HTTP_HOST'] . Request::base($row->ticket()->href());
+            $entry['link'] = Request::base($row->ticket()->href(), true);
         }
         // Milestones
         elseif (in_array($row->action, array('milestone_completed', 'milestone_cancelled'))) {
             $entry['title'] = l("timeline.{$row->action}", $row->milestone()->name);
             $entry['id'] = "timeline:{$row->id}:milestone:{$row->milestone()->slug}";
-            $entry['link'] = "http://" . $_SERVER['HTTP_HOST'] . Request::base($row->milestone()->href());
+            $entry['link'] = Request::base($row->milestone()->href(), true);
         }
         // Ticket comments
         elseif ($row->action == 'ticket_comment') {
             $entry['title'] = l('timeline.ticket_comment', $row->ticket()->summary, $row->ticket()->ticket_id);
             $entry['id'] = "timeline:{$row->id}:ticket:{$row->ticket()->ticket_id}:commented";
-            $entry['link'] = "http://" . $_SERVER['HTTP_HOST'] . Request::base($row->ticket()->href());
+            $entry['link'] = Request::base($row->ticket()->href(), true);
         }
         // Moved tickets
         elseif ($row->action == 'ticket_moved_from' or $row->action == 'ticket_moved_to') {
@@ -44,7 +44,7 @@ foreach ($days as $day) {
         elseif ($row->action == 'wiki_page_created' or $row->action == 'wiki_page_edited') {
             $entry['title'] = l("timeline.{$row->action}", array('title' => $row->wiki_page()->title, 'slug' => $row->wiki_page()->slug));
             $entry['id'] = "timeline:{$row->id}:wiki:{$row->owner_id}" . ($row->action == 'wiki_page_created' ? 'created' : 'edited');
-            $entry['link'] = "http://" . $_SERVER['HTTP_HOST'] . Request::base($row->wiki_page()->href());
+            $entry['link'] = Request::base($row->wiki_page()->href(), true);
         }
 
         $entry['updated'] = Time::date("c", $row->created_at);
@@ -55,12 +55,11 @@ foreach ($days as $day) {
 // Make feed
 $feed = new Atom(array(
     'title' => l('x_timeline_feed', $project->name),
-    'link' => "http://" . $_SERVER['HTTP_HOST'] . Request::base(),
-    'feed_link' => "http://" . $_SERVER['HTTP_HOST'] . Request::requestUri(),
+    'link' => Request::base('', true),
+    'feed_link' => Request::base(Request::requestUri(), true),
     'updated' => $entries[0]['updated'],
     'entries' => $entries,
 ));
 
 // Output feed
-header("Content-type: text/plain");
 print($feed->build());

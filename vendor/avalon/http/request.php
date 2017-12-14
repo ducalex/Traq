@@ -34,6 +34,7 @@ class Request
     private static $request_uri;
     private static $uri;
     private static $base;
+    private static $base_full;
     private static $segments = array();
     private static $method;
     private static $requested_with;
@@ -54,19 +55,6 @@ class Request
 
     public function __construct()
     {
-        // Because some hosts are complete
-        // idiotic pieces of shit, let's
-        // strip slashes from input.
-        if (get_magic_quotes_gpc()) {
-            $php_is_the_worst_language_ever_because_of_this = function (&$value) {
-                $value = stripslashes($value);
-            };
-            array_walk_recursive($_GET, $php_is_the_worst_language_ever_because_of_this);
-            array_walk_recursive($_POST, $php_is_the_worst_language_ever_because_of_this);
-            array_walk_recursive($_COOKIE, $php_is_the_worst_language_ever_because_of_this);
-            array_walk_recursive($_REQUEST, $php_is_the_worst_language_ever_because_of_this);
-        }
-
         // Set query string
         static::$query = (isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null);
 
@@ -78,13 +66,13 @@ class Request
 
         // Set base url
         static::$base = static::baseUrl();
+        static::$base_full = static::$scheme . '://' . static::$host . static::$base;
 
         // Set the request path
         static::$request_uri = static::requestPath();
 
         // Set relative uri without query string
-        $uri = explode('?', str_replace(static::$base, '', static::$request_uri));
-        static::$uri = $uri[0];
+        static::$uri = preg_replace(array('#^'.preg_quote(static::$base).'#', '/\?.*$/'), '', static::$request_uri);
 
         // Request segments
         static::$segments = explode('/', trim(static::$uri, '/'));
@@ -168,6 +156,34 @@ class Request
     }
 
     /**
+     * Returns the value of the key from the REQUEST array,
+     * if it's not set, returns null by default.
+     *
+     * @param string $key     Key to get from REQUEST array
+     * @param mixed  $not_set Value to return if not set
+     *
+     * @return mixed
+     */
+    public static function req($key, $not_set = null)
+    {
+        return isset(static::$request[$key]) ? static::$request[$key] : $not_set;
+    }
+
+    /**
+     * Returns the value of the key from the GET array,
+     * if it's not set, returns null by default.
+     *
+     * @param string $key     Key to get from GET array
+     * @param mixed  $not_set Value to return if not set
+     *
+     * @return mixed
+     */
+    public static function get($key, $not_set = null)
+    {
+        return isset(static::$get[$key]) ? static::$get[$key] : $not_set;
+    }
+
+    /**
      * Gets the URI segment.
      *
      * @param integer $segment Segment index
@@ -216,9 +232,9 @@ class Request
      *
      * @return string
      */
-    public static function base($path = '')
+    public static function base($path = '', $full = false)
     {
-        return static::$base . '/' . trim($path, '/');
+        return ($full ? static::$base_full : static::$base) . '/' . trim($path, '/');
     }
 
     /**
@@ -228,7 +244,7 @@ class Request
      */
     public static function isSecure()
     {
-        if (!isset($_SERV['HTTPS']) or empty($_SERVER['HTTPS'])) {
+        if (empty($_SERVER['HTTPS'])) {
             return false;
         }
 
@@ -247,7 +263,7 @@ class Request
             $baseUrl = $_SERVER['ORIG_SCRIPT_NAME'];
         }
 
-        $baseUrl = rtrim(str_replace($filename, '', $baseUrl), '/');
+        $baseUrl = dirname($baseUrl);
 
         return $baseUrl;
     }
@@ -270,7 +286,7 @@ class Request
             $requestPath = $_SERVER['REQUEST_URI'];
 
             $schemeAndHost = static::$scheme . '://' . static::$host;
-            if (strpos($requestPath, $schemeAndHost)) {
+            if (strpos($requestPath, $schemeAndHost) === 0) {
                 $requestPath = substr($requestPath, strlen($schemeAndHost));
             }
         } elseif (isset($_SERVER['ORIG_PATH_INFO'])) {

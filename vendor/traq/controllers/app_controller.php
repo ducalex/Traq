@@ -232,8 +232,8 @@ class AppController extends Controller
 
     public function __shutdown()
     {
-        // Plain layout for JSON and API requests
-        if (Router::$extension == '.json' or $this->is_api) {
+        // Plain layout for JSON and API requests and Atom feed
+        if (Router::$extension or $this->is_api) {
             $this->render['layout'] = 'plain';
         }
         // Bad API request?
@@ -258,13 +258,13 @@ class AppController extends Controller
 
             // Set the layout and view extension
             $this->render['layout'] = 'plain';
-            $this->render['view'] = $this->render['view'] . $extension;
+            $this->render['view'] .= $extension;
         }
 
-        if (Router::$extension == '.json') {
-            header('Content-type: application/json');
-            if ($this->render['view'] and strpos($this->render['view'], '.json') === false) {
-                $this->render['view'] = $this->render['view'] . '.json';
+        if (Router::$extension) {
+            header('Content-type: application/' . trim(Router::$extension, '.'));
+            if (!empty($this->render['view']) and strpos($this->render['view'], Router::$extension) === false) {
+                $this->render['view'] .= Router::$extension;
             }
         }
 

@@ -38,7 +38,7 @@ class Repositories extends AppController
         $this->title(l('repository'));
 
         if (!$this->user->permission($this->project->id, 'scm_browse_repositories')) {
-            return $this->show_no_permission();
+            return $this->show_no_permission(true);
         }
 
         $repositories = Repository::select()->where('project_id', $this->project->id)->order_by('is_default', 'desc')->exec()->fetch_all();

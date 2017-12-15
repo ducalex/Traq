@@ -42,6 +42,7 @@ class Git extends \traq\libraries\SCM
      */
     public function _before_save_info(&$repo, $is_new = false)
     {
+        $repo->location = realpath($repo->location);
         // Check if the location is a repository or not...
         if (!$resp = $this->_shell('branch') or preg_match("/Not a git repository/i", $resp)) {
             $repo->_add_error('location', l('errors.scm.location_not_a_repository'));

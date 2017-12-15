@@ -138,9 +138,12 @@ class AppController extends Controller
     /**
      * Used to display the no permission page.
      */
-    public function show_no_permission()
+    public function show_no_permission($http_auth = false)
     {
         header("HTTP/1.0 401 Unauthorized");
+        if (!LOGGEDIN && $http_auth) {
+            header('WWW-Authenticate: Basic realm="Traq"');
+        }
         $this->render['view'] = 'error/no_permission';
         $this->render['action'] = false;
     }
@@ -195,6 +198,12 @@ class AppController extends Controller
             // Set is_api and JSON view extension
             $this->is_api = true;
             Router::$extension = '.json';
+        }
+        elseif(isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+            $user = User::find('username', $_SERVER['PHP_AUTH_USER']);
+            if ($user == false or !$user->verify_password($_SERVER['PHP_AUTH_PW']) or !$user->is_activated()) {
+                $user = null;
+            }
         }
 
         // Guest

@@ -119,9 +119,9 @@ class User extends Model
      *
      * @return string
      */
-    public function option($option, $value = '!donothing')
+    public function option($option, $value = null)
     {
-        if ($value != '!donothing') {
+        if (func_num_args() === 2) {
             $this->_options[$option] = $value;
             $this->set('options', json_encode($this->_options));
         }

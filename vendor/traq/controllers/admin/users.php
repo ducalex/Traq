@@ -118,12 +118,6 @@ class Users extends AppController
 
             // Check if the users data is valid.
             if ($user->is_valid()) {
-                // Again check if we're changin their password.
-                if (Request::post('password')) {
-                    // Process the password.
-                    $user->prepare_password();
-                }
-
                 // Save and redirect to user listing.
                 $user->save();
 

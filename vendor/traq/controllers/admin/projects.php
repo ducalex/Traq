@@ -63,15 +63,11 @@ class Projects extends AppController
                 'slug'         => Request::post('slug'),
                 'codename'     => Request::post('codename'),
                 'info'         => Request::post('info'),
-                'enable_wiki'  => Request::post('enable_wiki', 0),
+                'enable_wiki'  => (int)Request::post('enable_wiki', 0),
                 'default_ticket_type_id' => Request::post('default_ticket_type_id'),
                 'default_ticket_sorting' => Request::post('default_ticket_sorting'),
-                'displayorder' => Request::post('displayorder', 0)
+                'displayorder' => (int)Request::post('displayorder', 0)
             ));
-
-            if (!is_numeric($project->displayorder)) {
-                $project->displayorder = 0;
-            }
 
             // Save project
             if ($project->save()) {

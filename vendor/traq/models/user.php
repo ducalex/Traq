@@ -66,7 +66,8 @@ class User extends Model
 
     // Things to do before certain things
     protected static $_filters_before = array(
-        'create' => array('_before_create')
+        'create' => array('_before_create'),
+        'save' => array('prepare_password'),
     );
 
     // Things to do after certain things
@@ -217,7 +218,6 @@ class User extends Model
     {
         $this->password = $new_password;
         $this->password_ver = 'crypt';
-        $this->prepare_password();
     }
 
     /**
@@ -256,11 +256,13 @@ class User extends Model
     }
 
     /**
-     * Hashes the users password.
+     * Hashes the users password if set.
      */
-    public function prepare_password()
+    protected function prepare_password()
     {
-        $this->_data['password'] = password_hash($this->_data['password'], PASSWORD_DEFAULT);
+        if ($this->_is_new() or in_array('password', $this->_changed_properties)) {
+            $this->_data['password'] = password_hash($this->_data['password'], PASSWORD_DEFAULT);
+        }
     }
 
     /**

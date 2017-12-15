@@ -62,15 +62,13 @@ function ticket_links($text, $project)
 {
     return preg_replace_callback(
         "|(?:[\w\d\-_]+)?#([\d]+)|",
-        function($matches){
-            $match = explode('#', $matches[0]);
+        function($matches) use($project) {
+            list($slug, $ticket) = explode('#', $matches[0]);
 
             // switch project project#123
-            if (isset($match[1])) {
-                $project = Project::find('slug', $match[0]) ?: $project;
-            }
+            $_project = $slug ? Project::find('slug', $slug) : $project;
 
-            return HTML::link($matches[0], $project->href("tickets/{$match[1]}"));
+            return HTML::link($matches[0], $_project->href("tickets/{$ticket}"));
         },
         $text
     );

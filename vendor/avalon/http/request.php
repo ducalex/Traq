@@ -144,42 +144,57 @@ class Request
     /**
      * Returns the value of the key from the POST array,
      * if it's not set, returns null by default.
+     * If no key is given, return the full array.
      *
      * @param string $key     Key to get from POST array
      * @param mixed  $not_set Value to return if not set
      *
      * @return mixed
      */
-    public static function post($key, $not_set = null)
+    public static function post($key = null, $not_set = null)
     {
+        if ($key === null) {
+            return static::$post;
+        }
+
         return isset(static::$post[$key]) ? static::$post[$key] : $not_set;
     }
 
     /**
      * Returns the value of the key from the REQUEST array,
      * if it's not set, returns null by default.
+     * If no key is given, return the full array.
      *
      * @param string $key     Key to get from REQUEST array
      * @param mixed  $not_set Value to return if not set
      *
      * @return mixed
      */
-    public static function req($key, $not_set = null)
+    public static function req($key = null, $not_set = null)
     {
+        if ($key === null) {
+            return static::$request;
+        }
+
         return isset(static::$request[$key]) ? static::$request[$key] : $not_set;
     }
 
     /**
      * Returns the value of the key from the GET array,
      * if it's not set, returns null by default.
+     * If no key is given, return the full array.
      *
      * @param string $key     Key to get from GET array
      * @param mixed  $not_set Value to return if not set
      *
      * @return mixed
      */
-    public static function get($key, $not_set = null)
+    public static function get($key = null, $not_set = null)
     {
+        if ($key === null) {
+            return static::$get;
+        }
+
         return isset(static::$get[$key]) ? static::$get[$key] : $not_set;
     }
 

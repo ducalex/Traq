@@ -87,102 +87,86 @@ class Tickets extends AppController
         // Create ticket filter query
         $filter_query = new TicketFilterQuery($this->project);
 
-        // Loop over request variables
-        foreach (Request::$request as $filter => $value) {
-            // Check if the filter exists...
-            if (in_array($filter, array_keys(ticket_filters_for($this->project)))) {
-                $filter_query->process($filter, $value);
-            }
-        }
+        $filters = Request::req();
 
         // Any filters stored in the session?
-        if (empty($filter_query->filters())
-        and isset($_SESSION['ticket_filters'])
-        and isset($_SESSION['ticket_filters'][$this->project->id])) {
-            foreach (explode('&', $_SESSION['ticket_filters'][$this->project->id]) as $filter_value) {
-                if (strpos($filter_value, '=')) {
-                    $filter_value = explode('=', $filter_value);
-                    if (in_array($filter_value[0], array_keys(ticket_filters_for($this->project)))) {
-                        $value = isset($filter_value[1]) ? explode(',', urldecode($filter_value[1])) : array();
-                        $filter_query->process($filter_value[0], $value);
-                    }
-                }
+        if (empty($filters) and !empty($_SESSION['ticket_filters'][$this->project->id])) {
+            foreach(explode('&', $_SESSION['ticket_filters'][$this->project->id]) as $filter_value) {
+                list($filter, $value) = explode('=', $filter_value, 2);
+                $filters[$filter] = array_filter(explode(',', urldecode($value)));
             }
-        } else {
-           // $_SESSION['ticket_filters'][$this->project->id] = Request::$query;
         }
-        
-        // Send filters to the view
-        View::set('filters', $filter_query->filters());
+
+        $filters = array_intersect_key($filters, ticket_filters_for($this->project));
+
+        foreach($filters as $filter => $value) {
+            $filter_query->process($filter, $value);
+        }
 
         // Fetch tickets
-        $tickets = array();
-        $rows = $this->db->select('tickets.*')->from('tickets')->custom_sql($filter_query->sql());
+        $rows = Ticket::select('tickets.*')->custom_sql($filter_query->sql());
 
         // Order by creation date for atom feed
         if (Router::$extension == '.atom') {
-            $rows->order_by('created_at', 'DESC');
+            $order = array('created_at', 'desc');
         }
         // Sort from URI, if set
         else {
             // field.direction
             $order = explode('.', ticket_sort_order($this->project->default_ticket_sorting));
-
-            // Check if we need to do
-            // anything with the field.
-            switch($order[0]) {
-                case 'summary':
-                case 'body':
-                case 'votes':
-                case 'created_at':
-                case 'updated_at':
-                    $property = $order[0];
-                    break;
-
-                case 'user':
-                case 'milestone':
-                case 'version':
-                case 'component':
-                case 'type':
-                case 'status':
-                case 'priority':
-                case 'severity':
-                case 'assigned_to':
-                    $property = "{$order[0]}_id";
-                    break;
-
-                case 'id':
-                    $property = "ticket_id";
-                    break;
-
-                default:
-                    $property = 'ticket_id';
-            }
-
-            // Order rows
-            $rows->order_by($property, (strtolower($order[1]) == 'asc' ? "ASC" : "DESC"));
         }
+        // Check if we need to do
+        // anything with the field.
+        switch($order[0]) {
+            case 'summary':
+            case 'body':
+            case 'votes':
+            case 'created_at':
+            case 'updated_at':
+                $property = $order[0];
+                break;
+
+            case 'user':
+            case 'milestone':
+            case 'version':
+            case 'component':
+            case 'type':
+            case 'status':
+            case 'priority':
+            case 'severity':
+            case 'assigned_to':
+                $property = "{$order[0]}_id";
+                break;
+
+            case 'id':
+                $property = "ticket_id";
+                break;
+
+            default:
+                $property = 'ticket_id';
+        }
+
+        // Order rows
+        $rows->order_by($property, (strtolower($order[1]) == 'asc' ? "ASC" : "DESC"));
+
+        $page = (int)Request::req('page') ?: 1;
+        $per_page = settings('tickets_per_page');
+
+        // We get one more record than we need to see if there's a next page.
+        $rows->limit(($page - 1) * $per_page, $per_page + 1);
+
+        $tickets = $rows->exec()->fetch_all();
+        $next_page = array_splice($tickets, $per_page);
 
         // Paginate tickets
         $pagination = new Pagination(
-            Request::post('page', 1), // Page
-            settings('tickets_per_page'), // Per page
-            $rows->exec()->row_count() // Row count
+            $page, // Page
+            $per_page, // Per page
+            ($page * $per_page) + ($next_page ? 1 : 0) // Total
         );
 
-        if ($pagination->paginate) {
-            $rows->limit($pagination->limit, settings('tickets_per_page'));
-        }
-
-        View::set(compact('pagination'));
-
-        // Add to tickets array
-        foreach($rows->exec()->fetch_all() as $row) {
-            $tickets[] = new Ticket($row, false);
-        }
-
         // Send the tickets array to the view..
-        View::set('tickets', $tickets);
+        View::set(compact('pagination', 'tickets', 'filters'));
 
         // Columns
         $this->get_columns();
@@ -830,7 +814,7 @@ class Tickets extends AppController
     {
         $query_string = array();
         $filters = Request::post('filters', array());
-        
+
         // Add filter
         if ($new_filter = Request::post('new_filter')) {
             // Add the blank value
@@ -845,7 +829,7 @@ class Tickets extends AppController
             if (!in_array($name, array_keys(ticket_filters_for($this->project)))) {
                 continue;
             }
-            
+
             if (!isset($filter['values'])) $filter['values'] = array();
 
             // Process filters

@@ -198,12 +198,12 @@ class User extends Model
         switch($this->_data['password_ver']) {
             // Passwords from Traq 0.1 to 2.3
             case 'sha1':
-                return sha1($password) == $this->_data['password'];
+                return sha1($password) === $this->_data['password'];
                 break;
 
             // Passwords from Traq 3+
             case 'crypt':
-                return crypt($password, $this->_data['password']) == $this->_data['password'];
+                return password_verify($password, $this->_data['password']);
                 break;
         }
     }
@@ -237,7 +237,7 @@ class User extends Model
     protected function _before_create()
     {
         $this->prepare_password();
-        $this->_data['login_hash'] = sha1(time() . $this->_data['username'] . rand(0, 1000));
+        $this->_data['login_hash'] = random_hash(40);
 
         if (!isset($this->_data['name'])) {
             $this->_data['name'] = $this->_data['username'];
@@ -260,7 +260,7 @@ class User extends Model
      */
     public function prepare_password()
     {
-        $this->_data['password'] = crypt($this->_data['password'], '$2a$10$' . sha1(microtime() . $this->_data['username'] . $this->_data['email']) . '$');
+        $this->_data['password'] = password_hash($this->_data['password'], PASSWORD_DEFAULT);
     }
 
     /**
@@ -334,7 +334,7 @@ class User extends Model
      */
     public function generate_api_key()
     {
-        $this->api_key = sha1(microtime() . rand(0, 1000) . time() . rand(0, 1000) . $this->email . $this->id . $this->created_at);
+        $this->api_key = random_hash(40);
     }
 
     /**

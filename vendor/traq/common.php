@@ -234,9 +234,13 @@ function scm_select_options()
  *
  * @return string
  */
-function random_hash()
+function random_hash($length = 40)
 {
-    return sha1(uniqid('', true).uniqid('', true));
+    $hash = '';
+    while(strlen($hash) < $length) {
+        $hash .= str_replace(['/', '+', '='], '', base64_encode(sha1(uniqid('', true).uniqid('', true), true)));
+    }
+    return substr($hash, 0, $length);
 }
 
 /**

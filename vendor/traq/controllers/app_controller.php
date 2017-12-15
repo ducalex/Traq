@@ -74,7 +74,7 @@ class AppController extends Controller
 
         // Load helpers
         Load::helper('html', 'errors', 'form', 'formats', 'time_ago', 'uri', 'string',
-            'subscriptions', 'timeline', 'formatting', 'tickets');
+            'subscriptions', 'timeline', 'formatting', 'tickets', 'compat');
 
         // Get the user info
         $this->user = $this->_get_user();

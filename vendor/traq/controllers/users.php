@@ -136,7 +136,7 @@ class Users extends AppController
 
             // Email validation
             if (settings('email_validation')) {
-                $user->option('validation_key', sha1($user->username . $user->name . microtime() . rand(0, 1000)));
+                $user->option('validation_key', random_hash());
             }
 
             // Run plugin hooks
@@ -150,7 +150,7 @@ class Users extends AppController
                         $user,
                         'email_validation',
                         array(
-                            'link' => "http://" . $_SERVER['HTTP_HOST'] . Request::base("users/validate/" . $user->option('validation_key'))
+                            'link' => Request::base("users/validate/" . $user->option('validation_key'), true)
                         )
                     );
 
@@ -189,7 +189,7 @@ class Users extends AppController
             // Find user
             if ($user = User::select()->where('options', '%"reset_password_key":"' . $key . '"%', 'LIKE')->exec()->fetch()) {
                 // Generate new password
-                $new_password = substr(random_hash(), 0, 10);
+                $new_password = random_hash(10);
 
                 // Set new password, clear reset key and save
                 $user->set_password($new_password);

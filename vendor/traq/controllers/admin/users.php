@@ -63,7 +63,7 @@ class Users extends AppController
             // Set the users information
             $user->set(array(
                 'username' => Request::post('username'),
-                'name'     => Request::post('name'),
+                'name'     => Request::post('name') ?: Request::post('username'),
                 'password' => Request::post('password'),
                 'email'    => Request::post('email'),
                 'group_id' => Request::post('group_id', 2)

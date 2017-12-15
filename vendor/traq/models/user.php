@@ -179,12 +179,8 @@ class User extends Model
      */
     public function get_project_role($project_id)
     {
-        if ($role = UserRole::select()->where('project_id', $project_id)->where('user_id', $this->_data['id'])->exec()
-        and $role->row_count() > 0) {
-            return $role->fetch()->project_role_id;
-        } else {
-            return 0;
-        }
+        $role = UserRole::select()->where('project_id', $project_id)->where('user_id', $this->_data['id'])->exec()->fetch();
+        return $role ? $role->project_role_id : 0;
     }
 
     /**
@@ -238,10 +234,6 @@ class User extends Model
     {
         $this->prepare_password();
         $this->_data['login_hash'] = random_hash(40);
-
-        if (!isset($this->_data['name'])) {
-            $this->_data['name'] = $this->_data['username'];
-        }
     }
 
     /**
@@ -250,7 +242,7 @@ class User extends Model
      */
     protected function _after_construct()
     {
-        if (isset($this->_data) and isset($this->_data['options'])) {
+        if (isset($this->_data['options'])) {
             $this->_options = json_decode($this->_data['options'], true);
         }
     }

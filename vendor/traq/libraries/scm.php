@@ -91,6 +91,7 @@ class SCM
      */
 
     protected $info;
+    protected $last_error;
 
     /**
      * Class constructor.
@@ -109,7 +110,17 @@ class SCM
      */
     public function name()
     {
-        return $this->_name;
+        return static::name;
+    }
+
+    /**
+     * Returns the last error from a command
+     *
+     * @return string
+     */
+    public function last_error()
+    {
+        return $this->last_error;
     }
 
     /**

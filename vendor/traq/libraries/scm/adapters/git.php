@@ -46,8 +46,9 @@ class Git extends \traq\libraries\SCM
     {
         $info->location = realpath($info->location);
         // Check if the location is a repository or not...
-        if (!$resp = $this->_shell('branch') or preg_match("/Not a git repository/i", $resp)) {
+        if (!$this->_shell('branch')) {
             $info->_add_error('location', l('errors.scm.location_not_a_repository'));
+            $info->_add_error('cmd', $this->last_error);
         }
     }
 
@@ -278,7 +279,7 @@ class Git extends \traq\libraries\SCM
             'HTTP_CONTENT_ENCODING' => $_SERVER['HTTP_CONTENT_ENCODING'],
         ];
 
-        $git = proc_open($this->_binary. ' http-backend', [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $this->info->location, $env);
+        $git = proc_open($this->_binary. ' http-backend', [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $pipes, $this->info->location, $env);
         if ($git === false) die('Failed to execute process');
         list($git_stdin, $git_stdout, $git_stderr) = $pipes;
 
@@ -307,9 +308,13 @@ class Git extends \traq\libraries\SCM
         $arg_path = $path ? ' -- '.escapeshellarg(ltrim($path, '/')) : '';
         $arg_location = escapeshellarg($this->info->location);
 
-        $fp = popen("{$this->_binary} -C $arg_location $cmd $arg_revision $arg_path", 'r');
-        $buffer = stream_get_contents($fp);
-        return pclose($fp) ? false : $buffer;
+        $git = proc_open("{$this->_binary} -C $arg_location $cmd $arg_revision $arg_path", [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $this->info->location);
+        if ($git === false) return false;
+        list(, $git_stdout, $git_stderr) = $pipes;
+
+        $this->last_error = stream_get_contents($git_stderr) ?: null;
+        $stdout = stream_get_contents($git_stdout);
+        return proc_close($git) ? false : $stdout;
     }
 
     private function _parse_log_entry($revision)

@@ -127,7 +127,7 @@ class Repositories extends AppController
             'location'   => Request::post('location', $repo->location),
             'is_default' => Request::post('is_default', 0),
             'project_id' => $this->project->id,
-            'extra'      => Request::post('extra', $repo->extra),
+            //'extra'      => Request::post('extra', $repo->extra),
             'serve'      => Request::post('serve', $repo->serve),
         ));
 

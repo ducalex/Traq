@@ -98,11 +98,26 @@ class Repositories extends AppController
 
     public function action_commits($branch = null, $path = null)
     {
-		$page = (int)Request::req('page', 1);
-		$revision_count = $this->scm->revision_count($branch ?: $this->target, $path);
+        $target = $branch ?: $this->target;
+        $extra = $this->repository->extra;
+        $cache = &$extra['cache'][$target];
 
+        if (empty($cache['rev_count']) || $cache['expires'] < time() || $cache['last_modified'] != $this->scm->last_modified()) {
+            $cache = [
+                'expires' => time() + 3600,
+                'last_modified' => $this->scm->last_modified(),
+                'rev_count' => $this->scm->revision_count($target, $path)
+            ];
+            $this->repository->extra = $extra;
+            $this->repository->save();
+        }
+        //$revision_count = $this->scm->revision_count($branch ?: $this->target, $path);
+        $revision_count = $cache['rev_count'];
+
+        $page = (int)Request::req('page', 1);
         $revisions = $this->scm->revisions($branch, $path, ($page - 1) * 50, 50);
         $pagination = new Pagination($page, 50, $revision_count);
+
         $nav_title = $path . ' ' . (($page - 1) * 50) . '-' . ($page * 50) . ' of '. $revision_count;
 
         $users = array();
@@ -128,6 +143,7 @@ class Repositories extends AppController
 
         View::set(['commit' => $commit, 'nav_title' => $commit->subject, 'commit_diff' => $commit->diff]);
 	}
+
 
     public function action_compare()
     {

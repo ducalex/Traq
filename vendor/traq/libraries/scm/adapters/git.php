@@ -259,6 +259,21 @@ class Git extends \traq\libraries\SCM
     }
 
     /**
+     * Returns the unix timestamp of when the repository was last modified in any way(push/rebase/merge/commit/branch/tag/etc)
+     * I haven't found a reliable way for git yet so we have to read the filesystem
+     *
+     * @return int
+     */
+    public function last_modified()
+    {
+        if (file_exists($this->info->location.'/index')) {
+            return filemtime($this->info->location.'/index');
+        } else {
+            return filemtime($this->info->location.'/.git/index');
+        }
+    }
+
+    /**
      * Client backend (for git clone or svn checkout)
      *
      */

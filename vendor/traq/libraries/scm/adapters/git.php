@@ -21,16 +21,18 @@
 namespace traq\libraries\scm\adapters;
 use avalon\core\Load;
 use avalon\core\Kernel as Avalon;
+use traq\libraries\scm\Revision;
+use traq\libraries\scm\File;
 
 Load::helper('diff');
 
 
 class Git extends \traq\libraries\SCM
 {
-    protected $_name = 'Git';
-    protected $_binary = 'git';
+    const name = 'Git';
     const link_pattern = '([a-f0-9]{7}|[a-f0-9]{40})';
 
+    private $_binary = 'git'; // In the future this might be configurable
 
     /**
      * Used when saving repository information.
@@ -40,12 +42,12 @@ class Git extends \traq\libraries\SCM
      *
      * @return object
      */
-    public function _before_save_info(&$repo, $is_new = false)
+    public function _before_save_info(&$info, $is_new = false)
     {
-        $repo->location = realpath($repo->location);
+        $info->location = realpath($info->location);
         // Check if the location is a repository or not...
         if (!$resp = $this->_shell('branch') or preg_match("/Not a git repository/i", $resp)) {
-            $repo->_add_error('location', l('errors.scm.location_not_a_repository'));
+            $info->_add_error('location', l('errors.scm.location_not_a_repository'));
         }
     }
 
@@ -186,19 +188,19 @@ class Git extends \traq\libraries\SCM
                 // This will probably need caching
                 $last_revision = $this->revisions($revision, $path, 0, 1);
 
-                $files[$path] = (object)[
+                $files[$path] = new File([
                     'mode' => $matches[1][$i],
-                    'type' => $matches[2][$i],
+                    'type' => $matches[2][$i] === 'tree' ? 'dir' : 'blob',
                     'id'   => $matches[3][$i],
                     'size' => $matches[4][$i],
                     'revision' => reset($last_revision),
-                ];
+                ]);
             }
             uasort($files, function($a, $b) {
-                if ($a->type === 'tree' && $b->type === 'tree') {
+                if ($a->is_dir() === $b->is_dir()) {
                     return 0;
                 } else {
-                    return $a->type === 'tree' ? -1 : 1;
+                    return $a->is_dir() ? -1 : 1;
                 }
             });
             return $files;
@@ -320,18 +322,18 @@ class Git extends \traq\libraries\SCM
 
         $parents = array_filter(explode(' ', $match['parents']));
 
-        return (object) [
+        return new Revision([
             'id'        => $match['id'],
             'full_id'   => $match['hash'],
             'parents'   => $parents,
             'author'    => $match['author'],
             'email'     => $match['email'],
-            'date'      => $match['date'],
+            'date'      => strtotime($match['date']),
             'subject'   => $match['subject'],
             'message'   => $match['message'],
             'diff'      => $match['diff'],
             'is_first'  => empty($parents),
             'is_merge'  => count($parents) > 1,
-        ];
+        ]);
     }
 }

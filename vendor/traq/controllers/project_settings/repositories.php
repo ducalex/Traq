@@ -40,7 +40,7 @@ class Repositories extends AppController
     public function __construct()
     {
         parent::__construct();
-        View::set('scm_types', scm_types());
+        View::set('scm_types', SCM::adapters());
         $this->title(l('repositories'));
 
         if (!$this->user->permission($this->project->id, 'scm_manage_repositories')) {

@@ -47,6 +47,22 @@ class SCM
     }
 
     /**
+     * Used to list supported SCM adapters.
+     */
+    public static function adapters()
+    {
+        $adapters = array();
+        foreach(glob(APPPATH . "/libraries/scm/adapters/*.php") as $file) {
+            $name = basename($file, '.php');
+            $class = "\\traq\\libraries\\scm\\adapters\\" . ucfirst($name);
+            $adapters[$name] = $class::name;
+        }
+
+        \FishHook::run('function:scm_types', array(&$adapters));
+        return $adapters;
+    }
+
+    /**
      * Used when saving repository information.
      *
      * @param array $info Repository model object.
@@ -132,7 +148,7 @@ class SCM
      * @param string $path File/directory path
      * @param string $revision Revision identifier
      *
-     * @return array
+     * @return File
      */
     public function file_info($path, $revision = null)
     {
@@ -144,6 +160,8 @@ class SCM
      *
      * @param string $revision Revision identifier.
      * @param string $path Directory path for the revision.
+     * 
+     * @return Revision
      */
     public function revision($revision, $path = null)
     {
@@ -154,6 +172,8 @@ class SCM
      * Check if the revision exists.
      *
      * @param string $revision Revision identifier.
+     * 
+     * @return bool
      */
     public function revision_exists($revision)
     {
@@ -165,6 +185,8 @@ class SCM
      *
      * @param string $revision Revision identifier.
      * @param string $path Directory path for the revision.
+     * 
+     * @return integer
      */
     public function revision_count($revision, $path = null)
     {
@@ -197,6 +219,8 @@ class SCM
      *
      * @param string $path Directory path.
      * @param string $revision Revision identifier.
+     * 
+     * @return array
      */
     public function list_dir($path, $revision = null)
     {
@@ -208,6 +232,8 @@ class SCM
      *
      * @param string $path Directory path.
      * @param string $revision Revision identifier.
+     * 
+     * @return blob
      */
     public function read_file($path, $revision = null)
     {
@@ -218,6 +244,8 @@ class SCM
      * Return a patch in unified diff format of the specified revision
      *
      * @param string $revision Revision identifier.
+     * 
+     * @return string
      */
     public function patch($revision)
     {
@@ -239,6 +267,8 @@ class SCM
      *
      * @param string $revision Revision identifier.
      * @param string $format archive format
+     * 
+     * @return blob
      */
     public function archive($revision, $format = 'zip')
     {

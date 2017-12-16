@@ -19,7 +19,7 @@
 		}
 
 		foreach($files as $name => $meta) {
-			$icon = ($meta->type === 'tree') ? 'button_folder' : 'button_page';
+			$icon = $meta->is_dir() ? 'button_folder' : 'button_page';
 			$link = HTML::link($name, $repository->href("browse/$target/$name"), ['class' => $icon]);
 			$date = time_ago($meta->revision->date, false, true);
 			$commit_link = HTML::link($meta->revision->id, $repository->href("commit/{$meta->revision->id}"));

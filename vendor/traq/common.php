@@ -196,26 +196,6 @@ function permission_actions()
 }
 
 /**
- * Returns an array of available SCMs.
- *
- * @return array
- */
-function scm_types()
-{
-    static $scms = array();
-
-    if (empty($scms)) {
-        foreach (glob(APPPATH . "/libraries/scm/adapters/*.php") as $file) {
-            $name = basename($file, '.php');
-            $scms[$name] = SCM::factory($name)->name();
-        }
-    }
-
-    FishHook::run('function:scm_types', array(&$scms));
-    return $scms;
-}
-
-/**
  * Returns the available SCMS as form select options.
  *
  * @return array
@@ -223,7 +203,7 @@ function scm_types()
 function scm_select_options()
 {
     $options = array();
-    foreach (scm_types() as $scm => $name) {
+    foreach (SCM::adapters() as $scm => $name) {
         $options[] = array('label' => $name, 'value' => $scm);
     }
     return $options;

@@ -33,7 +33,8 @@ namespace traq\libraries\scm;
 class File
 {
     // This class should store the following information
-    public $path; // File path.
+    public $id;   // Object ID (if provided by the SCM)
+    public $path; // Object path.
     public $type; // Directory (dir) or file.
     public $size; // File size (in bytes)
     public $revision; // Last revision.
@@ -43,15 +44,17 @@ class File
      *
      * @param array $info File/directory info.
      */
-    public function __construct($info)
+    public function __construct(array $info)
     {
         // Assign the info to accessible variables
         foreach ($info as $key => $val) {
             $this->$key = $val;
         }
+        
+        $this->path = trim($this->path, '/');
 
-        if ($this->type == 'dir' and substr($this->path, -1) != '/') {
-            $this->path = "{$this->path}/";
+        if ($this->type === 'dir') {
+            $this->path .= '/';
         }
     }
 
@@ -62,8 +65,7 @@ class File
      */
     public function name()
     {
-        $bits = explode("/", $this->path);
-        return end($bits);
+        return basename($this->path);
     }
 
     /**
@@ -73,19 +75,7 @@ class File
      */
     public function ext()
     {
-        if ($this->type == 'dir') {
-            return false;
-        }
-
-        $bits = explode(".", $this->name());
-        unset($bits[0]);
-
-        // Check if this extension uses two dots.
-        if (count($bits) > 1 and in_array(end($bits), array('gz'))) {
-            return implode(".", $bits);
-        }
-
-        return end($bits);
+        return pathinfo($this->path, PATHINFO_EXTENSION);
     }
 
     /**
@@ -96,7 +86,7 @@ class File
      */
     public function is_root()
     {
-        return $this->type == 'dir' and ($this->path == '/' or $this->path == '');
+        return trim($this->path, '/') === '';
     }
 
     /**
@@ -106,6 +96,6 @@ class File
      */
     public function is_dir()
     {
-        return $this->type == 'dir';
+        return $this->type === 'dir';
     }
 }

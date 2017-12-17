@@ -63,19 +63,11 @@ if (isset($_REQUEST['theme'])) {
     }
 }
 
-// Fetch the request class.
-require 'vendor/avalon/http/request.php';
-use avalon\http\Request;
-Request::init();
-
 $files = array_filter($files, function($path) {
     return strpos($path, '../') === false && file_exists($path);
 });
 
 $output = array_map('file_get_contents', $files);
-
-// Replace the :baseuri: token
-$output = str_replace(':baseuri:', Request::base(), $output);
 
 // Remove comments and such from the output.
 $output = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $output);

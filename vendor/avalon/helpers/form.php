@@ -266,21 +266,10 @@ class Form
         }
 
         // Check if the value is set in the
-        // attributes array
-        if (isset($attributes['value'])) {
-            $value = $attributes['value'];
+        // attributes array otherwise check POST
+        if (!isset($attributes['value'])) {
+            $attributes['value'] = Request::post($name, '');
         }
-        // Check if its in the _POST array
-        elseif (isset($_POST[$name])) {
-            $value = htmlspecialchars($_POST[$name]);
-        }
-        // It's nowhere...
-        else {
-            $value = '';
-        }
-
-        // Make the value "safe"
-        $attributes['value'] = $value;
 
         // Add selected or checked attribute?
         foreach (array('selected', 'checked') as $attr) {
@@ -299,6 +288,8 @@ class Form
 
         // Textareas
         if ($type == 'textarea') {
+            $value = htmlentities($attributes['value']);
+            unset($attributes['value']);
             return "<textarea " . HTML::build_attributes($attributes) . ">{$value}</textarea>";
         }
         // Everything else

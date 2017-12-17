@@ -39,8 +39,10 @@ class Request
     private static $method;
     private static $requested_with;
     public static $query;
-    public static $request = array();
+    public static $headers = array();
+    public static $cookies = array();
     public static $post = array();
+    public static $get = array();
     public static $scheme;
     public static $host;
 
@@ -83,11 +85,20 @@ class Request
         // Requested with
         static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
 
-        // _REQUEST
-        static::$request = $_REQUEST;
+        // _GET
+        static::$get = $_GET;
 
         // _POST
         static::$post = $_POST;
+
+        // _COOKIE
+        static::$cookies = $_COOKIE;
+
+        foreach($_SERVER as $key => $value) {
+            if (substr($key, 0, 5) === 'HTTP_') {
+                static::$headers[substr($key, 5)] = $value;
+            }
+        }
     }
 
     /**
@@ -142,6 +153,43 @@ class Request
     }
 
     /**
+     *
+     * @param string $key     Header name
+     * @param mixed  $not_set Value to return if not set
+     *
+     * @return mixed
+     */
+    public static function header($key = null, $not_set = null)
+    {
+        if ($key === null) {
+            return static::$headers;
+        }
+
+        $key = strtoupper($key);
+
+        return isset(static::$headers[$key]) ? static::$headers[$key] : $not_set;
+    }
+
+    /**
+     * Returns the value of the key from the COOKIE array,
+     * if it's not set, returns null by default.
+     * If no key is given, return all cookies.
+     *
+     * @param string $key     Cookie name
+     * @param mixed  $not_set Value to return if not set
+     *
+     * @return mixed
+     */
+    public static function cookie($key = null, $not_set = null)
+    {
+        if ($key === null) {
+            return static::$cookies;
+        }
+
+        return isset(static::$cookies[$key]) ? static::$cookies[$key] : $not_set;
+    }
+
+    /**
      * Returns the value of the key from the POST array,
      * if it's not set, returns null by default.
      * If no key is given, return the full array.
@@ -161,22 +209,20 @@ class Request
     }
 
     /**
-     * Returns the value of the key from the REQUEST array,
+     * Returns the value of the key from the GET+POST array,
      * if it's not set, returns null by default.
      * If no key is given, return the full array.
+     * 
+     * This is replacing $_REQUEST because variable_order can be problematic
      *
-     * @param string $key     Key to get from REQUEST array
+     * @param string $key     Key to get from GET+POST array
      * @param mixed  $not_set Value to return if not set
      *
      * @return mixed
      */
     public static function req($key = null, $not_set = null)
     {
-        if ($key === null) {
-            return static::$request;
-        }
-
-        return isset(static::$request[$key]) ? static::$request[$key] : $not_set;
+        return static::get($key, static::post($key, $not_set));
     }
 
     /**
@@ -250,6 +296,25 @@ class Request
     public static function base($path = '', $full = false)
     {
         return ($full ? static::$base_full : static::$base) . '/' . trim($path, '/');
+    }
+
+    /**
+     * Builds a full Traq URL to be used in links
+     *
+     * @param string $path    If path is empty then the current uri will be used
+     * @param array $query
+     *
+     * @return string
+     */
+    public static function url($path = null, array $query = [], $full = false)
+    {
+        $url = static::base($path ?: static::$uri, $full);
+
+        if ($query && $query = http_build_query($query)) {
+            $url .= '?' . $query;
+        }
+
+        return $url;
     }
 
     /**

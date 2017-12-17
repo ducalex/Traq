@@ -366,12 +366,16 @@ class Ticket extends Model
                 }
             }
             // Attaching a file?
-            elseif ($field == 'attachment' and isset($_FILES['attachment']) and isset($_FILES['attachment']['name'])) {
+            elseif ($field == 'attachment' and $file = Request::files('attachment')) {
+                // Large files shouldn't/can't be stored in the database.
+                if ($file['size'] > 2 * 1024 * 1024) {
+                    continue;
+                }
                 $this->_save_queue[] = new Attachment(array(
-                    'name' => $_FILES['attachment']['name'],
-                    'contents' => base64_encode(file_get_contents($_FILES['attachment']['tmp_name'])),
-                    'type' => $_FILES['attachment']['type'],
-                    'size' => $_FILES['attachment']['size'],
+                    'name' => $file['name'] ?: 'untitled.txt',
+                    'type' => $file['type'] ?: 'text/plain',
+                    'size' => $file['size'],
+                    'contents' => base64_encode(file_get_contents($file['tmp_name'])),
                     'user_id' => $user->id,
                     'ticket_id' => $this->id
                 ));

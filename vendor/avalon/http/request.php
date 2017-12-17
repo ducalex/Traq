@@ -39,6 +39,7 @@ class Request
     private static $method;
     private static $requested_with;
     public static $query;
+    public static $files = array();
     public static $headers = array();
     public static $cookies = array();
     public static $post = array();
@@ -93,6 +94,9 @@ class Request
 
         // _COOKIE
         static::$cookies = $_COOKIE;
+
+        // _FILES
+        static::$files = $_FILES;
 
         foreach($_SERVER as $key => $value) {
             if (substr($key, 0, 5) === 'HTTP_') {
@@ -194,6 +198,23 @@ class Request
         $key = strtoupper($key);
 
         return isset(static::$headers[$key]) ? static::$headers[$key] : $not_set;
+    }
+
+    /**
+     * Returns the value of the key from the FILES array.
+     * If no key is given, return all files.
+     *
+     * @param string $key     File field
+     *
+     * @return mixed
+     */
+    public static function files($key = null)
+    {
+        if ($key === null) {
+            return static::$files;
+        }
+
+        return isset(static::$files[$key]) ? static::$files[$key] : null;
     }
 
     /**

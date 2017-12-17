@@ -25,6 +25,8 @@ namespace traq\controllers;
 
 use avalon\http\Request;
 use avalon\http\Router;
+use avalon\http\Session;
+use avalon\http\Cookie;
 use avalon\output\View;
 use avalon\core\Load;
 
@@ -90,8 +92,8 @@ class Tickets extends AppController
         $filters = Request::req();
 
         // Any filters stored in the session?
-        if (empty($filters) and !empty($_SESSION['ticket_filters'][$this->project->id])) {
-            foreach(explode('&', $_SESSION['ticket_filters'][$this->project->id]) as $filter_value) {
+        if (empty($filters) and Session::get("ticket_filters.{$this->project->id}")) {
+            foreach(Session::get("ticket_filters.{$this->project->id}") as $filter_value) {
                 list($filter, $value) = explode('=', $filter_value, 2);
                 $filters[$filter] = array_filter(explode(',', urldecode($value)));
             }
@@ -185,11 +187,11 @@ class Tickets extends AppController
 
         // Set columns from form
         if (Request::post('update_columns')) {
-            $columns = $_SESSION['columns'] = array_values(Request::post('columns', array()));
+            Session::set('columns', $columns = array_values(Request::post('columns', array())));
         } elseif(Request::req('columns')) {
             $columns = explode(',', Request::req('columns'));
-        } elseif(!empty($_SESSION['columns'])) {
-            $columns = $_SESSION['columns'];
+        } elseif(Session::get('columns')) {
+            $columns = Session::get('columns');
         } else {
             $columns = $this->project->default_ticket_columns;
         }
@@ -398,7 +400,7 @@ class Tickets extends AppController
             // redirect to the ticket page.
             if (check_ticket_creation_delay($ticket) and $ticket->is_valid()) {
                 // Set last ticket creation time
-                $_SESSION['last_ticket_creation'] = time();
+                Session::set('last_ticket_creation', time());
 
                 $ticket->save();
 
@@ -803,7 +805,7 @@ class Tickets extends AppController
         }
 
         // Clear selected tickets
-        setcookie('selected_tickets', '', time(), '/');
+        Cookie::delete('selected_tickets');
 
         Request::redirectTo($this->project->href('tickets'));
     }
@@ -890,7 +892,7 @@ class Tickets extends AppController
         }
 
         // Save to session and redirect
-        $_SESSION['ticket_filters'][$this->project->id] = implode('&', $query_string);
+        Session::set("ticket_filters.{$this->project->id}", $query_string);
         Request::redirectTo($this->project->href('tickets') . '?' . implode('&', $query_string));
     }
 

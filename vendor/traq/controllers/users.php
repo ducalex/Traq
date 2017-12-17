@@ -26,6 +26,7 @@ namespace traq\controllers;
 use \FishHook;
 use avalon\core\Load;
 use avalon\http\Request;
+use avalon\http\Session;
 use avalon\output\View;
 
 use traq\helpers\Notification;
@@ -83,7 +84,7 @@ class Users extends AppController
                 // User found and verified, set the cookie and redirect them
                 // to the index page if no "redirect" page was set.
                 if ($user->is_activated()) {
-                    setcookie('_traq', $user->login_hash, time() + (2 * 4 * 7 * 24 * 60 * 60 * 60), '/');
+                    Session::set('user_id', $user->id);
                     Request::redirect(Request::post('redirect', Request::base()));
                 }
                 // Tell the user to activate
@@ -103,7 +104,7 @@ class Users extends AppController
      */
     public function action_logout()
     {
-        setcookie('_traq', sha1(time()), time() + 5, '/');
+        Session::clear();
         Request::redirectTo();
     }
 

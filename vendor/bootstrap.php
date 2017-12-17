@@ -43,6 +43,8 @@ Autoloader::aliasClasses(array(
     'avalon\http\Router' => 'Router',
     'avalon\output\View' => 'View',
     'avalon\http\Request' => 'Request',
+    'avalon\http\Session' => 'Session',
+    'avalon\http\Cookie'  => 'Cookie',
 
     // Helpers
     'avalon\helpers\Time' => 'Time',

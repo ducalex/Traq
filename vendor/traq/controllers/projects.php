@@ -21,6 +21,7 @@
 namespace traq\controllers;
 
 use avalon\http\Request;
+use avalon\http\Session;
 use avalon\output\View;
 use avalon\Database;
 
@@ -148,9 +149,9 @@ class Projects extends AppController
         $events = timeline_events();
 
         // Check if filters are set
-        if (Request::post('filters') or isset($_SESSION['timeline_filters'])) {
+        if ($req_filters = Request::post('filters', Session::get('timeline_filters'))) {
             // Fetch filters
-            $filters = array_keys(Request::post('filters') ?: $_SESSION['timeline_filters']);
+            $filters = array_keys($req_filters);
             $events = array();
 
             // Process filters
@@ -159,7 +160,7 @@ class Projects extends AppController
             }
 
             // Save filters to session
-            $_SESSION['timeline_filters'] = $timeline_filters;
+            Session::set('timeline_filters', $timeline_filters);
         }
 
         // Atom feed

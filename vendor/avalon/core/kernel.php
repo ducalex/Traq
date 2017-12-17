@@ -22,6 +22,7 @@ namespace avalon\core;
 
 use avalon\http\Router;
 use avalon\http\Request;
+use avalon\http\Session;
 use avalon\output\Body;
 use avalon\output\View;
 
@@ -44,7 +45,7 @@ class Kernel
      */
     public static function init()
     {
-        session_start();
+        Session::start();
 
         // Route the request
         Router::route(new Request);

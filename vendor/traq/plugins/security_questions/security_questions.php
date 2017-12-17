@@ -26,6 +26,7 @@ use avalon\Autoloader;
 use avalon\Database;
 use avalon\http\Router;
 use avalon\http\Request;
+use avalon\http\Session;
 use avalon\output\View;
 
 use traq\models\Setting;
@@ -88,7 +89,7 @@ class SecurityQuestions extends \traq\libraries\Plugin
          // Get a random question
          $id = rand(0, count($questions) - 1);
          $question = $questions[$id];
-         $_SESSION['question_id'] = $id;
+         Session::set('question_id', $id);
 
          echo View::render('users/_question_field', array('question' => $question));
      }
@@ -101,7 +102,7 @@ class SecurityQuestions extends \traq\libraries\Plugin
      public static function check_answer(&$model)
      {
         $questions = json_decode(settings('security_questions'), true);
-        $question  = $questions[$_SESSION['question_id']];
+        $question  = $questions[Session::get('question_id')];
         $answers   = explode('|', $question['answers']);
 
         if (!in_array(Request::post('answer'), $answers)) {

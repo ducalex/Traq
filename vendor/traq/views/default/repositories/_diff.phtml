@@ -38,7 +38,7 @@ $format = [
 		<div class="diff-view-file" id="<?= sha1($diff['diff']) ?>">
 			<div class="diff-file-header">
 				<?= htmlentities($diff['diff']) ?>
-				<div style="float:right;"><a style="color:white;" href="?<?=http_build_query(['split' => !$mode] + $_GET)?>"><?=$format[!$mode]['name']?></a></div>
+				<div style="float:right;"><a style="color:white;" href="?<?= Request::url(null, ['split' => !$mode] + Request::get()) ?>"><?=$format[!$mode]['name']?></a></div>
 			</div>
 			<table class="diff-file-code">
 				<tr class="diff-split-header"><th>a: <?= htmlentities($diff['file_a']) ?></th><th>b: <?= htmlentities($diff['file_b']) ?></th></tr>

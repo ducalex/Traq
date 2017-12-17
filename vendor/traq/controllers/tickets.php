@@ -165,6 +165,8 @@ class Tickets extends AppController
             ($page * $per_page) + ($next_page ? 1 : 0) // Total
         );
 
+        $filters = $filter_query->filters();
+
         // Send the tickets array to the view..
         View::set(compact('pagination', 'tickets', 'filters'));
 

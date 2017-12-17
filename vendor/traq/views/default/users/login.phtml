@@ -13,8 +13,8 @@
 		</div>
 		<?php } ?>
 		<form action="<?php echo Request::base('login'); ?>" method="post" class="box">
-			<?php if (!empty($_SERVER['HTTP_REFERER']) or Request::post('redirect')) { ?>
-			<input type="hidden" name="redirect" value="<?php echo Request::post('redirect') ?: $_SERVER['HTTP_REFERER']; ?>" />
+			<?php if ($redirect = Request::post('redirect', Request::header('REFERER'))) { ?>
+			<input type="hidden" name="redirect" value="<?php echo htmlentities($redirect); ?>" />
 			<?php } ?>
 			<div class="group">
 				<label><?php echo l('username'); ?></label>

@@ -69,12 +69,12 @@ class Pagination
 
             // Next page URL
             if ($this->next_page <= $this->total_pages) {
-                $this->next_page_url = Request::base(Request::getUri().'?' . http_build_query(['page' => $this->next_page] + $_GET));
+                $this->next_page_url = Request::url(null, ['page' => $this->next_page] + Request::get());
             }
 
             // Previous page URL
             if ($this->prev_page > 0) {
-                $this->prev_page_url = Request::base(Request::getUri().'?' . http_build_query(['page' => $this->prev_page] + $_GET));
+                $this->prev_page_url = Request::url(null, ['page' => $this->prev_page] + Request::get());
             }
         }
     }

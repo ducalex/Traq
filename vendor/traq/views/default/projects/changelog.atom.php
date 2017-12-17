@@ -35,7 +35,7 @@ foreach ($milestones as $milestone) {
 $feed = new Atom(array(
     'title'     => l('x_changelog_feed', $project->name),
     'link'      => Request::base('', true),
-    'feed_link' => Request::base(Request::getUri(), true),
+    'feed_link' => Request::base(Request::uri(), true),
     'updated'   => $updated == 0 ? Time::date("c") : Time::date("c", $updated),
     'entries'   => $entries,
 ));

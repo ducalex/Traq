@@ -8,7 +8,7 @@ foreach ($tickets as $ticket) {
         'title' => $ticket->summary,
         'id' => "tickets:{$ticket->ticket_id}",
         'updated' => Time::date("c", $ticket->created_at),
-        'link' => "http://" . $_SERVER['HTTP_HOST'] . Request::base($ticket->href()),
+        'link' => Request::base($ticket->href(), true),
         'author' => array(
             'name' => $ticket->user->name
         ),

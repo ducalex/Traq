@@ -149,7 +149,7 @@ class Notification
                     format_text($options['ticket']->body),
                     $options['ticket']->project->name,
                     $options['ticket']->project->slug,
-                    "http://" . $_SERVER['HTTP_HOST'] . Request::base($options['ticket']->href())
+                    Request::base($options['ticket']->href(), true)
                 );
                 break;
 

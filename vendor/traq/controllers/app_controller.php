@@ -165,7 +165,7 @@ class AppController extends Controller
         header("HTTP/1.0 404 Not Found");
         $this->render['view'] = 'error/404';
         $this->render['action'] = false;
-        View::set('request', $_SERVER['REQUEST_URI']);
+        View::set('request', Request::requestUri());
     }
 
     /**
@@ -189,8 +189,8 @@ class AppController extends Controller
     {
         // Check if the session cookie is set, if so, check if it matches a user
         // and set set the user info.
-        if (isset($_COOKIE['_traq'])) {
-            $user = User::find('login_hash', $_COOKIE['_traq']);
+        if (Request::cookie('_traq')) {
+            $user = User::find('login_hash', Request::cookie('_traq'));
         }
         // Check if the API key is set
         elseif ($api_key = API::get_key()) {
@@ -199,10 +199,13 @@ class AppController extends Controller
             $this->is_api = true;
             Router::$extension = '.json';
         }
-        elseif(isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
-            $user = User::find('username', $_SERVER['PHP_AUTH_USER']);
-            if ($user == false or !$user->verify_password($_SERVER['PHP_AUTH_PW']) or !$user->is_activated()) {
-                $user = null;
+        // Check if there's an HTTP Basic Auth header going on
+        elseif ($auth = Request::header('AUTHORIZATION')) {
+            $auth = explode(':', (string)@\base64_decode(preg_replace('#^basic\s+#i', '', $auth)), 2);
+            if (count($auth) === 2 && $user = User::find('username', $auth[0])) {
+                if (!$user->verify_password($auth[1]) or !$user->is_activated()) {
+                    $user = null;
+                }
             }
         }
 

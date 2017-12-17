@@ -36,20 +36,15 @@ use traq\models\CustomField;
  */
 function ticket_sort_url_for($column) {
     // Get current order
-    if (Request::req('order_by')) {
-        $order = explode('.', Request::req('order_by'));
-    } else {
-        return Request::requestUri() . (strlen($_SERVER['QUERY_STRING']) ? '&amp;' : '?') . "order_by={$column}.asc";
-    }
+    list($col, $order) = explode('.', Request::req('order_by')) + array($column, 'asc');
+    $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
     // Are we flipping the current sort?
-    if ($order[0] == $column) {
-        $query = "{$column}." . (strtolower($order[1]) == 'asc' ? 'desc' : 'asc');
-    } else {
-        $query = "{$column}.{$order[1]}";
+    if ($col == $column) {
+        $order = $order === 'asc' ? 'desc' : 'asc';
     }
 
-    return str_replace("order_by=". implode('.', $order), "order_by={$query}", Request::requestUri());
+    return Request::url(null, array('order_by' => "$column.$order") + Request::get());
 }
 
 /**

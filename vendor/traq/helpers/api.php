@@ -40,7 +40,7 @@ class API
      */
     public static function get_key()
     {
-        $code = Request::req('access_token', @$_SERVER['HTTP_ACCESS_TOKEN']);
+        $code = Request::req('access_token', Request::header('ACCESS_TOKEN'));
 
         if (empty($code)) {
             return null;

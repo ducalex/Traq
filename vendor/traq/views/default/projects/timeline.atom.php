@@ -38,7 +38,7 @@ foreach ($days as $day) {
         elseif ($row->action == 'ticket_moved_from' or $row->action == 'ticket_moved_to') {
             $entry['title'] = l("timeline.{$row->action}", array('ticket' => $row->ticket()->summary, 'project' => $row->other_project()->name));
             $entry['id'] = "timeline:{$row->id}:ticket:{$row->ticket()->ticket_id}:moved";
-            $entry['link'] = "http://" . $_SERVER['HTTP_HOST'] . Request::base($row->ticket()->href());
+            $entry['link'] = Request::base($row->ticket()->href(), true);
         }
         // Wiki new/edite page
         elseif ($row->action == 'wiki_page_created' or $row->action == 'wiki_page_edited') {

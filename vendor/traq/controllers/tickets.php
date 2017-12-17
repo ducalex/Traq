@@ -89,17 +89,8 @@ class Tickets extends AppController
         // Create ticket filter query
         $filter_query = new TicketFilterQuery($this->project);
 
-        $filters = Request::req();
-
-        // Any filters stored in the session?
-        if (empty($filters) and Session::get("ticket_filters.{$this->project->id}")) {
-            foreach(Session::get("ticket_filters.{$this->project->id}") as $filter_value) {
-                list($filter, $value) = explode('=', $filter_value, 2);
-                $filters[$filter] = array_filter(explode(',', urldecode($value)));
-            }
-        }
-
-        $filters = array_intersect_key($filters, ticket_filters_for($this->project));
+        $filters = Request::req() ?: Session::get("ticket_filters.{$this->project->id}");
+        $filters = $filters ? array_intersect_key($filters, ticket_filters_for($this->project)) : array();
 
         foreach($filters as $filter => $value) {
             $filter_query->process($filter, $value);
@@ -816,7 +807,7 @@ class Tickets extends AppController
      */
     public function action_update_filters()
     {
-        $query_string = array();
+        $query = array();
         $filters = Request::post('filters', array());
 
         // Add filter
@@ -849,7 +840,7 @@ class Tickets extends AppController
                     foreach ($filter['values'] as $value) {
                         $values[] = urlencode($value);
                     }
-                    $query_string[] = "{$name}=" . $filter['prefix'] . implode(',', $values);
+                    $query[$name] = $filter['prefix'] . implode(',', $values);
                     break;
 
                 // Milestone, version, type,
@@ -881,19 +872,19 @@ class Tickets extends AppController
                         $values[] = urlencode($class::find($value)->{$field});
                     }
 
-                    $query_string[] = "{$name}=" . $filter['prefix'] . implode(',', $values);
+                    $query[$name] = $filter['prefix'] . implode(',', $values);
                     break;
             }
 
             // Process custom field filters
             if ($field = CustomField::find('slug', $name)) {
-                $query_string[] = "{$field->slug}={$filter['prefix']}" . implode(',', $filter['values']);
+                $query[$field->slug] = $filter['prefix'] . implode(',', $filter['values']);
             }
         }
 
         // Save to session and redirect
-        Session::set("ticket_filters.{$this->project->id}", $query_string);
-        Request::redirectTo($this->project->href('tickets') . '?' . implode('&', $query_string));
+        Session::set("ticket_filters.{$this->project->id}", $query);
+        Request::redirectTo($this->project->href('tickets') . '?' . \http_build_query($query));
     }
 
     /**

@@ -735,58 +735,19 @@ class Tickets extends AppController
             Request::redirectTo($this->project->href('tickets'));
         }
 
+        $valid_fields = array('type', 'milestone', 'version', 'component', 'severity', 'priority', 'status', 'assigned_to');
+
         // Loop over tickets and process actions
         foreach ($tickets as $ticket_id) {
             $ticket = Ticket::select('*')->where('project_id', $this->project->id)->where('ticket_id', $ticket_id)->exec()->fetch();
 
             $data = array();
 
-            // Type
-            if ($this->user->permission($this->project->id, 'ticket_properties_change_type')
-            and Request::post('type', -1) != -1) {
-                $data['type_id'] = Request::post('type');
-            }
-
-            // Milestone
-            if ($this->user->permission($this->project->id, 'ticket_properties_change_milestone')
-            and Request::post('milestone', -1) != -1) {
-                $data['milestone_id'] = Request::post('milestone');
-            }
-
-            // Version
-            if ($this->user->permission($this->project->id, 'ticket_properties_change_version')
-            and Request::post('version', -1) != -1) {
-                $data['version_id'] = Request::post('version');
-            }
-
-            // Component
-            if ($this->user->permission($this->project->id, 'ticket_properties_change_component')
-            and Request::post('component', -1) != -1) {
-                $data['component_id'] = Request::post('component');
-            }
-
-            // Severity
-            if ($this->user->permission($this->project->id, 'ticket_properties_change_severity')
-            and Request::post('severity', -1) != -1) {
-                $data['severity_id'] = Request::post('severity');
-            }
-
-            // Priority
-            if ($this->user->permission($this->project->id, 'ticket_properties_change_priority')
-            and Request::post('priority', -1) != -1) {
-                $data['priority_id'] = Request::post('priority');
-            }
-
-            // Status
-            if ($this->user->permission($this->project->id, 'ticket_properties_change_status')
-            and Request::post('status', -1) != -1) {
-                $data['status_id'] = Request::post('status');
-            }
-
-            // Assigned to
-            if ($this->user->permission($this->project->id, 'ticket_properties_change_assigned_to')
-            and Request::post('assigned_to', -1) != -1) {
-                $data['assigned_to_id'] = Request::post('assigned_to');
+            foreach ($valid_fields as $field) {
+                if ($this->user->permission($this->project->id, "ticket_properties_change_$field")
+                and Request::post($field, -1) != -1) {
+                    $data["{$field}_id"] = Request::post($field);
+                }
             }
 
             if (count($data) or Request::post('comment')) {
@@ -884,7 +845,7 @@ class Tickets extends AppController
 
         // Save to session and redirect
         Session::set("ticket_filters.{$this->project->id}", $query);
-        Request::redirectTo($this->project->href('tickets') . '?' . \http_build_query($query));
+        Request::redirect(Request::url($this->project->href('tickets'), $query));
     }
 
     /**

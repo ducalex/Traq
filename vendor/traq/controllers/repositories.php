@@ -221,7 +221,7 @@ class Repositories extends AppController
     public function action_serve($path)
     {
         if (!$this->repository->serve || !$this->user->permission($this->project->id, 'scm_http_client_read')) {
-            return $this->show_no_permission();
+            return $this->show_no_permission(true);
 		}
 
 		$this->scm->http_serve_backend($path);

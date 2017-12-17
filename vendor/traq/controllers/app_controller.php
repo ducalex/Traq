@@ -200,12 +200,11 @@ class AppController extends Controller
             Router::$extension = '.json';
         }
         // Check if there's an HTTP Basic Auth header going on
-        elseif ($auth = Request::header('AUTHORIZATION')) {
-            $auth = explode(':', (string)@\base64_decode(preg_replace('#^basic\s+#i', '', $auth)), 2);
-            if (count($auth) === 2 && $user = User::find('username', $auth[0])) {
-                if (!$user->verify_password($auth[1]) or !$user->is_activated()) {
-                    $user = null;
-                }
+        elseif ($username = Request::auth('username')) {
+            $user = User::find('username', $username);
+
+            if (!$user or !$user->verify_password(Request::auth('password')) or !$user->is_activated()) {
+                $user = null;
             }
         }
 

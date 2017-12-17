@@ -153,6 +153,32 @@ class Request
     }
 
     /**
+     * 
+     * Returns a parsed authorization header containing each of "scheme", "username", "password", 
+     * "digest" elements if applicable. $key can be specified if you want only one element
+     *
+     * @return mixed
+     */
+    public static function auth($key = null)
+    {
+        if (preg_match('/^(?<scheme>Basic|Digest)\s+(?<data>.+)$/i', static::header('AUTHORIZATION'), $data)) {
+            $data['scheme'] = strtolower($data['scheme']);
+            
+            if ($data['scheme'] === 'basic') {
+                list($data['username'], $data['password']) = @explode(':', base64_decode($data['data']), 2);
+            }
+            
+            if ($key === null) {
+                unset($data[0], $data[1], $data[2]);
+                return $data;
+            }
+
+            return isset($data[$key]) ? $data[$key] : false;
+        }
+        return false;
+    }
+
+    /**
      *
      * @param string $key     Header name
      * @param mixed  $not_set Value to return if not set

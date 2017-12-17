@@ -32,34 +32,50 @@ class Session
         static::$session = &$_SESSION;
         static::$last_activity = isset(static::$session['__activity']) ? static::$session['__activity'] : time();
         static::$session['__activity'] = time();
+
+        if (!isset(static::$session['__created'])) {
+            static::$session['__created'] = time();
+        }
     }
 
+    
     public static function stop()
     {
         session_write_close();
     }
+
 
     public static function clear()
     {
         static::$session = [];
     }
 
+
     public static function reset()
     {
         return session_regenerate_id(true);
     }
+
 
     public static function get($key)
     {
         return isset(static::$session[$key]) ? static::$session[$key] : null;
     }
 
+
     public static function set($key, $value)
     {
         static::$session[$key] = $value;
     }
 
+
     public static function age()
+    {
+        return time() - static::$session['__created'];
+    }
+
+
+    public static function idle()
     {
         return time() - static::$last_activity;
     }

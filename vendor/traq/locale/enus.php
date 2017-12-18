@@ -325,6 +325,8 @@ class enUS extends \traq\libraries\Locale
             // Pagination
             'previous' => "Previous",
             'next'     => "Next",
+            'last'     => "Last",
+            'first'     => "First",
 
             // Other
             'actions' => "Actions",

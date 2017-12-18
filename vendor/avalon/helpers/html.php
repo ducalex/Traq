@@ -72,16 +72,14 @@ class HTML
      * @param string $url The URL.
      * @param string $label The label.
      * @param array $options Options for the URL code (class, title, etc).
+     * @param bool $prepend_base Add the site's base URL to $url
      *
      * @return string
      */
-    public static function link($label, $url = null, array $attributes = array())
+    public static function link($label, $url = null, array $attributes = array(), $prepend_base = true)
     {
-        if ($label === null) {
-            $label = $url;
-        }
-
-        $attributes['href'] = Request::base(ltrim($url, '/'));
+        $label = htmlentities($label === null ? $url : $label);
+        $attributes['href'] = $prepend_base ? Request::base(ltrim($url, '/')) : $url;
         $options = static::build_attributes($attributes);
 
         return "<a {$options}>{$label}</a>";

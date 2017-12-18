@@ -40,6 +40,7 @@ class Pagination
     public $next_page_url;
     public $prev_page_url;
     public $limit;
+    public $pages;
 
     /**
      * Generates pagination information.
@@ -65,16 +66,26 @@ class Pagination
             $this->prev_page = ($this->page - 1);
 
             // Limit pages
-            $this->limit = ($this->page-1 > 0 ? $this->page-1 : 0) * $per_page;
+            $this->limit = max($this->page-1 > 0, 0) * $per_page;
+
+            $this->first_page_url = Request::url('', ['page' => 1] + Request::get());
+            $this->last_page_url = Request::url('', ['page' => $this->total_pages] + Request::get());
 
             // Next page URL
             if ($this->next_page <= $this->total_pages) {
-                $this->next_page_url = Request::url(null, ['page' => $this->next_page] + Request::get());
+                $this->next_page_url = Request::url('', ['page' => $this->next_page] + Request::get());
             }
 
             // Previous page URL
             if ($this->prev_page > 0) {
-                $this->prev_page_url = Request::url(null, ['page' => $this->prev_page] + Request::get());
+                $this->prev_page_url = Request::url('', ['page' => $this->prev_page] + Request::get());
+            }
+
+            $range_from = max($page - 5, 1);
+            $range_to = min($page + 5, $this->total_pages);
+
+            foreach(range($range_from, $range_to) as $page) {
+                $this->pages[$page] = Request::url('', ['page' => $page] + Request::get());
             }
         }
     }

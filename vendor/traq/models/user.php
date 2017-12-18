@@ -53,6 +53,8 @@ class User extends Model
         'name'
     );
 
+    protected static $_serialize = array('options');
+
     // Things the user belongs to
     protected static $_belongs_to = array('group');
 
@@ -70,18 +72,11 @@ class User extends Model
         'save' => array('prepare_password'),
     );
 
-    // Things to do after certain things
-    protected static $_filters_after = array(
-        'construct' => array('_after_construct')
-    );
-
     // Users group and role ermissions
     protected $permissions = array(
         'project' => array(),
         'role' => array()
     );
-
-    private $_options;
 
     /**
      * Returns the URI for the users profile.
@@ -123,11 +118,11 @@ class User extends Model
     public function option($option, $value = null)
     {
         if (func_num_args() === 2) {
-            $this->_options[$option] = $value;
-            $this->set('options', json_encode($this->_options));
+            $this->_data['options'][$option] = $value;
+            $this->_set_changed('options');
         }
 
-        return (isset($this->_options[$option])) ? $this->_options[$option] : false;
+        return (isset($this->_data['options'][$option])) ? $this->_data['options'][$option] : false;
     }
 
     /**
@@ -234,17 +229,7 @@ class User extends Model
     {
         $this->prepare_password();
         $this->_data['login_hash'] = random_hash(40);
-    }
-
-    /**
-     * Handles all the required after the model
-     * construction.
-     */
-    protected function _after_construct()
-    {
-        if (isset($this->_data['options'])) {
-            $this->_options = json_decode($this->_data['options'], true);
-        }
+        if (empty($this->_data['options'])) $this->_data['options'] = array();
     }
 
     /**

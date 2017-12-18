@@ -44,6 +44,7 @@ class Model
     protected static $_filters_before = array(); // Before filters
     protected static $_filters_after = array(); // After filters
     protected static $_connection_name = 'main'; // Name of the connection to use
+    protected static $_serialize = array(); // Fields to serialize to json when reading/writing database
     protected static $_escape = array(); // Fields to escape when reading from database
 
     // Information different per table row
@@ -68,6 +69,11 @@ class Model
             foreach (array_keys($data) as $column) {
                 if (!in_array($column, static::$_properties)) {
                     static::$_properties[] = $column;
+                }
+
+                // Unserialize only if it comes from the database
+                if ($is_new == false and in_array($column, static::$_serialize)) {
+                    $this->_data[$column] = json_decode($this->_data[$column], true);
                 }
 
                 if (in_array($column, static::$_escape)) {
@@ -163,7 +169,13 @@ class Model
             foreach (static::$_properties as $column) {
                 // Check if column is updated, if so, save.
                 if (in_array($column, $this->_changed_properties)) {
-                    $data[$column] = (in_array($column, static::$_escape)) ? htmlspecialchars_decode($this->_data[$column]) : $this->_data[$column];
+                    if (in_array($column, static::$_escape)) {
+                        $data[$column] = htmlspecialchars_decode($this->_data[$column]);
+                    } elseif (in_array($column, static::$_serialize)) {
+                        $data[$column] = json_encode($this->_data[$column]);
+                    } else {
+                        $data[$column] = $this->_data[$column];
+                    }
                 }
             }
             unset($data[static::$_primary_key]);
@@ -189,7 +201,13 @@ class Model
             foreach (static::$_properties as $column) {
                 // Hack to fix http://bugs.traq.io/traq/tickets/358
                 if (!is_array($column) and !is_object($column) and isset($this->_data[$column])) {
-                    $data[$column] = $this->_data[$column];
+                    if (in_array($column, static::$_escape)) {
+                        $data[$column] = htmlspecialchars_decode($this->_data[$column]);
+                    } elseif (in_array($column, static::$_serialize)) {
+                        $data[$column] = json_encode($this->_data[$column]);
+                    } else {
+                        $data[$column] = $this->_data[$column];
+                    }
                 }
             }
             //unset($data[static::$_primary_key]);
@@ -212,7 +230,7 @@ class Model
     public function delete() {
         if ($this->_is_new() === false) {
             // Before delete filters
-            if (isset(static::$_filters_before['delete']) and is_array(static::$_filters_before['delet'])) {
+            if (isset(static::$_filters_before['delete']) and is_array(static::$_filters_before['delete'])) {
                 foreach (static::$_filters_before['delete'] as $filter) {
                     $this->$filter();
                 }

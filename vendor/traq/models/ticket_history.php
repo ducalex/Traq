@@ -33,6 +33,7 @@ use avalon\database\Model;
 class TicketHistory extends Model
 {
     protected static $_name = 'ticket_history';
+    protected static $_serialize = array('changes');
     protected static $_properties = array(
         'id',
         'user_id',
@@ -44,19 +45,6 @@ class TicketHistory extends Model
 
     // Relations
     protected static $_belongs_to = array('ticket', 'user');
-
-    // Filters
-    protected static $_filters_after = array('construct' => array('read_changes'));
-
-    /**
-     * Converts the changes data from json to an array.
-     */
-    protected function read_changes()
-    {
-        if (!$this->_is_new()) {
-            $this->_data['changes'] = json_decode($this->_data['changes'], true);
-        }
-    }
 
     /**
      * Checks that the data is valid.

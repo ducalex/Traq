@@ -63,6 +63,8 @@ class Ticket extends Model
         'created_at',
         'updated_at'
     );
+    
+    protected static $_serialize = array('extra', 'tasks');
 
     protected static $_has_many = array(
         'attachments',
@@ -83,11 +85,6 @@ class Ticket extends Model
 
     protected static $_filters_after = array(
         'construct' => array('process_data_read')
-    );
-
-    protected static $_filters_before = array(
-        'create' => array('process_data_write'),
-        'save' => array('process_data_write')
     );
 
     protected $_changes            = array();
@@ -308,9 +305,10 @@ class Ticket extends Model
                     }
 
                     $to    = array();
-                    $values = (!is_array($value) ? json_decode($value, true) : $value);
-                    foreach ($values as $task) {
-                        $to[] = $task['task'];
+                    if ($value) {
+                        foreach ($value as $task) {
+                            $to[] = $task['task'];
+                        }
                     }
                     break;
 
@@ -397,7 +395,7 @@ class Ticket extends Model
             $this->_save_queue[] = new TicketHistory(array(
                 'user_id' => $user->id,
                 'ticket_id' => $this->id,
-                'changes' => count($changes) > 0 ? json_encode($changes) : '',
+                'changes' => $changes,
                 'comment' => Request::post('comment', '')
             ));
 
@@ -490,10 +488,6 @@ class Ticket extends Model
     {
         $data = parent::__toArray($fields);
         $data['id'] = $data['ticket_id'];
-
-        if (!is_array($data['extra'])) {
-            $data['extra'] = json_decode($data['extra'], true);
-        }
 
         // Set vote count and remove the IDs of
         // users who have voted.
@@ -666,38 +660,19 @@ class Ticket extends Model
      */
     protected function process_data_read()
     {
-        $this->_data['extra'] = json_decode(isset($this->_data['extra']) ? $this->_data['extra'] : '', true);
+        // Tasks
+        if (!is_array($this->extra)) {
+            $this->_data['extra'] = array();
+        }
+
+        // Tasks
+        if (!is_array($this->tasks)) {
+            $this->_data['tasks'] = array();
+        }
 
         // Set the voted array
         if (!isset($this->extra['voted']) or !is_array($this->extra['voted'])) {
             $this->_data['extra']['voted'] = array();
-        }
-
-        // Tasks
-        if (!isset($this->_data['tasks'])) {
-            $this->_data['tasks'] = array();
-        }
-
-        // Decode tasks
-        if (!is_array($this->tasks)) {
-            $this->_data['tasks'] = json_decode($this->_data['tasks'], true);
-        }
-    }
-
-    /**
-     * Processes the data when saving to the database.
-     *
-     * @access private
-     */
-    protected function process_data_write()
-    {
-        if (isset($this->_data['extra']) and is_array($this->_data['extra'])) {
-            $this->extra = json_encode($this->_data['extra']);
-        }
-
-        // Encode ticket tasks
-        if (is_array($this->_data['tasks'])) {
-            $this->tasks = json_encode($this->_data['tasks']);
         }
     }
 

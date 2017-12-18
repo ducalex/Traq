@@ -33,6 +33,7 @@ use avalon\database\Model;
 class CustomFieldValue extends Model
 {
     protected static $_name = 'custom_field_values';
+    protected static $_serialize = array('value');
     protected static $_properties = array(
         'id',
         'custom_field_id',
@@ -40,29 +41,8 @@ class CustomFieldValue extends Model
         'value'
     );
 
-    protected static $_filters_before = array(
-        'create' => array('_encode'),
-        'save'   => array('_encode')
-    );
-
-    protected static $_filters_after = array(
-        'construct' => array('_decode')
-    );
-
     public function is_valid()
     {
         return true;
-    }
-
-    protected function _encode()
-    {
-        $this->value = json_encode($this->value);
-    }
-
-    protected function _decode()
-    {
-        if (!$this->_is_new()) {
-            $this->value = json_decode($this->value, true);
-        }
     }
 }

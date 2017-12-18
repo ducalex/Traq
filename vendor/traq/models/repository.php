@@ -33,6 +33,7 @@ use avalon\database\Model;
 class Repository extends Model
 {
     protected static $_name = 'repositories';
+    protected static $_serialize = array('extra');
     protected static $_properties = array(
         'id',
         'project_id',
@@ -59,11 +60,6 @@ class Repository extends Model
         'create' => array('_before_save'),
     );
 
-    protected static $_filters_after = array(
-        'construct' => array('_after_construct')
-    );
-
-
     protected function _before_save()
     {
         if (!$this->_is_new && $this->_data['is_default']) {
@@ -73,15 +69,7 @@ class Repository extends Model
                         ->where('id', $this->id, '!=')
                         ->exec();
         }
-        $this->_data['extra'] = json_encode($this->_data['extra']);
     }
-
-
-    public function _after_construct()
-    {
-        $this->_data['extra'] = empty($this->_data['extra']) ? array() : json_decode($this->_data['extra'], true);
-    }
-
 
     public function href($commit = null)
     {

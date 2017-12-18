@@ -49,6 +49,8 @@ class Project extends Model
         'private_key'
     );
 
+    protected static $_serialize = array('extra', 'default_ticket_columns');
+
     protected static $_escape = array(
         'name',
         'codename'
@@ -221,20 +223,13 @@ class Project extends Model
      */
     protected function _before_save()
     {
-        $this->_data['extra'] = json_encode($this->_data['extra']);
-        $this->_data['default_ticket_columns'] = implode(',', $this->_data['default_ticket_columns']);
         $this->_create_slug();
     }
 
     public function _after_construct()
     {
-        if (!empty($this->_data['default_ticket_columns'])) {
-            $this->_data['default_ticket_columns'] = explode(',', $this->_data['default_ticket_columns']);
-        } else {
-            $this->_data['default_ticket_columns'] = ticket_columns();
-        }
-
-        $this->_data['extra'] = empty($this->_data['extra']) ? array() : json_decode($this->_data['extra'], true);
+        $this->_data['default_ticket_columns'] = $this->_data['default_ticket_columns'] ?: ticket_columns();
+        $this->_data['extra'] = $this->_data['extra'] ?: array();
     }
 
     /**

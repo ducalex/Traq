@@ -33,6 +33,7 @@ use avalon\database\Model;
 class CustomField extends Model
 {
     protected static $_name = 'custom_fields';
+    protected static $_serialize = array('ticket_type_ids');
     protected static $_properties = array(
         'id',
         'name',
@@ -57,13 +58,11 @@ class CustomField extends Model
      */
     public function __construct($data = null, $is_new = true )
     {
-        parent::__construct($data, $is_new);
-
-        if (!$is_new) {
-            $this->_data['ticket_type_ids'] = json_decode($this->_data['ticket_type_ids'], true);
-        } else {
-            $this->_data['ticket_type_ids'] = array();
+        if ($is_new) {
+            $data['ticket_type_ids'] = array();
         }
+    
+        parent::__construct($data, $is_new);
     }
 
     /**
@@ -370,9 +369,6 @@ class CustomField extends Model
 
             // Remove stupid crap
             $this->_data['values'] = str_replace("\r", '', $this->_data['values']);
-
-            // JSON encode ticket type IDs
-            $this->_data['ticket_type_ids'] = json_encode($this->_data['ticket_type_ids']);
 
             return parent::save();
         }

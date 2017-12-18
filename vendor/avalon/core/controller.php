@@ -47,7 +47,7 @@ class Controller
 
     public function __construct()
     {
-        $called_class = explode('\\', get_called_class());
+        $called_class = explode('\\', static::class);
         unset($called_class[0], $called_class[1]);
 
         $this->render['view'] = str_replace('\\', '/', implode('/', $called_class) . '/' . Router::$method);

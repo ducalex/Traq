@@ -20,8 +20,8 @@ class Markdown extends \traq\libraries\Plugin
 
     public static function init()
     {
-        FishHook::add('template:layouts/global/head', array(get_called_class(), 'head'));
-        FishHook::add('function:format_text', array(get_called_class(), 'format_text'));
+        FishHook::add('template:layouts/global/head', array(static::class, 'head'));
+        FishHook::add('function:format_text', array(static::class, 'format_text'));
     }
     
     public static function head()

@@ -20,7 +20,7 @@ class Prism extends \traq\libraries\Plugin
      */
     public static function init()
     {
-        FishHook::add('template:layouts/global/head', array(get_called_class(), 'insert'));
+        FishHook::add('template:layouts/global/head', array(static::class, 'insert'));
     }
 
     public static function insert()

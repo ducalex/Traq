@@ -60,14 +60,14 @@ class CustomTabs extends \traq\libraries\Plugin
         Router::add('/admin/custom_tabs/([0-9]+)/(edit|delete)', 'CustomTabs::controllers::admin::CustomTabs.$2/$1');
 
         // Hook into the admin navbar
-        FishHook::add('template:layouts/admin/main_nav', array(get_called_class(), 'admin_nav'));
+        FishHook::add('template:layouts/admin/main_nav', array(static::class, 'admin_nav'));
 
         // Get tabs
         static::$tabs = CustomTab::fetch_all();
         View::set('custom_tabs', static::$tabs);
 
         // Hook into navbar
-        FishHook::add('template:layouts/default/main_nav', array(get_called_class(), 'display_tabs'));
+        FishHook::add('template:layouts/default/main_nav', array(static::class, 'display_tabs'));
     }
 
     /**

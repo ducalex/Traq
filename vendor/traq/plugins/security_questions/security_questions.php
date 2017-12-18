@@ -57,17 +57,17 @@ class SecurityQuestions extends \traq\libraries\Plugin
         Router::add('/admin/settings/security_questions/new_question', 'SecurityQuestions::controllers::Questions.new_question');
 
         // Hook into the settings navbar
-        FishHook::add('template:admin/settings/_nav', array(get_called_class(), 'admin_nav'));
+        FishHook::add('template:admin/settings/_nav', array(static::class, 'admin_nav'));
 
         // Hook into register form
-        FishHook::add('template:users/register', array(get_called_class(), 'question_field'));
+        FishHook::add('template:users/register', array(static::class, 'question_field'));
 
         // Hook into the register action
-        FishHook::add('controller:users.register', array(get_called_class(), 'check_answer'));
+        FishHook::add('controller:users.register', array(static::class, 'check_answer'));
 
         // Allow other plugins to use this plugin
-        FishHook::add('use:plugins:security_questions.question_field', array(get_called_class(), 'question_field'));
-        FishHook::add('use:plugins:security_questions.check_answer', array(get_called_class(), 'check_answer'));
+        FishHook::add('use:plugins:security_questions.question_field', array(static::class, 'question_field'));
+        FishHook::add('use:plugins:security_questions.check_answer', array(static::class, 'check_answer'));
     }
 
     /**

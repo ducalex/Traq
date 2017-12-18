@@ -43,7 +43,7 @@ class Nl2br extends \traq\libraries\Plugin
      */
     public static function init()
     {
-        FishHook::add('function:format_text', array(get_called_class(), 'format_text'));
+        FishHook::add('function:format_text', array(static::class, 'format_text'));
     }
 
     /**

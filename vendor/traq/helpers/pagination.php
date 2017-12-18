@@ -52,9 +52,9 @@ class Pagination
     public function __construct($page, $per_page, $rows)
     {
         // Set information
-        $this->page = $page;
         $this->per_page = $per_page;
         $this->total_pages = ceil($rows / $per_page);
+        $this->page = min(max($page, 1), $this->total_pages);
         $this->rows = $rows;
 
         // More than per-page limit?
@@ -81,8 +81,8 @@ class Pagination
                 $this->prev_page_url = Request::url('', ['page' => $this->prev_page] + Request::get());
             }
 
-            $range_from = max($page - 5, 1);
-            $range_to = min($page + 5, $this->total_pages);
+            $range_from = min(max($this->page - 5, 1), $this->total_pages);
+            $range_to = min($this->page + 5, $this->total_pages);
 
             foreach(range($range_from, $range_to) as $page) {
                 $this->pages[$page] = Request::url('', ['page' => $page] + Request::get());

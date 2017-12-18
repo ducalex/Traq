@@ -21,7 +21,7 @@
 namespace traq\libraries;
 
 use \avalon\core\Load;
-use \Time;
+use \avalon\helpers\Time;
 
 Load::helper('array');
 

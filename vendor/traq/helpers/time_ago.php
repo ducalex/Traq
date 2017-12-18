@@ -18,62 +18,17 @@
  * along with Traq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-function time_from_now_ago($original, $detailed = true, $include_from_now_ago = true)
-{
-    if (Time::to_unix($original) > time()) {
-        return time_from_now($original, $detailed, $include_from_now_ago);
-    } else {
-        return time_ago($original, $detailed, $include_from_now_ago);
-    }
-}
-
 /**
- * Returns the time ago in words wrapped in a span
+ * Returns the time difference in words wrapped in a span
  * with the full date as the hover title.
  *
  * @param mixed $original
  * @param bool $detailed Include "and seconds/minutes/etc"
- * @param bool $include_ago Appends the word "ago" to the end
+ * @param bool $include_tense Appends the word "ago/from now" to the end
  *
  * @return string
  */
-function time_ago($original, $detailed = true, $include_ago = true)
-{
-    $original = Time::to_unix($original);
-
-    $datetime = ldate("l, jS F Y @ g:ia P", $original); //Time::date('Y-m-d H:i:s', $original);
-    $time_ago = $include_ago ? l('time.ago', time_difference_in_words($original, $detailed)) : time_difference_in_words($original, $detailed);
-    return "<span title=\"{$datetime}\">{$time_ago}</span>";
-}
-
-/**
- * Returns the time from now in words wrapped in a span
- * with the full date as the hover title.
- *
- * @param mixed $original
- * @param bool $detailed Include "and seconds/minutes/etc"
- * @param bool $include_ago Appends the word "ago" to the end
- *
- * @return string
- */
-function time_from_now($original, $detailed = true, $include_from_now = true)
-{
-    $original = Time::to_unix($original);
-
-    $datetime = ldate('l, jS F Y @ g:ia P', $original);
-    $time_ago = $include_from_now ? l('time.from_now', time_difference_in_words($original, $detailed)) : time_difference_in_words($original, $detailed);
-    return "<span title=\"{$datetime}\">{$time_ago}</span>";
-}
-
-/**
- * Returns the time ago in words.
- *
- * @param mixed $original
- * @param bool $detailed Include "and seconds/minutes/etc"
- *
- * @return string
- */
-function time_difference_in_words($original, $detailed = true)
+function time_from_now_ago($original, $detailed = true, $include_tense = true)
 {
     $original = Time::to_unix($original);
     $now = time(); // Get the time right now...
@@ -98,16 +53,25 @@ function time_difference_in_words($original, $detailed = true)
     }
 
     // Format the time from
-    $from = l("time.x_{$name}", $count);
+    $words = l("time.x_{$name}", $count);
 
-    // Get the detailed time from if the detaile variable is true
+    // Get the detailed time from if the details variable is true
     if ($detailed && isset($chunks[++$i])) {
         list($seconds2, $name2, $names2) = $chunks[$i];
         if ($count2 = floor(($difference - $seconds * $count) / $seconds2)) {
-            $from = l('time.x_and_x', $from, l("time.x_{$name2}", $count2));
+            $words = l('time.x_and_x', $words, l("time.x_{$name2}", $count2));
         }
     }
 
-    // Return the time from
-    return $from;
+    $datetime = ldate('l, jS F Y @ g:ia P', $original);
+
+    if ($include_tense) {
+        $words = l($original > $now ? 'time.from_now' : 'time.ago', $words);
+    }
+
+    return "<span title=\"{$datetime}\">{$words}</span>";
+}
+
+function time_ago() {
+    return call_user_func_array('time_from_now_ago', func_get_args());
 }

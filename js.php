@@ -20,7 +20,7 @@
 
 // Set content type and charset.
 header('Content-Type: text/javascript; charset: UTF-8;');
-header('Expires: '.gmdate("D, d M Y H:i:s", time() + 1800).' GMT');
+header('Expires: '.gmdate("D, d M Y H:i:s e", time() + 1800));
 header('Pragma: cache');
 header('Cache-Control: max-age=1800');
 

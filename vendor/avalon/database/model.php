@@ -58,27 +58,23 @@ class Model
      *
      * @param array $data The row data
      */
-    public function __construct($data = null, $is_new = true) {
+    public function __construct(array $data = [], $is_new = true) {
         $this->_data = $data;
         $this->_is_new = $is_new;
 
         // Is there any data?
-        if (is_array($data)) {
-            // If so get the columns and add them to
-            // the properties array
-            foreach (array_keys($data) as $column) {
-                if (!in_array($column, static::$_properties)) {
-                    static::$_properties[] = $column;
-                }
+        // If so get the columns and add them to
+        // the properties array
+        foreach ($data as $column => $value) {
+            if (!in_array($column, static::$_properties)) {
+                static::$_properties[] = $column;
+            }
 
-                // Unserialize only if it comes from the database
-                if ($is_new == false and in_array($column, static::$_serialize)) {
-                    $this->_data[$column] = json_decode($this->_data[$column], true);
-                }
-
-                if (in_array($column, static::$_escape)) {
-                    $this->_data[$column] = htmlspecialchars($this->_data[$column]);
-                }
+            // Unserialize only if it comes from the database
+            if ($is_new == false and in_array($column, static::$_serialize)) {
+                $this->_data[$column] = json_decode($value, true);
+            } elseif (in_array($column, static::$_escape)) {
+                $this->_data[$column] = htmlspecialchars($value);
             }
         }
 
@@ -108,14 +104,12 @@ class Model
         }
 
         // And run the after construct filter array...
-        if (isset(static::$_filters_after['construct'])) {
-            foreach (static::$_filters_after['construct'] as $filter) {
-                $this->$filter();
-            }
+        foreach (static::$_filters_after['construct'] as $filter) {
+            $this->$filter();
         }
 
         // Plugin hook
-        FishHook::run('model::__construct', array(get_called_class(), $this, &static::$_properties, &static::$_escape));
+        FishHook::run('model::__construct', array(static::class, $this, &static::$_properties, &static::$_escape));
     }
 
     /**
@@ -127,117 +121,82 @@ class Model
      * @return Object
      */
     public static function find($find, $value = null) {
-        $select = static::db()->select()->from(static::$_name);
         if ($value == null) {
-            $select = $select->where(static::$_primary_key, $find)->limit(1)->exec();
-        } else {
-            $select = $select->where($find, $value)->limit(1)->exec();
+            list($find, $value) = array(static::$_primary_key, $find);
         }
 
-        if ($select->row_count() == 0) {
+        $data = static::select()->where($find, $value)->limit(1)->exec()->fetch();
+
+        if (!$data) {
             return false;
         }
 
         // Plugin hook
-        FishHook::run('model::find', array(get_called_class(), $find, $value));
+        FishHook::run('model::find', array(static::class, $find, $value));
 
-        return new static($select->fetch(), false);
+        return $data;
     }
 
     /**
      * Creates a new row or saves the changed properties.
      */
     public function save() {
-        $primary_key = static::$_primary_key;
-
         // Make sure the data is valid..
         if (!$this->is_valid()) {
             return false;
         }
 
+        $primary_key = static::$_primary_key;
+        $action = $this->_is_new() ? 'create' : 'save';
+        $data = array();
+
+        // Before save filters
+        if (!empty(static::$_filters_before[$action])) {
+            foreach (static::$_filters_before[$action] as $filter) {
+                $this->$filter();
+            }
+        }
+
+        foreach (static::$_properties as $column) {
+            if (is_scalar($column) && isset($this->_data[$column]) && $column !== $primary_key) {
+                if (in_array($column, static::$_escape)) {
+                    $data[$column] = htmlspecialchars_decode($this->_data[$column]);
+                } elseif (in_array($column, static::$_serialize)) {
+                    $data[$column] = json_encode($this->_data[$column]);
+                } else {
+                    $data[$column] = $this->_data[$column];
+                }
+            }
+        }
+
+        FishHook::run('model::save/'.$action, array(static::class, &$data));
+
         // Save
         if ($this->_is_new() === false) {
-            // Before save filters
-            if (isset(static::$_filters_before['save']) and is_array(static::$_filters_before['save'])) {
-                foreach (static::$_filters_before['save'] as $filter) {
-                    $this->$filter();
-                }
-            }
-
-            // Loop over the properties
-            $data = array();
-            foreach (static::$_properties as $column) {
-                // Check if column is updated, if so, save.
-                if (in_array($column, $this->_changed_properties)) {
-                    if (in_array($column, static::$_escape)) {
-                        $data[$column] = htmlspecialchars_decode($this->_data[$column]);
-                    } elseif (in_array($column, static::$_serialize)) {
-                        $data[$column] = json_encode($this->_data[$column]);
-                    } else {
-                        $data[$column] = $this->_data[$column];
-                    }
-                }
-            }
-            unset($data[static::$_primary_key]);
-
-            FishHook::run('model::save/save', array(get_called_class(), &$data));
-
-            // Save the row..
-            static::db()->update(static::$_name)->set($data)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
-
-            return true;
+            static::db()->update(static::$_name)->set($data)->where($primary_key, $this->_data[$primary_key])->exec();
         }
         // Create
         else {
-            // Before create filters
-            if (isset(static::$_filters_before['create']) and is_array(static::$_filters_before['create'])) {
-                foreach (static::$_filters_before['create'] as $filter) {
-                    $this->$filter();
-                }
-            }
-
-            // Loop over the properties
-            $data = array();
-            foreach (static::$_properties as $column) {
-                // Hack to fix http://bugs.traq.io/traq/tickets/358
-                if (!is_array($column) and !is_object($column) and isset($this->_data[$column])) {
-                    if (in_array($column, static::$_escape)) {
-                        $data[$column] = htmlspecialchars_decode($this->_data[$column]);
-                    } elseif (in_array($column, static::$_serialize)) {
-                        $data[$column] = json_encode($this->_data[$column]);
-                    } else {
-                        $data[$column] = $this->_data[$column];
-                    }
-                }
-            }
-            //unset($data[static::$_primary_key]);
-
-            FishHook::run('model::save/create', array(get_called_class(), &$data));
-
-            // Insert the row..
             static::db()->insert($data)->into(static::$_name)->exec();
-
-            // Set the primary key
             $this->_data[$primary_key] = static::db()->last_insert_id();
-
-            return true;
         }
+        return true;
     }
 
     /**
      * Deletes the row.
      */
     public function delete() {
-        if ($this->_is_new() === false) {
-            // Before delete filters
-            if (isset(static::$_filters_before['delete']) and is_array(static::$_filters_before['delete'])) {
-                foreach (static::$_filters_before['delete'] as $filter) {
-                    $this->$filter();
-                }
-            }
-            return static::db()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
+        if ($this->_is_new() === true) {
+            return false;
         }
-        return false;
+        // Before delete filters
+        if (!empty(static::$_filters_before['delete'])) {
+            foreach (static::$_filters_before['delete'] as $filter) {
+                $this->$filter();
+            }
+        }
+        return static::db()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
     }
 
     /**
@@ -275,7 +234,7 @@ class Model
             }
 
             // Plugin hook
-            FishHook::run('model::set', array(get_called_class(), $col, $val));
+            FishHook::run('model::set', array(static::class, $col, $val));
         }
     }
 
@@ -298,7 +257,7 @@ class Model
      * @return object
      */
     public static function select($cols = null) {
-        return static::db()->select($cols === null ? static::$_properties : $cols)->from(static::$_name)->_model(static::_class());
+        return static::db()->select($cols ?: static::$_properties)->from(static::$_name)->_model(static::class);
     }
 
     /**
@@ -333,7 +292,7 @@ class Model
             $val = isset($this->_data[$var]) ? $this->_data[$var] : '';
 
             // Plugin hook
-            FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
+            FishHook::run('model::__get', array(static::class, $var, $this->_data, &$val));
 
             return $val;
         }
@@ -345,7 +304,7 @@ class Model
             }
             // Model
             if (!isset($has_many['model'])) {
-                $namespace = explode('\\', get_called_class());
+                $namespace = explode('\\', static::class);
                 unset($namespace[count($namespace) - 1]);
 
                 $model = ucfirst((substr($var, -1) == 's' ? substr($var, 0, -1) : $var));
@@ -356,7 +315,7 @@ class Model
                 $model = explode('\\', $var);
 
                 if (count($model) == 1) {
-                    $namespace = explode('\\', get_called_class());
+                    $namespace = explode('\\', static::class);
                     $namespace[count($namespace) -1] = ucfirst($has_many['model']);
                     $has_many['model'] = implode('\\', $namespace);
                 }
@@ -382,7 +341,7 @@ class Model
             }
             // Model
             if (!isset($belongs_to['model'])) {
-                $namespace = explode('\\', get_called_class());
+                $namespace = explode('\\', static::class);
                 unset($namespace[count($namespace) - 1]);
 
                 $model = ucfirst($var);
@@ -393,7 +352,7 @@ class Model
                 $model = explode('\\', $belongs_to['model']);
 
                 if (count($model) == 1) {
-                    $namespace = explode('\\', get_called_class());
+                    $namespace = explode('\\', static::class);
                     $namespace[count($namespace) -1] = ucfirst($belongs_to['model']);
                     $belongs_to['model'] = implode('\\', $namespace);
                 }
@@ -412,7 +371,7 @@ class Model
             $val = $this->$var;
 
             // Plugin hook
-            FishHook::run('model::__get', array(get_called_class(), $var, $this->_data, &$val));
+            FishHook::run('model::__get', array(static::class, $var, $this->_data, &$val));
 
             return $val;
         }
@@ -423,7 +382,7 @@ class Model
      */
     public function __set($var, $val) {
         if (in_array($var, static::$_properties)) {
-            FishHook::run('model::__set', array(get_called_class(), $var, &$val));
+            FishHook::run('model::__set', array(static::class, $var, &$val));
             $this->_data[$var] = $val;
             $this->_set_changed($var);
         } else {
@@ -472,15 +431,6 @@ class Model
         if (!in_array($name, static::$_properties)) {
             static::$_properties[] = $name;
         }
-    }
-
-    /**
-     * Returns the real name of this model class, not the top-most parent.
-     *
-     * @return string
-     */
-    public static function _class() {
-        return get_called_class();
     }
 
     /**

@@ -31,38 +31,45 @@ namespace avalon\http;
  */
 class Request
 {
+    private static $server;
     private static $request_uri;
     private static $uri;
     private static $base;
     private static $base_full;
-    private static $segments = array();
+    private static $segments;
     private static $method;
-    private static $requested_with;
-    public static $query;
-    public static $files = array();
-    public static $headers = array();
-    public static $cookies = array();
-    public static $post = array();
-    public static $get = array();
-    public static $scheme;
-    public static $host;
-
+    private static $query;
+    private static $files;
+    private static $headers;
+    private static $cookies;
+    private static $post;
+    private static $get;
+    private static $scheme;
+    private static $host;
+    private static $remote_addr;
+    
     /**
      * Initialize the class to get request
      * information statically.
      */
-    public static function init()
+    public static function fromGlobals()
     {
-        return new static;
+        return new static($_SERVER, $_GET, $_POST, $_COOKIE, $_FILES);
     }
 
-    public function __construct()
+    public function __construct(array $server, array $get = [], array $post = [], array $cookies = [], array $files = [])
     {
+        static::$server = $server;
+        static::$get = $get;
+        static::$post = $post;
+        static::$cookies = $cookies;
+        static::$files = $files;
+
         // Set query string
-        static::$query = (isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null);
+        static::$query = (isset($server['QUERY_STRING']) ? $server['QUERY_STRING'] : null);
 
         // Set request scheme
-        static::$scheme = static::isSecure() ? 'https' : 'http';
+        static::$scheme = (empty($server['HTTPS']) || $server['HTTPS'] == 'off') ? 'http' : 'https';
 
         // Set host
         static::$host = strtolower(preg_replace('/:\d+$/', '', trim($_SERVER['SERVER_NAME'])));
@@ -81,24 +88,12 @@ class Request
         static::$segments = explode('/', trim(static::$uri, '/'));
 
         // Set the request method
-        static::$method = strtolower($_SERVER['REQUEST_METHOD']);
+        static::$method = strtolower($server['REQUEST_METHOD']);
 
-        // Requested with
-        static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
+        // Set the request method
+        static::$remote_addr = $server['REMOTE_ADDR'];
 
-        // _GET
-        static::$get = $_GET;
-
-        // _POST
-        static::$post = $_POST;
-
-        // _COOKIE
-        static::$cookies = $_COOKIE;
-
-        // _FILES
-        static::$files = $_FILES;
-
-        foreach($_SERVER as $key => $value) {
+        foreach ($server as $key => $value) {
             if (substr($key, 0, 5) === 'HTTP_') {
                 static::$headers[substr($key, 5)] = $value;
             }
@@ -157,8 +152,28 @@ class Request
     }
 
     /**
-     * 
-     * Returns a parsed authorization header containing each of "scheme", "username", "password", 
+     * Returns the server host
+     *
+     * @return string
+     */
+    public static function host()
+    {
+        return static::$host;
+    }
+
+    /**
+     * Returns the client IP
+     *
+     * @return string
+     */
+    public static function remoteIP()
+    {
+        return static::$remote_addr;
+    }
+
+    /**
+     *
+     * Returns a parsed authorization header containing each of "scheme", "username", "password",
      * "digest" elements if applicable. $key can be specified if you want only one element
      *
      * @return mixed
@@ -167,11 +182,11 @@ class Request
     {
         if (preg_match('/^(?<scheme>Basic|Digest)\s+(?<data>.+)$/i', static::header('AUTHORIZATION'), $data)) {
             $data['scheme'] = strtolower($data['scheme']);
-            
+
             if ($data['scheme'] === 'basic') {
                 list($data['username'], $data['password']) = @explode(':', base64_decode($data['data']), 2);
             }
-            
+
             if ($key === null) {
                 unset($data[0], $data[1], $data[2]);
                 return $data;
@@ -214,7 +229,7 @@ class Request
             return static::$files;
         }
 
-        return isset(static::$files[$key]) ? static::$files[$key] : null;
+        return isset(static::$files[$key]['name']) ? static::$files[$key] : null;
     }
 
     /**
@@ -259,7 +274,7 @@ class Request
      * Returns the value of the key from the GET+POST array,
      * if it's not set, returns null by default.
      * If no key is given, return the full array.
-     * 
+     *
      * This is replacing $_REQUEST because variable_order can be problematic
      *
      * @param string $key     Key to get from GET+POST array
@@ -332,7 +347,17 @@ class Request
      */
     public static function isAjax()
     {
-        return strtolower(static::$requested_with) == 'xmlhttprequest';
+        return strtolower(static::header('X_REQUESTED_WITH')) == 'xmlhttprequest';
+    }
+
+    /**
+     * Determines if the request is secure.
+     *
+     * @return boolean
+     */
+    public static function isSecure()
+    {
+        return static::$scheme === 'https';
     }
 
     /**
@@ -364,62 +389,29 @@ class Request
         return $url;
     }
 
-    /**
-     * Determines if the request is secure.
-     *
-     * @return boolean
-     */
-    public static function isSecure()
-    {
-        if (empty($_SERVER['HTTPS'])) {
-            return false;
-        }
-
-        return $_SERVER['HTTPS'] == 'on' or $_SERVER['HTTPS'] == 1;
-    }
 
     private function baseUrl()
     {
-        $filename = basename($_SERVER['SCRIPT_FILENAME']);
+        $filename = basename(static::$server['SCRIPT_FILENAME']);
+        $try = array('SCRIPT_NAME', 'PHP_SELF', 'ORIG_SCRIPT_NAME');
 
-        if (basename($_SERVER['SCRIPT_NAME']) === $filename) {
-            $baseUrl = $_SERVER['SCRIPT_NAME'];
-        } elseif (basename($_SERVER['PHP_SELF']) === $filename) {
-            $baseUrl = $_SERVER['PHP_SELF'];
-        } elseif (basename($_SERVER['ORIG_SCRIPT_NAME']) === $filename) {
-            $baseUrl = $_SERVER['ORIG_SCRIPT_NAME'];
+        foreach ($try as $key) {
+            if (basename(static::$server[$key]) === $filename) {
+                return dirname(static::$server[$key]);
+            }
         }
 
-        $baseUrl = dirname($baseUrl);
-
-        return $baseUrl;
+        return false;
     }
 
     private function requestPath()
     {
-        $requestPath = '';
+        $try = array('HTTP_X_ORIGINAL_URL', 'HTTP_X_REWRITE_URL', 'UNENCODED_URL', 'REQUEST_URI', 'ORIG_PATH_INFO');
 
-        if (isset($_SERVER['HTTP_X_ORIGINAL_URL'])) {
-            $requestPath = $_SERVER['HTTP_X_ORIGINAL_URL'];
-        } elseif (isset($_SERVER['HTTP_X_REWRITE_URL'])) {
-            $requestPath = $_SERVER['HTTP_X_REWRITE_URL'];
-        } elseif (isset($_SERVER['IIS_WasUrlRewritten'])
-                  and $_SERVER['IIS_WasUrlRewritten'] = 1
-                  and isset($_SERVER['UNENCODED_URL'])
-                  and $_SERVER['UNENCODED_URL'] != '')
-        {
-            $requestPath = $_SERVER['UNENCODED_URL'];
-        } elseif (isset($_SERVER['REQUEST_URI'])) {
-            $requestPath = $_SERVER['REQUEST_URI'];
-
-            $schemeAndHost = static::$scheme . '://' . static::$host;
-            if (strpos($requestPath, $schemeAndHost) === 0) {
-                $requestPath = substr($requestPath, strlen($schemeAndHost));
+        foreach ($try as $key) {
+            if (!empty(static::$server[$key])) {
+                return preg_replace('#^'.preg_quote(static::$scheme.'://'.static::$host).'#', '', static::$server[$key]);
             }
-        } elseif (isset($_SERVER['ORIG_PATH_INFO'])) {
-            $requestPath = $_SERVER['ORIG_PATH_INFO'];
         }
-
-        return $requestPath;
     }
 }

@@ -65,7 +65,7 @@ require_once APPPATH . '/version.php';
 
 // Check for the database config file
 if (!file_exists(APPPATH . '/config/database.php')) {
-    (new Request)::redirectTo('install');
+    Request::fromGlobals()->redirectTo('install');
 }
 
 // Include config and connect

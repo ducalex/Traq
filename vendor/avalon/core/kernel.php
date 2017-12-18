@@ -48,7 +48,7 @@ class Kernel
         Session::start();
 
         // Route the request
-        Router::route(new Request);
+        Router::route(Request::fromGlobals());
 
         // Check if the routed controller and method exists
         if (!class_exists(Router::$controller) or !method_exists(Router::$controller, 'action_' . Router::$method)) {

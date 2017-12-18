@@ -224,7 +224,7 @@ class Users extends AppController
                             $user->name,       // Users name
                             $user->username,   // Users username
                             Request::base("/login/resetpassword/{$key}", true), // Reset password URL
-                            $_SERVER['REMOTE_ADDR'] // IP of reset request
+                            Request::remoteIP() // IP of reset request
                         )
                     );
                     View::set('reset_email_sent', true);

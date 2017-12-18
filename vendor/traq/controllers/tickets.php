@@ -567,8 +567,8 @@ class Tickets extends AppController
         }
 
         // Check if we're adding an attachment and that the user has permission to do so
-        if ($this->user->permission($this->project->id, 'add_attachments') and isset($_FILES['attachment']) and isset($_FILES['attachment']['name'])) {
-            $data['attachment'] = $_FILES['attachment']['name'];
+        if ($this->user->permission($this->project->id, 'add_attachments') and $file = Request::files('attachment')) {
+            $data['attachment'] = $file['name'];
         }
 
         // Custom fields, FUN!

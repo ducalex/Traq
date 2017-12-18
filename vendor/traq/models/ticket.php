@@ -593,9 +593,9 @@ class Ticket extends Model
      *
      * @param integer $task_id
      */
-    public function toggle_task($task_id)
+    public function toggle_task($task_id, $status = null)
     {
-        $this->_data['tasks'][$task_id]['completed'] = $this->_data['tasks'][$task_id]['completed'] ? false : true;
+        $this->_data['tasks'][$task_id]['completed'] = $status !== null ? $status : !$this->_data['tasks'][$task_id]['completed'];
         $this->_set_changed('tasks');
     }
 

@@ -268,6 +268,40 @@ class Tickets extends AppController
     }
 
     /**
+     * Handles the tasks page.
+     *
+     * @param integer $ticket_id
+     */
+    public function action_manage_tasks($ticket_id)
+    {
+        $this->render['view'] = 'tickets/tasks';
+        
+        if (!$this->user->permission($this->project->id, 'ticket_properties_set_tasks')) {
+            return $this->show_no_permission();
+        }
+
+        $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
+        $tasks = $ticket->tasks ?: array();
+        View::set('tasks', $tasks);
+    }
+
+  /**
+     * Toggles the state of a task.
+     *
+     * @param integer $ticket_id
+     * @param integer $task_id
+     */
+    public function action_toggle_task($ticket_id, $task_id)
+    {
+        if ($this->user->permission($this->project->id, 'ticket_properties_complete_tasks')) {
+            // Get ticket, update task and save
+            $ticket = Ticket::select()->where('project_id', $this->project->id)->where('ticket_id', $ticket_id)->exec()->fetch();
+            $ticket->toggle_task($task_id, Request::req('completed') === 'true');
+            $ticket->save();
+        }
+    }
+
+    /**
      * Handles the voters page.
      *
      * @param integer $ticket_id
@@ -359,13 +393,7 @@ class Tickets extends AppController
 
             // Ticket tasks
             if ($this->user->permission($this->project->id, 'ticket_properties_set_tasks') and Request::post('tasks') != null) {
-                $tasks = json_decode(Request::post('tasks'), true);
-
-                foreach ($tasks as $id => $task) {
-                    if (is_array($task) and !empty($task['task'])) {
-                        $data['tasks'][] = $task;
-                    }
-                }
+                $data['tasks'] = array_values(@json_decode(Request::post('tasks'), true) ?: array());
             }
 
             // Time proposed
@@ -508,14 +536,7 @@ class Tickets extends AppController
 
         // Ticket tasks
         if ($this->user->permission($this->project->id, 'ticket_properties_change_tasks') and Request::post('tasks') != null) {
-            $data['tasks'] = array();
-            $tasks = json_decode(Request::post('tasks'), true);
-
-            foreach ($tasks as $id => $task) {
-                if (is_array($task) and !empty($task['task'])) {
-                    $data['tasks'][] = $task;
-                }
-            }
+            $data['tasks'] = array_values(@json_decode(Request::post('tasks'), true) ?: array());
         }
 
         // Time proposed

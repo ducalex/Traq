@@ -1,0 +1,24 @@
+<h3><?php echo l('manage_tasks'); ?></h3>
+<div>
+	<div id="ticket_tasks_manager">
+		<div class="tasks">
+			<?php foreach($tasks as $id => $task) { ?>
+				<div class="task" data-task-id="<?php echo $id ?>">
+					<?php echo Form::checkbox("completed", '1', array('checked' => !empty($task['completed']))) ?>
+					<?php echo Form::text("task", array('value' => $task['task'])) ?>
+					<button type="button" class="button_delete delete_ticket_task"><?php echo l('delete') ?></button>
+				</div>
+			<?php } ?>
+			<div id="ticket_task_new" class="task" hidden>
+					<?php echo Form::checkbox("completed", '1', array('checked' => false)) ?>
+					<?php echo Form::text("task") ?>
+					<button type="button" class="button_delete delete_ticket_task"><?php echo l('delete')?></button>
+			</div>
+		</div>
+		<button type="button" id="add_task"><?php echo l('add_task')?></button>
+	</div>
+	<div class="overlay-actions">
+		<input id="set_ticket_tasks" type="submit" value="<?php echo l('done'); ?>" />
+		<input type="button" value="<?php echo l('cancel'); ?>" onclick="close_overlay();" />
+	</div>
+</div>

@@ -61,8 +61,8 @@ Router::add('/' . RTR_PROJSLUG, 'traq::controllers::Projects.view');
 Router::add('/' . RTR_PROJSLUG . '/tickets/(?P<ticket_id>[0-9]+)', 'traq::controllers::Tickets.view/$2');
 Router::add('/' . RTR_PROJSLUG . '/tickets/(?P<ticket_id>[0-9]+)/(move|delete|update|edit|vote|voters)', 'traq::controllers::Tickets.$3/$2');
 Router::add('/' . RTR_PROJSLUG . '/tickets/(?P<ticket_id>[0-9]+)/history/([0-9]+)/(edit|delete)', 'traq::controllers::TicketHistory.$4/$3');
-Router::add('/' . RTR_PROJSLUG . '/tickets/(?P<ticket_id>[0-9]+)/tasks/manage', 'traq::controllers::TicketTasks.manage/$2');
-Router::add('/' . RTR_PROJSLUG . '/tickets/(?P<ticket_id>[0-9]+)/tasks/([0-9]+)', 'traq::controllers::TicketTasks.toggle/$2,$3');
+Router::add('/' . RTR_PROJSLUG . '/tickets/(?P<ticket_id>[0-9]+)/tasks/manage', 'traq::controllers::Tickets.manage_tasks/$2');
+Router::add('/' . RTR_PROJSLUG . '/tickets/(?P<ticket_id>[0-9]+)/tasks/([0-9]+)', 'traq::controllers::Tickets.toggle_task/$2,$3');
 Router::add('/' . RTR_PROJSLUG . '/tickets/(mass_actions|update_filters|new)', 'traq::controllers::Tickets.$2');
 Router::add('/' . RTR_PROJSLUG . '/tickets', 'traq::controllers::Tickets.index');
 

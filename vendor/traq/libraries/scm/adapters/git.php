@@ -327,8 +327,9 @@ class Git extends \traq\libraries\SCM
         if ($git === false) return false;
         list(, $git_stdout, $git_stderr) = $pipes;
 
-        $this->last_error = stream_get_contents($git_stderr) ?: null;
         $stdout = stream_get_contents($git_stdout);
+        $this->last_error = stream_get_contents($git_stderr) ?: null;
+
         return proc_close($git) ? false : $stdout;
     }
 

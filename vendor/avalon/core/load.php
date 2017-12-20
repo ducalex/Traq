@@ -35,36 +35,25 @@ class Load
     public static $search_paths = array();
 
     /**
-     * Loads the specified controller.
+     * Loads the specified configuration file.
      *
-     * @param string $controller
+     * @param string $file
      *
      * @return string
      */
-    public static function controller($controller)
+    public static function config($file)
     {
-        $controller = strtolower($controller);
+        $file = basename(strtolower($file), '.php');
+        $paths = array(APPPATH, SYSPATH);
 
-        // Add the apps controller directory
-        $dirs = array();
-        $dirs[] = APPPATH . '/controllers';
-
-        // Add the registered paths
-        foreach (static::$search_paths as $path) {
-            if (is_dir($path . '/controllers')) {
-                $dirs[] = $path . '/controllers';
+        foreach ($paths as $dir) {
+            if (file_exists("$dir/config/$file.php")) {
+                return require "$dir/config/$file.php";
             }
         }
 
-        // Search for the controller
-        foreach ($dirs as $dir) {
-            if (file_exists("{$dir}/{$controller}_controller.php")) {
-                return "{$dir}/{$controller}_controller.php";
-            }
-        }
-
-        // No controller found...
-        return APPPATH . '/controllers/error_controller.php';
+        Error::halt("Loader Error", "Unable to load config '{$file}'");
+        return false;
     }
 
     /**

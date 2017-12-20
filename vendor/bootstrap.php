@@ -18,7 +18,7 @@
  * along with Traq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Define the paths needed
+// Define the constants needed
 define("SYSPATH", __DIR__ . '/avalon');
 define("APPPATH", __DIR__ . '/traq');
 define("DOCROOT", dirname(__DIR__));
@@ -59,20 +59,18 @@ Autoloader::aliasClasses(array(
 Error::register();
 
 // Fetch the routes
-require_once APPPATH . '/config/routes.php';
+Load::config('routes');
 
 // Load common functions and version file
 require_once APPPATH . '/common.php';
 require_once APPPATH . '/version.php';
 
 // Check for the database config file
-if (!file_exists(APPPATH . '/config/database.php')) {
+if ($db = Load::config('database')) {
+    Database::factory($db, 'main');
+} else {
     Request::fromGlobals()->redirectTo('install');
 }
-
-// Include config and connect
-require APPPATH . '/config/database.php';
-Database::factory($db, 'main');
 
 // Load the plugins
 foreach(Plugin::select('file')->where('enabled', '1')->fetch_all() as $plugin) {

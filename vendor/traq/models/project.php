@@ -46,7 +46,8 @@ class Project extends Model
         'default_ticket_sorting',
         'default_ticket_columns',
         'displayorder',
-        'private_key'
+        'private_key',
+        'extra'
     );
 
     protected static $_serialize = array('extra', 'default_ticket_columns');

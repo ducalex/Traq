@@ -32,7 +32,7 @@ class Load
     private static $undo = array('my_sql' => 'mysql', 'java_script' => 'javascript');
     private static $libs = array();
     private static $helpers = array();
-    public static $search_paths = array();
+    private static $search_paths = array();
 
     /**
      * Loads the specified configuration file.
@@ -54,6 +54,34 @@ class Load
 
         Error::halt("Loader Error", "Unable to load config '{$file}'");
         return false;
+    }
+
+    /**
+     * Loads the specified configuration file.
+     *
+     * @param string $file
+     *
+     * @return string
+     */
+    public static function find($name, $paths = array(), $default_subdir = '')
+    {
+        $default_paths = array_merge(array(APPPATH, SYSPATH), self::$search_paths);
+        $name = self::lowercase($name);
+        $files = array();
+
+        foreach ($paths as $path) {
+            if ($file = glob("$path/$name", GLOB_BRACE)) {
+                $files = array_merge($files, $file);
+            }
+        }
+
+        foreach ($default_paths as $path) {
+            if ($file = glob("$path/$default_subdir/$name", GLOB_BRACE)) {
+                $files = array_merge($files, $file);
+            }
+        }
+
+        return array_map('realpath', $files);
     }
 
     /**
@@ -162,6 +190,6 @@ class Load
      */
     private static function lowercase($string) {
         $string = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $string));
-        return str_replace(array_keys(static::$undo), array_values(static::$undo), $string);
+        return strtr($string, static::$undo);
     }
 }

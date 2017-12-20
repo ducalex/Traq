@@ -31,7 +31,6 @@ use avalon\core\Error;
  */
 class View
 {
-    private static $ob_level;
     public static $theme;
     public static $inherit_from;
     private static $vars = array();
@@ -44,8 +43,21 @@ class View
      */
     public static function render($file, array $vars = array())
     {
-        // Get the view content
-        return static::_get_view($file, $vars);
+        // Get the file name/path
+        $_file = static::find($file);
+
+        // Check if the theme has this view
+        if (!$_file) {
+            Error::halt("View Error", "Unable to load view '{$_file}'", 'HALT');
+        }
+
+        extract(self::$vars);
+        extract($vars);
+
+        // Load up the view and get the contents
+        ob_start();
+        include $_file;
+        return ob_get_clean();
     }
 
     /**
@@ -59,87 +71,18 @@ class View
     }
 
     /**
-     * Private function to handle the rendering of files.
+     * Scan the search paths to find the view file
      *
-     * @param string $file
-     * @param array $vars Variables to be passed to the view.
-     *
-     * @return string
+     * @param string $var The view name.
+     * @param mixed $val The file path or false on failure
      */
-    private static function _get_view($_file, array $vars = array())
+    public static function find($name)
     {
-        // Get the file name/path
-        $_file = self::_view_file_path($_file);
+        // Add the theme and inherit path
+        $dirs = array_filter(array(APPPATH . '/views/' . static::$theme . '/', static::$inherit_from));
+        $view = Load::find("$name.{phtml,php}", $dirs, 'views');
 
-        // Make sure the ob_level is set
-        if (self::$ob_level === null) {
-            self::$ob_level = ob_get_level();
-        }
-
-        extract(self::$vars);
-        extract($vars);
-
-        // Load up the view and get the contents
-        ob_start();
-        include $_file;
-        return ob_get_clean();
-    }
-
-    /**
-     * Determines the path of the view file.
-     *
-     * @param string $file File name.
-     *
-     * @return string
-     */
-    private static function _view_file_path($file)
-    {
-        $path = static::exists($file);
-
-        // Check if the theme has this view
-        if (!$path) {
-            Error::halt("View Error", "Unable to load view '{$file}'", 'HALT');
-        }
-
-        return $path;
-    }
-
-    public static function exists($name)
-    {
-        $dirs = array();
-
-        // Add the theme path, if a theme is set
-        if (static::$theme !== null) {
-            $dirs[] = APPPATH . '/views/' . static::$theme . '/';
-        }
-
-        // Registered search paths
-        foreach (Load::$search_paths as $path) {
-            if (is_dir($path . '/views')) {
-                $dirs[] = $path . '/views/';
-            }
-        }
-
-        // Add the inheritance path, if there is one
-        if (static::$inherit_from !== null) {
-            $dirs[] = static::$inherit_from . '/';
-        }
-
-        // Add the regular path
-        $dirs[] = APPPATH . '/views/';
-
-        // Loop over and find the view
-        foreach ($dirs as $dir) {
-            $path = $dir . strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $name));
-            if (file_exists($path . '.phtml')) {
-                return $path . '.phtml';
-            } elseif (file_exists($path . '.php')) {
-                return $path . '.php';
-            }
-        }
-
-        // Damn it Jim, I'm a doctor not a view path.
-        return false;
+        return $view ? $view[0] : false;
     }
 
     /**
@@ -152,9 +95,7 @@ class View
     {
         // Mass set
         if (is_array($var)) {
-            foreach ($var as $k => $v) {
-                static::set($k, $v);
-            }
+            self::$vars = $var + self::$vars;
         } else {
             self::$vars[$var] = $val;
         }

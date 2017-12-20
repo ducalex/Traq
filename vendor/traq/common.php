@@ -130,17 +130,19 @@ function theme_select_options()
  * Checks if the given regex matches the request
  *
  * @param string $uri
+ * @param mixed $true value to return if nav is active
+ * @param mixed $false value to return if nav is not active
  *
- * @return bool
+ * @return mixed
  */
-function active_nav($uri)
+function active_nav($uri, $true = true, $false = null)
 {
     $uri = str_replace(
         array(':slug', ':any', ':num'),
         array('([a-zA-Z0-9\-\_]+)', '(.*)', '([0-9]+)'),
         $uri
     );
-    return preg_match("#^{$uri}$#", Request::uri());
+    return preg_match("#^{$uri}$#", Request::uri()) ? $true : $false;
 }
 
 /**
@@ -151,20 +153,6 @@ function active_nav($uri)
 function current_user()
 {
     return Avalon::app()->user;
-}
-
-/**
- * Checks the condition and returns the respective value.
- *
- * @param bool $condition
- * @param mixed $true
- * @param mixed $false
- *
- * @return mixed
- */
-function iif($condition, $true, $false = null)
-{
-    return $condition ? $true : $false;
 }
 
 /**
@@ -239,4 +227,15 @@ function get_percent($min, $max)
     if ($max == 0) return 0;
 
     return intval($min / $max * 100);
+}
+
+/**
+ * Used to render an array of errors.
+ *
+ * @param array $errors
+ *
+ */
+function show_errors(array $errors)
+{
+    return View::render('error/_list', array('errors' => is_array($errors) ? $errors : array($errors)));
 }

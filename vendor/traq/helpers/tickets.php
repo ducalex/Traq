@@ -479,7 +479,7 @@ function check_ticket_creation_delay($ticket) {
     if (Session::get('last_ticket_creation') > (time() - settings('ticket_creation_delay'))) {
         $ticket->_add_error(
             'ticket_creation_delay',
-            l('errors.you_must_wait_x', Time::difference_in_words(Session::get('last_ticket_creation') + settings('ticket_creation_delay')))
+            l('errors.you_must_wait_x', time_from_now_ago(Session::get('last_ticket_creation') + settings('ticket_creation_delay')))
         );
         return false;
     }

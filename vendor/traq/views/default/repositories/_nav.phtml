@@ -7,7 +7,7 @@
 <nav class="tabs">
 	<ul>
 		<?php foreach($repositories as $repo) { ?>
-		<li<?= iif($repository === $repo, ' class="active"')?>><?= HTML::link(l('repository').': '.$repo->slug, $repo->href()) ?></li>
+		<li<?php if ($repository === $repo) echo ' class="active"' ?>><?= HTML::link(l('repository').': '.$repo->slug, $repo->href()) ?></li>
 		<?php } ?>
 	</ul>
 </nav>

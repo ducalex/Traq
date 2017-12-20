@@ -75,7 +75,7 @@ class SecurityQuestions extends \traq\libraries\Plugin
      */
     public static function admin_nav()
     {
-        echo '<li' . iif(active_nav('/admin/settings/security_questions'), ' class="active"') . '>' . HTML::link(l('security_questions'), "/admin/settings/security_questions") . '</li>';
+        echo '<li' . active_nav('/admin/settings/security_questions', ' class="active"') . '>' . HTML::link(l('security_questions'), "/admin/settings/security_questions") . '</li>';
     }
 
     /**

@@ -1,4 +1,4 @@
-<div id="git_scm_options" <?php echo iif($repo->type != 'git', ' style="display:none;"'); ?>>
+<div id="git_scm_options" <?php echo ($repo->type != 'git' ? 'hidden' : '') ?>>
 <div class="group">
 	<label><?php echo l('Serve repository'); ?></label>
 	<?php echo Form::checkbox('serve', 1, array('checked' => $repo->serve)); ?>

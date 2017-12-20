@@ -39,16 +39,19 @@ class Kernel
 {
     private static $version = '0.7';
     private static $app;
+    private static $request;
 
     /**
      * Initializes the the kernel and routes the request.
      */
     public static function init()
     {
-        Session::start();
+        static::$request = Request::fromGlobals();
+
+        Session::start(2592000, Request::base());
 
         // Route the request
-        Router::route(Request::fromGlobals());
+        Router::route(static::$request);
 
         // Check if the routed controller and method exists
         if (!class_exists(Router::$controller) or !method_exists(Router::$controller, 'action_' . Router::$method)) {
@@ -118,6 +121,16 @@ class Kernel
     public static function app()
     {
         return static::$app;
+    }
+
+    /**
+     * Returns the request object.
+     *
+     * @return object
+     */
+    public static function request()
+    {
+        return static::$request;
     }
 
     /**

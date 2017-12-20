@@ -25,9 +25,13 @@ class Session
     private static $last_activity = 0;
 
 
-    public static function start(array $options = [])
+    public static function start($lifetime = 0, $path = '/')
     {
-        session_start($options);
+        session_start([
+            'name' => 'Avalon',
+            'cookie_lifetime' => $lifetime,
+            'cookie_path' => $path,
+        ]);
 
         static::$session = &$_SESSION;
         static::$last_activity = isset(static::$session['__activity']) ? static::$session['__activity'] : time();

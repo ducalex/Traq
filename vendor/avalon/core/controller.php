@@ -73,8 +73,7 @@ class Controller
             Body::append($content);
         }
 
-        // Set the X-Powered-By header and render the layout with the content
-        header("X-Powered-By: Avalon/" . Kernel::version());
+        // Render the layout with the content
         print(Body::content());
     }
 }

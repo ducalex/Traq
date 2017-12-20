@@ -44,7 +44,7 @@ function parse_diff($diff)
 			$in_block = null;
 
 			foreach(preg_split('/\r?\n/', rtrim($content, "\r\n")) as $line) {
-				if (preg_match('/^@@ -(?:(\d+),)?(\d+) \+(?:(\d+),)?(\d+) @@/', $line, $match)) {
+				if (preg_match('/^@@(?:@ [\-\+]\d+,\d+)? -(?:(\d+),)?(\d+) \+(?:(\d+),)?(\d+) @@/', $line, $match)) {
 					list($in_block, $a_start, $a_length, $b_start, $b_length) = $match;
 					$in_block = $line;
 					$file['chunks'][$in_block]['details'] = compact('a_start', 'b_start', 'a_length', 'b_length');

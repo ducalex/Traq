@@ -18,5 +18,8 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+defined('SYSPATH') or define('SYSPATH', __DIR__);
+defined('APPNAME') or defined('APPNAME', 'Avalon');
+
 require SYSPATH . '/autoloader.php';
 require SYSPATH . '/libs/fishhook.php';

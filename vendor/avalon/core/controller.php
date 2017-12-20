@@ -47,10 +47,8 @@ class Controller
 
     public function __construct()
     {
-        $called_class = explode('\\', static::class);
-        unset($called_class[0], $called_class[1]);
-
-        $this->render['view'] = str_replace('\\', '/', implode('/', $called_class) . '/' . Router::$method);
+        $called_class = array_slice(explode('\\', static::class), 2);
+        $this->render['view'] = implode('/', $called_class) . '/' . Router::$method;
     }
 
     public function __shutdown()

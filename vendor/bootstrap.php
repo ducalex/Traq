@@ -23,6 +23,8 @@ define("SYSPATH", __DIR__ . '/avalon');
 define("APPPATH", __DIR__ . '/traq');
 define("DOCROOT", dirname(__DIR__));
 
+define("APPNAME", 'Traq');
+
 // Load the framework
 require SYSPATH . '/base.php';
 use avalon\Database;

@@ -25,10 +25,10 @@ class Session
     private static $last_activity = 0;
 
 
-    public static function start($lifetime = 0, $path = '/')
+    public static function start($name = APPNAME, $lifetime = 0, $path = '/')
     {
         session_start([
-            'name' => 'Avalon',
+            'name' => $name,
             'cookie_lifetime' => $lifetime,
             'cookie_path' => $path,
         ]);

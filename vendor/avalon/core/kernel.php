@@ -48,7 +48,7 @@ class Kernel
     {
         static::$request = Request::fromGlobals();
 
-        Session::start(2592000, Request::base());
+        Session::start(APPNAME, 2592000, Request::base());
 
         // Route the request
         Router::route(static::$request);

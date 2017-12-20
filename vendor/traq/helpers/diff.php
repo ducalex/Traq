@@ -34,35 +34,57 @@ function parse_diff($diff)
 		if ($i % 2 === 0) {
 			$path = explode(' ', $content);
 			$file = [
-				'diff' => $content,
+				'command' => $content,
 				'status' => 'changed',
 				'file_b' => array_pop($path),
 				'file_a' => array_pop($path),
+				'chunks' => [],
 			];
 		} else {
-			foreach(preg_split('/\r?\n/', $content) as $line) {
-				list($word, $rest) = explode(' ', $line, 2);
-				if ($word === '@@' || $word === '@@@') {
-					break;
-				} elseif ($word === '---') {
-					$file['file_a'] = $rest;
-				} elseif ($word === '+++') {
-					$file['file_b'] = $rest;
-				} elseif ($word === 'rename') {
-					$file['status'] = $word;
-					list($direction, $name) = explode(' ', $rest, 2);
-					if ($direction === 'from') $file['file_a'] = $name;
-					if ($direction === 'to')   $file['file_b'] = $name;
-				} elseif ($word === 'new' || $word === 'delete') {
-					$file['status'] = $word;
+			$in_block = null;
+
+			foreach(preg_split('/\r?\n/', rtrim($content, "\r\n")) as $line) {
+				if (preg_match('/^@@ -(?:(\d+),)?(\d+) \+(?:(\d+),)?(\d+) @@/', $line, $match)) {
+					list($in_block, $a_start, $a_length, $b_start, $b_length) = $match;
+					$in_block = $line;
+					$file['chunks'][$in_block]['details'] = compact('a_start', 'b_start', 'a_length', 'b_length');
+					$file['chunks'][$in_block]['file_a'] =
+					$file['chunks'][$in_block]['file_b'] = array_fill(0, max($a_length, $b_length), null);
+					$pos_a = $pos_b = $prev = 0;
+				} elseif ($in_block) {
+					switch($line[0]) {
+						case ' ':
+							if ($prev === '+' || $prev === '-') {
+								$pos_a = $pos_b = max($pos_a, $pos_b);
+							}
+							$file['chunks'][$in_block]['file_a'][$pos_a++] = $line;
+							$file['chunks'][$in_block]['file_b'][$pos_b++] = $line;
+							break;
+						case '+':
+							$file['chunks'][$in_block]['file_b'][$pos_b++] = $line;
+							break;
+						case '-':
+							$file['chunks'][$in_block]['file_a'][$pos_a++] = $line;
+							break;
+					}
+					$file['chunks'][$in_block]['unified'][] = $line;
+					$prev = $line[0];
+				} else {
+					if (preg_match('/^(?:rename from|---) (?<file_a>.+)$/i', $line, $match)) {
+						$file['file_a'] = $match['file_a'];
+					} elseif (preg_match('/^(?:rename to|\+\+\+) (?<file_b>.+)$/i', $line, $match)) {
+						$file['file_b'] = $match['file_b'];
+					}
+					if (preg_match('/^(new|deleted|rename) /', $line, $match)) {
+						$file['status'] = $match[1];
+					}
+					$file['header'][] = $line;
 				}
 			}
 			$file['file_a'] = preg_replace('#^[ab]/#', '', $file['file_a']);
 			$file['file_b'] = preg_replace('#^[ab]/#', '', $file['file_b']);
-			$file['content'] = trim($content, "\r\n");
 			$files[] = $file;
 		}
 	}
-
 	return $files;
 }

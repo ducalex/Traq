@@ -1,21 +1,18 @@
 <?php
 $mode = !!Request::req('split');
+$classes = [' ' => 'diff-equal', '-' => 'diff-sub', '+' => 'diff-add', '*' => 'diff-void'];
 $format = [
 	0 => [ // Unified
 		'name' => 'unified',
-		' ' => '<tr class="%s"><td class="diff-equal" colspan=2>%s</td></tr>',
-		'-' => '<tr class="%s"><td class="diff-sub" colspan=2>%s</td></tr>',
-		'+' => '<tr class="%s"><td class="diff-add" colspan=2>%s</td></tr>',
-		'@' => '<tr class="%s"><td class="diff-info" colspan=2>%s</td></tr>',
-		'*' => '<tr class="%s"><td class="diff-void" colspan=2>%s</td></tr>',
+		'file_a' => 'unified',
+		'file_b' => 'unified',
+		'row' => '<tr class="diff-line %1$s"><td class="line-number">%4$s</td><td class="line-number">%5$s</td><td class="%2$s" colspan="2">%6$s</td></tr>',
 	],
 	1 => [ // Split
 		'name' => 'split',
-		' ' => '<tr class="%s"><td class="diff-equal">%s</td><td class="diff-equal">%s</td></tr>',
-		'-' => '<tr class="%s"><td class="diff-sub">%s</td><td class="diff-void"></td></tr>',
-		'+' => '<tr class="%s"><td class="diff-void"></td><td class="diff-add">%s</td></tr>',
-		'@' => '<tr class="%s"><td class="diff-info" colspan=2>%s</td></tr>',
-		'*' => '<tr class="%s"><td class="diff-void" colspan=2>%s</td></tr>',
+		'file_a' => 'file_a',
+		'file_b' => 'file_b',
+		'row' => '<tr class="diff-line %1$s"><td class="line-number">%4$s</td><td class="%2$s">%6$s</td><td class="line-number">%5$s</td><td class="%3$s">%7$s</td></tr>',
 	]
 ];
 ?>
@@ -23,7 +20,7 @@ $format = [
 <?php if (empty($commit_diff)) { ?>
 	No changes
 <?php } else { ?>
-	<table class="diff-files">
+	<table class="diff-changes-list">
 		<?php foreach($commit_diff as $diff) {
 			$name = $diff['file_b'] == '/dev/null' ? $diff['file_a'] : $diff['file_b'];
 			echo '<tr>';
@@ -35,22 +32,46 @@ $format = [
 		} ?>
 	</table>
 	<?php foreach($commit_diff as $diff) { ?>
-		<div class="diff-view-file" id="<?= sha1($diff['diff']) ?>">
+		<div class="diff-view-file" id="<?= sha1($diff['command']) ?>">
 			<div class="diff-file-header">
-				<?= htmlentities($diff['diff']) ?>
+				<?= htmlentities($diff['command']) ?>
 				<div style="float:right;"><a style="color:white;" href="<?= Request::url(null, ['split' => !$mode] + Request::get()) ?>"><?=$format[!$mode]['name']?></a></div>
 			</div>
 			<table class="diff-file-code">
-				<tr class="diff-split-header"><th>a: <?= htmlentities($diff['file_a']) ?></th><th>b: <?= htmlentities($diff['file_b']) ?></th></tr>
 				<?php
-				$base_class = 'diff-header';
-				$lines = explode("\n", $diff['content']);
-				foreach($lines as $i => $line) {
-					if ($line[0] === '@') $base_class = 'diff-line';
-					$class = $base_class;
-					if ($line[0] !== @$lines[$i-1][0]) $class .= ' diff-top';
-					if ($line[0] !== @$lines[$i+1][0]) $class .= ' diff-bottom';
-					printf($format[$mode][$line[0]] ?: $format[$mode]['*'], $class, htmlentities($line), htmlentities($line));
+				printf($format[$mode]['row'], '', '', '', '', '', '', '', ''); // For fixed layout
+
+				if (empty($diff['chunks'])) { // Probably binary file
+					foreach($diff['header'] as $line) {
+						echo '<tr class="diff-line diff-top diff-bottom diff-header"><td class="diff-header" colspan="4">'.htmlentities($line).'</td></tr>';
+					}
+				}
+
+				foreach($diff['chunks'] as $chunk => $files) {
+					echo '<tr class="diff-line diff-top diff-bottom"><td class="diff-info" colspan="4">'.htmlentities($chunk).'</td></tr>';
+
+					$file_a = $files[$format[$mode]['file_a']];
+					$file_b = $files[$format[$mode]['file_b']];
+					$line_a = $files['details']['a_start'];
+					$line_b = $files['details']['b_start'];
+
+					foreach($file_a as $i => $a) {
+						$b = $file_b[$i];
+						printf(
+							// html code
+							$format[$mode]['row'],
+							// classes
+							($a[0] !== @$file_a[$i-1][0] ? 'diff-top':'') . ($a[0] !== @$file_a[$i+1][0] ? ' diff-bottom':''),
+							$classes[$a ? $a[0] : '*'],
+							$classes[$b ? $b[0] : '*'],
+							// line numbers
+							$a && $a[0] != '+'  ? $line_a++ : '',
+							$b && $b[0] != '-' ? $line_b++ : '',
+							// line contents
+							htmlentities($a),
+							htmlentities($b)
+						);
+					}
 				}
 			?>
 		</table>

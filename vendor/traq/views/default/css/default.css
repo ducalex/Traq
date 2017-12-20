@@ -36,21 +36,20 @@
  #project_list > li {border:1px solid #bbb; margin: 5px 0px; padding: 10px;}
  #project_list > li > h3 {margin: 0px 0px 5px 0px;}
 
-.diff-file-code {border-collapse: collapse;}
-.diff-file-code td {width: 50%; padding: 2px;background:inherit;white-space: pre-wrap;}
+.diff-file-header {color:white;background:#3478AA;padding:5px;}
+.diff-file-code {border-collapse: collapse;width:100%;table-layout: fixed;margin:0px;}
+.diff-file-code td {padding: 0px 2px;background:inherit;white-space: pre-wrap;overflow: hidden;word-wrap:break-word;text-overflow: ellipsis;}
+.diff-file-code .line-number {width: 3%; text-align:center;color:#333;border-left:1px solid #aaa;border-right:1px solid #aaa;}
 .diff-file-code .diff-header td {background:#fefefe;}
 .diff-file-code .diff-line.diff-bottom td {border-bottom-width: 1px;}
 .diff-file-code .diff-line.diff-top td {border-top-width: 1px;}
-.diff-file-code .diff-line .diff-info {background:#dbedff;border:0px solid #77bbff;}
-.diff-file-code .diff-line .diff-add {background:#cdffd8; border:0px solid #00c82d;}
-.diff-file-code .diff-line .diff-sub {background:#ffdce0;border:0px solid #ff556a;}
-.diff-file-code .diff-line .diff-equal {background:white;border-right:0px solid #aaa;}
-.diff-file-code .diff-line .diff-void {background:#fafafa;border:0px solid #ccc;}
+.diff-file-code .diff-line .diff-info {width: 100%;background:#dbedff;border:0px solid #77bbff;padding: 2px;}
+.diff-file-code .diff-line .diff-add {width: 47%;background:#cdffd8; border:0px solid #00c82d;}
+.diff-file-code .diff-line .diff-sub {width: 47%;background:#ffdce0;border:0px solid #ff556a;}
+.diff-file-code .diff-line .diff-equal {width: 47%;background:white;border-right:0px solid #aaa;}
+.diff-file-code .diff-line .diff-void {width: 47%;background:#fafafa;border:0px solid #ccc;}
 .diff-file-code {background: white;padding:2px;}
-.diff-file-header {color:white;background:#3478AA;padding:5px;}
-.diff-files {width: auto;}
+.diff-changes-list {width: auto;}
 .diff-view-file {overflow-x:auto;background:white;font-family: consolas, monospace,lucida;margin-top:20px;border-radius:3px;border:1px solid #3478AA;}
-.diff-style-unified .diff-split-header {display: none;}
-.diff-style-split .diff-file-code .diff-header {display: none;}
 .commits .commit-merge a {color: #8d9bae;font-style: italic;}
 .commits .commit-first a {font-weight: bold;}

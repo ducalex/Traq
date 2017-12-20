@@ -51,39 +51,32 @@ class PDO extends Driver
     public function __construct(array $config, $name)
     {
         // Lowercase the database type
-        $config['type'] = strtolower($config['type']);
-        
-        try {
-            $this->connection_name = $name;
-            $this->prefix = isset($config['prefix']) ? $config['prefix'] : '';
-            $this->type = $config['type'];
+        $this->connection_name = $name;
+        $this->prefix = isset($config['prefix']) ? $config['prefix'] : '';
+        $this->type = strtolower($config['type']);
 
-            // Check if a DSN is already specified
-            if (isset($config['dsn'])) {
-                $dsn = $config['dsn'];
-            }
-            // SQLite
-            elseif ($config['type'] == 'sqlite') {
-                $dsn = "sqlite:{$config['path']}";
-            }
-            // Something else...
-            else {
-                $dsn = $config['type'] . ':dbname=' . $config['database'] . ';host=' . $config['host'];
-                if (isset($config['port'])) {
-                    $dsn = "{$dsn};port={$config['port']}";
-                }
-            }
-
-            $this->connection = new \PDO(
-                $dsn,
-                isset($config['username']) ? $config['username'] : null,
-                isset($config['password']) ? $config['password'] : null,
-                (isset($config['options']) ? $config['options'] : []) + [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
-            );
-
-        } catch (\PDOException $e) {
-            $this->halt($e->getMessage());
+        // Check if a DSN is already specified
+        if (isset($config['dsn'])) {
+            $dsn = $config['dsn'];
         }
+        // SQLite
+        elseif ($this->type == 'sqlite') {
+            $dsn = "sqlite:{$config['path']}";
+        }
+        // Something else...
+        else {
+            $dsn = $this->type . ':dbname=' . $config['database'] . ';host=' . $config['host'];
+            if (isset($config['port'])) {
+                $dsn = "{$dsn};port={$config['port']}";
+            }
+        }
+
+        $this->connection = new \PDO(
+            $dsn,
+            isset($config['username']) ? $config['username'] : null,
+            isset($config['password']) ? $config['password'] : null,
+            (isset($config['options']) ? $config['options'] : []) + [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+        );
     }
 
     /**

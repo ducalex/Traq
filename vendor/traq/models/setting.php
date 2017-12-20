@@ -42,6 +42,6 @@ class Setting extends Model
     
     public function is_valid()
     {
-        return !empty($this->_data['setting']);
+        return isset($this->_data['setting']) && is_scalar($this->_data['setting']);
     }
 }

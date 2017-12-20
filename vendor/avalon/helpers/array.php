@@ -23,6 +23,7 @@
  *
  * @param array $array
  * @param array $keys Keys to remove
+ * @param bool  $recursive Search for $keys recursively
  *
  * @return array
  *
@@ -30,17 +31,19 @@
  * @package Avalon
  * @subpackage Helpers
  */
-function array_remove_keys(array $array, array $keys)
+function array_remove_keys(array $array, array $keys, $recursive = true)
 {
     $array = array_diff_key($array, array_flip($keys));
 
     // Loop over the array in case we need to recurse
-    foreach ($array as &$value) {
-        if (is_array($value)) {
-            $value = array_remove_keys($value, $keys);
+    if ($recursive) {
+        foreach ($array as &$value) {
+            if (is_array($value)) {
+                $value = array_remove_keys($value, $keys);
+            }
         }
     }
-
+    
     return $array;
 }
 

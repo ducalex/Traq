@@ -38,16 +38,16 @@
 
 .diff-file-header {color:white;background:#3478AA;padding:5px;}
 .diff-file-code {border-collapse: collapse;width:100%;table-layout: fixed;margin:0px;}
-.diff-file-code td {padding: 0px 2px;background:inherit;white-space: pre-wrap;overflow: hidden;word-wrap:break-word;text-overflow: ellipsis;}
-.diff-file-code .line-number {width: 3%; text-align:center;color:#333;border-left:1px solid #aaa;border-right:1px solid #aaa;}
+.diff-file-code td {padding: 0px 2px;background:inherit;white-space: pre-wrap;}
+.diff-file-code .line-number {width: 3.5%; text-align:center;color:#333;border-left:1px solid #aaa;border-right:1px solid #aaa;overflow: hidden;text-overflow: ellipsis;}
 .diff-file-code .diff-header td {background:#fefefe;}
 .diff-file-code .diff-line.diff-bottom td {border-bottom-width: 1px;}
 .diff-file-code .diff-line.diff-top td {border-top-width: 1px;}
-.diff-file-code .diff-line .diff-info {width: 100%;background:#dbedff;border:0px solid #77bbff;padding: 2px;}
-.diff-file-code .diff-line .diff-add {width: 47%;background:#cdffd8; border:0px solid #00c82d;}
-.diff-file-code .diff-line .diff-sub {width: 47%;background:#ffdce0;border:0px solid #ff556a;}
-.diff-file-code .diff-line .diff-equal {width: 47%;background:white;border-right:0px solid #aaa;}
-.diff-file-code .diff-line .diff-void {width: 47%;background:#fafafa;border:0px solid #ccc;}
+.diff-file-code .diff-line .diff-info {width: 100%;background:#dbedff;border:0px solid #77bbff;padding: 5px;}
+.diff-file-code .diff-line .diff-add {width: 46.5%;background:#cdffd8; border:0px solid #00c82d;word-wrap:break-word;}
+.diff-file-code .diff-line .diff-sub {width: 46.5%;background:#ffdce0;border:0px solid #ff556a;word-wrap:break-word;}
+.diff-file-code .diff-line .diff-equal {width: 46.5%;background:white;border-right:0px solid #aaa;word-wrap:break-word;}
+.diff-file-code .diff-line .diff-void {width: 46.5%;background:#fafafa;border:0px solid #ccc;}
 .diff-file-code {background: white;padding:2px;}
 .diff-changes-list {width: auto;}
 .diff-view-file {overflow-x:auto;background:white;font-family: consolas, monospace,lucida;margin-top:20px;border-radius:3px;border:1px solid #3478AA;}

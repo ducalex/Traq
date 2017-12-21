@@ -25,10 +25,11 @@
  * @param mixed $original
  * @param bool $detailed Include "and seconds/minutes/etc"
  * @param bool $include_tense Appends the word "ago/from now" to the end
+ * @param bool $swap Make a span with the full date and a tooltip with the time difference
  *
  * @return string
  */
-function time_from_now_ago($original, $detailed = true, $include_tense = true)
+function time_from_now_ago($original, $detailed = true, $include_tense = true, $swap = false)
 {
     $original = Time::to_unix($original);
     $now = time(); // Get the time right now...
@@ -62,11 +63,15 @@ function time_from_now_ago($original, $detailed = true, $include_tense = true)
             $words = l('time.x_and_x', $words, l("time.x_{$name2}", $count2));
         }
     }
-
+    
     $datetime = ldate('l, jS F Y @ g:ia P', $original);
 
     if ($include_tense) {
         $words = l($original > $now ? 'time.from_now' : 'time.ago', $words);
+    }
+
+    if ($swap) {
+        list($datetime, $words) = array($words, $datetime);
     }
 
     return "<span title=\"{$datetime}\">{$words}</span>";

@@ -10,7 +10,7 @@
 		<dt><?= Form::label(l('author')) ?></dt>
 		<dd><?= $commit->author ?> &lt;<?= $commit->email ?>&gt;</dd>
 		<dt><?= Form::label(l('date')) ?></dt>
-		<dd><?= $commit->date ?></dd>
+		<dd><?= time_from_now_ago($commit->date, true, true, true) ?></dd>
 		<dt><?= Form::label(l('comment')) ?></dt>
 		<dd><?= nl2br(htmlentities($commit->message)); ?></dd>
 		<dt><?= Form::label(l('changes')) ?></dt>

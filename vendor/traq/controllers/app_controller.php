@@ -81,7 +81,7 @@ class AppController extends Controller
         $this->user = $this->_get_user();
 
         // Set user locale if needed
-        if ($user->locale !== settings('locale') && $locale = Locale::load($user->locale)) {
+        if ($this->user->locale !== settings('locale') && $locale = Locale::load($this->user->locale)) {
             $this->locale = $locale;
         }
 

@@ -10,7 +10,7 @@
 			<dt><?= Form::label(l('author')) ?></dt>
 			<dd><?= $commit1->author ?> &lt;<?= $commit1->email ?>&gt;</dd>
 			<dt><?= Form::label(l('date')) ?></dt>
-			<dd><?= $commit1->date ?></dd>
+			<dd><?= time_from_now_ago($commit1->date, true, true, true) ?></dd>
 			<dt><?= Form::label(l('comment')) ?></dt>
 			<dd><?= nl2br(htmlentities($commit1->message)); ?></dd>
 		</dl>
@@ -22,7 +22,7 @@
 			<dt><?= Form::label(l('author')) ?></dt>
 			<dd><?= $commit2->author ?> &lt;<?= $commit2->email ?>&gt;</dd>
 			<dt><?= Form::label(l('date')) ?></dt>
-			<dd><?= $commit2->date ?></dd>
+			<dd><?= time_from_now_ago($commit2->date, true, true, true) ?></dd>
 			<dt><?= Form::label(l('comment')) ?></dt>
 			<dd><?= nl2br(htmlentities($commit2->message)); ?></dd>
 		</dl>

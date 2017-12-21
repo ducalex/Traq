@@ -54,7 +54,7 @@ class Locale
         }
 
         if (!empty(static::$info['system'])) {
-            setlocale(LC_TIME, static::$info['system'], static::$info['system'].'.utf8');
+            setlocale(LC_TIME, static::$info['system'].'.UTF-8', static::$info['system'].'.utf8', static::$info['system']);
         }
     }
 

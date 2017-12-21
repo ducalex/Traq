@@ -164,7 +164,7 @@ class Milestone extends Model
     {
         // Set completed date
         if ($this->_data['status'] != 1 and $this->completed_on == null) {
-            $this->set('completed_on', "NOW()");
+            $this->set('completed_on', Time::gmt());
         }
 
         if (parent::save()) {

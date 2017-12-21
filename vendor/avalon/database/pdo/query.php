@@ -362,9 +362,7 @@ class Query
      */
     private function _process_value($value)
     {
-        if ($value === "NOW()") {
-            return $this->connection->quote(gmdate("Y-m-d H:i:s"));
-        } elseif ($value === null) {
+        if ($value === null) {
             return 'NULL';
         } else {
             return $this->connection->quote($value);

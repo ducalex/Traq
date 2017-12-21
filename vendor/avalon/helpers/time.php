@@ -37,21 +37,22 @@ class Time
      *
      * @return string
      */
-    public static function date($format = "Y-m-d H:i:s", $time = null)
+    public static function date($format = "Y-m-d H:i:s", $time = 'now')
     {
-        $time = is_null($time) ? time() : static::to_unix($time);
-
-        return date($format, $time);
+        return date($format, static::to_unix($time));
     }
 
     /**
-     * Returns the current GMT date andtime in date/time format.
+     * Formats the GMT date.
+     *
+     * @param string $format Date format
+     * @param mixed $time Date in unix time or date-time format.
      *
      * @return string
      */
-    public static function gmt()
+    public static function gmt($format = "Y-m-d H:i:s", $time = 'now')
     {
-        return date("Y-m-d H:i:s", time() - date("Z"));
+        return gmdate($format, static::to_unix($time));
     }
 
     /**
@@ -63,8 +64,7 @@ class Time
      */
     public static function gmt_to_local($datetime)
     {
-        $stamp = static::to_unix($datetime);
-        return date("Y-m-d H:i:s", $stamp + date("Z"));
+        return date("Y-m-d H:i:s", static::to_unix($datetime) + idate('Z'));
     }
 
     /**
@@ -76,11 +76,7 @@ class Time
      */
     public static function to_unix($original)
     {
-        if (is_numeric($original)) {
-            return $original;
-        }
-
-        return strtotime($original);
+        return ctype_digit($original) ? $original : strtotime($original);
     }
 
     /**

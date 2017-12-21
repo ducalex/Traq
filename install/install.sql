@@ -388,7 +388,6 @@ VALUES
   ('ticket_history_sorting', 'oldest_first'),
   ('tickets_per_page', '25'),
   ('timeline_days_per_page','7'),
-	('timeline_time_format','h:iA'),
 	('title','Traq'),
   ('site_name', ''),
   ('site_url', '');

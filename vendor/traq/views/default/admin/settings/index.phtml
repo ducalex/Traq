@@ -57,19 +57,19 @@
 			<legend><?php echo l('date_and_time'); ?></legend>
 			<div class="group">
 				<label><?php echo l('date_time_format'); ?></label>
-				<?php echo Form::text('settings[date_time_format]', array('value' => settings('date_time_format'))); ?>
+				<?php echo Form::text('settings[date_format_date_full]', array('value' => settings('date_format_date_full'), 'placeholder' => l('date_format.date.full'))); ?>
 			</div>
 			<div class="group">
-				<label><?php echo l('date_format'); ?></label>
-				<?php echo Form::text('settings[date_format]', array('value' => settings('date_format'))); ?>
+				<label><?php echo l('date_format_long'); ?></label>
+				<?php echo Form::text('settings[date_format_date_long]', array('value' => settings('date_format_date_long'), 'placeholder' => l('date_format.date.long'))); ?>
 			</div>
 			<div class="group">
-				<label><?php echo l('timeline_day_format'); ?></label>
-				<?php echo Form::text('settings[timeline_day_format]', array('value' => settings('timeline_day_format'))); ?>
+				<label><?php echo l('date_format_short'); ?></label>
+				<?php echo Form::text('settings[date_format_date_short]', array('value' => settings('date_format_date_short'), 'placeholder' => l('date_format.date.short'))); ?>
 			</div>
 			<div class="group">
-				<label><?php echo l('timeline_time_format'); ?></label>
-				<?php echo Form::text('settings[timeline_time_format]', array('value' => settings('timeline_time_format'))); ?>
+				<label><?php echo l('time_format'); ?></label>
+				<?php echo Form::text('settings[date_format_time]', array('value' => settings('date_format_time'), 'placeholder' => l('date_format.time'))); ?>
 			</div>
 		</fieldset>
 

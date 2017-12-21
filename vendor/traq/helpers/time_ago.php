@@ -64,7 +64,7 @@ function time_from_now_ago($original, $detailed = true, $include_tense = true, $
         }
     }
     
-    $datetime = ldate('l, jS F Y @ g:ia P', $original);
+    $datetime = ldate('date.full', $original); // l, jS F Y @ g:ia P
 
     if ($include_tense) {
         $words = l($original > $now ? 'time.from_now' : 'time.ago', $words);

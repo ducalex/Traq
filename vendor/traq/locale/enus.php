@@ -39,7 +39,8 @@ class enUS extends \traq\libraries\Locale
         // Locale information
         'language'       => "English",
         'language_short' => "en",
-        'locale'         => "US"
+        'locale'         => "US",
+        'system'         => 'en_US',
     );
 
     public static function locale()
@@ -146,9 +147,9 @@ class enUS extends \traq\libraries\Locale
             'allow_registration'        => "Allow Registration",
             'date_and_time'             => "Date and Time",
             'date_time_format'          => "Date/Time Format",
-            'date_format'               => "Date Format",
-            'timeline_day_format'       => "Timeline Day Format",
-            'timeline_time_format'      => "Timeline Time Format",
+            'date_format_long'          => "Date Format Long",
+            'date_format_short'         => "Date Format Short",
+            'time_format'               => "Time Format",
             'install'                   => "Install",
             'uninstall'                 => "Uninstall",
             'roles'                     => "Roles",
@@ -677,7 +678,12 @@ class enUS extends \traq\libraries\Locale
             // Testing purposes only...
             'test' => array(
                 'plurals' => "There {plural:{1}, {is {1} bottle|are {1} bottles}} of scotch on the shelf."
-            )
+            ),
+
+            'date_format.date.short' => '%x',
+            'date_format.date.long' => '%a, %d %B %Y',
+            'date_format.date.full' => '%c',
+            'date_format.time' => '%X',
         );
     }
 }

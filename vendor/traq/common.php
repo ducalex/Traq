@@ -59,22 +59,25 @@ function settings($setting) {
  */
 function l()
 {
-    $locale = Avalon::app()->locale ?: Locale::load(settings('locale'));
+    $locale = end(Locale::$locales) ?: Locale::load(settings('locale'));
     return call_user_func_array(array($locale, 'translate'), func_get_args());
 }
 
 /**
  * Returns the localized date.
  *
- * @param string $format
- * @param mixed $timestamo
+ * @param string $format Localized presets are: date.full, date.long, date.short, and time. Anything else will be formatted by strftime
+ * @param mixed $timestamp
  *
  * @return string
  */
-function ldate()
+function ldate($type, $timestamp = null)
 {
-    $locale = Avalon::app()->locale ?: Locale::load(settings('locale'));
-    return call_user_func_array(array($locale, 'date'), func_get_args());
+    // Date settings can override the locale
+    $format = settings('date_format_'.strtr($type, '.', '_')) ?: $type;
+
+    $locale = end(Locale::$locales) ?: Locale::load(settings('locale'));
+    return $locale->date($format, $timestamp);
 }
 
 /**
@@ -119,7 +122,7 @@ function theme_select_options()
         $info = require $file;
         $options[] = array(
             'label' => l('admin.theme_select_option', $info['name'], $info['version'], $info['author']),
-            'value' => basename($file, '.php')
+            'value' => basename(dirname($file))
         );
     }
 

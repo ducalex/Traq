@@ -18,7 +18,7 @@
 				<dd><?php echo $profile->ticket_updates->exec()->row_count(); ?></dd>
 
 				<dt><?php echo l('member_since'); ?></dt>
-				<dd><?php echo ($profile->created_at ? ldate(settings('date_format')) : l('unknown')); ?></dd>
+				<dd><?php echo ($profile->created_at ? ldate('date.short', $profile->created_at) : l('unknown')); ?></dd>
 				<?php FishHook::run('template:users/users/view', array($profile)); ?>
 			</dl>
 

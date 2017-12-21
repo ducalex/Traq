@@ -39,6 +39,8 @@ class Locale
     protected static $info = array();
     protected $locale = array();
 
+    public static $locales = array();
+
     /**
      * Constructor!
      */
@@ -49,6 +51,10 @@ class Locale
         // to the Locale_x->$locale array.
         if (method_exists($this, 'locale')) {
             $this->locale = $this->locale();
+        }
+
+        if (!empty(static::$info['system'])) {
+            setlocale(LC_TIME, static::$info['system'], static::$info['system'].'.utf8');
         }
     }
 
@@ -61,18 +67,23 @@ class Locale
      */
     public static function load($locale)
     {
+        if (!empty(self::$locales[$locale])) {
+            return self::$locales[$locale];
+        }
+
         $class = "\\traq\locale\\{$locale}";
         // Check if the file exists..
         if (class_exists($class)) {
             $localization = new $class();
 
-            // Load plugin translation files
-            foreach (Load::$search_paths as $path) {
-                $locale_file = "{$path}/locale/{$locale}.php";
-                if (file_exists($locale_file)) {
-                    $localization->add(include($locale_file));
+            if ($files = Load::find("locale/$locale.php")) {
+                $files = array_diff($files, array(APPPATH."/locale/$locale.php"));
+                foreach($files as $locale_file) {
+                    $localization->add(include $locale_file);
                 }
             }
+
+            self::$locales[$locale] = $localization;
 
             return $localization;
         }
@@ -111,7 +122,11 @@ class Locale
      */
     public function date($format, $timestamp = null)
     {
-        return Time::date($format, $timestamp);
+        $defaults = array('date.short' => '%x', 'date.long' => '%a, %d %B %Y', 'date.full' => '%c', 'time' => '%X');
+
+        $locale_format = $this->get_strings("date_format.$format") ?: (isset($defaults[$format]) ? $defaults[$format] : $format);
+
+        return strftime($locale_format, Time::to_unix($timestamp));
     }
 
     /**

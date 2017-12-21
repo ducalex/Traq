@@ -54,7 +54,7 @@ class Kernel
         Router::route(static::$request);
 
         // Check if the routed controller and method exists
-        if (!class_exists(Router::$controller) or !method_exists(Router::$controller, 'action_' . Router::$method)) {
+        if (!is_callable(array(Router::$controller, 'action_' . Router::$method))) {
             Router::set404();
         }
     }
@@ -75,10 +75,8 @@ class Kernel
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);
         }
-        unset($filters, $filter);
 
         // Call the method
-        $output = null;
         if (static::$app->render['action']) {
             $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
         }
@@ -91,23 +89,19 @@ class Kernel
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);
         }
-        unset($filters, $filter);
 
         // If an object is returned, use the `response` variable if it's set.
-        if (is_object($output)) {
-            $output = isset($output->response) ? $output->response : null;
+        if (isset($output->response)) {
+            $output = $output->response;
         }
 
         // Check if we have any content
-        if (static::$app->render['action'] and $output !== null) {
+        if (static::$app->render['action'] and isset($output)) {
             static::$app->render['view'] = false;
-            Body::append($output);
-
             // Get the content, clear the body
             // and append content to a clean slate.
-            $content = Body::content();
             Body::clear();
-            Body::append($content);
+            Body::append($output);
         }
 
         static::$app->__shutdown();

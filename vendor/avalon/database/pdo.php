@@ -170,6 +170,18 @@ class PDO extends Driver
     }
 
     /**
+     * Returns a replace query builder object.
+     *
+     * @param array $data Data to insert/replace
+     *
+     * @return object
+     */
+    public function replace(array $data)
+    {
+        return new Query("REPLACE INTO", $data, $this->connection_name);
+    }
+
+    /**
      * Returns the ID of the last inserted row.
      *
      * @return integer

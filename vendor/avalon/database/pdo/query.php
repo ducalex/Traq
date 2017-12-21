@@ -58,7 +58,7 @@ class Query
     {
         if ($type == 'SELECT') {
             $this->cols = (is_array($data) ? $data : array('*'));
-        } else if ($type == 'INSERT INTO') {
+        } else if ($type == 'INSERT INTO' || $type == 'REPLACE INTO') {
             $this->data = $data;
         } else if ($type == 'UPDATE') {
             $this->table = $data;
@@ -303,7 +303,7 @@ class Query
             }
         }
         // Insert query
-        else if($this->type == "INSERT INTO") {
+        else if($this->type == "INSERT INTO" || $this->type == "REPLACE INTO" ) {
             $query[] = "`{$this->prefix}{$this->table}`";
 
             $keys = array();

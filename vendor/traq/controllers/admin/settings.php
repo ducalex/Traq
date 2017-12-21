@@ -62,7 +62,9 @@ class Settings extends AppController
             // Check for errors
             if (empty($errors)) {
                 foreach ($_settings as $_setting => $_value) {
-                    $this->db->update('settings')->set(array('value' => $_value))->where('setting', $_setting)->exec();
+                    if (settings($_setting) !== $_value) {
+                        $this->db->replace(array('value' => $_value, 'setting' => $_setting))->into('settings')->exec();
+                    }
                 }
 
                 Request::redirect(Request::requestUri());

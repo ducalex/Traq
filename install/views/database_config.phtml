@@ -29,7 +29,7 @@
 		<div id="sqlite"<?php echo (!isset($_POST['type']) or $_POST['type'] != 'sqlite') ? ' style="display: none;"' : ''; ?>>
 			<div class="group<?php echo isset($errors['path']) ? ' error' :'' ?>">
 				<label for="path">Path</label>
-				<input type="text" name="path" id="path" placeholder="Database path" />
+				<input type="text" name="path" id="path" value="database/db.sqlite" placeholder="Database path" title="Use .ht.sqlite" />
 			</div>
 		</div>
 		<div class="group<?php echo isset($errors['host']) ? ' error' :'' ?>">

@@ -102,16 +102,12 @@ post('/step/2', function(){
                 $_SESSION['db'] = array(
                     'driver' => 'pdo',
                     'type'   => 'sqlite',
-                    'path'   => ($_POST['path'][0] == '/') ? $_POST['path'] : realpath('..').'/'.$_POST['path']
+                    'path'   => ($_POST['path'][0] == '/') ? $_POST['path'] : APPPATH.'/'.$_POST['path']
                 );
                 break;
         }
 
         $_SESSION['db']['prefix'] = $_POST['prefix'];
-
-
-        // Remote database info from _POST
-        unset($_POST['type'], $_POST['host'], $_POST['username'], $_POST['password'], $_POST['database'], $_POST['prefix']);
 
         View::set('title', 'Step 2 - Admin Account');
         View::set('errors', array());
@@ -176,13 +172,13 @@ post('/step/3', function(){
         // Create anonymous user
         $anon = new User(array(
             'username'   => 'Anonymous',
-            'password'   => sha1(microtime() . rand(0, 200) . time() . rand(0, 200)) . microtime(),
+            'password'   => random_hash(40),
             'name'       => 'Anonymous',
             'email'      => 'anonymous' . microtime() . '@' . $_SERVER['HTTP_HOST'],
             'group_id'   => 3,
             'locale'     => 'enUS',
             'options'    => '{"watch_created_tickets":null}',
-            'login_hash' => sha1(microtime() . rand(0, 250) . time() . rand(0, 250) . microtime()),
+            'login_hash' => random_hash(40),
         ));
         $anon->save();
 
@@ -209,15 +205,15 @@ post('/step/3', function(){
 
         // Config file
         $config = '<?php' . PHP_EOL . 'return $db = ' . var_export($_SESSION['db'], true) . ';';
+        // Put the path constants back
+        $config = preg_replace('#([\'"])'.APPPATH.'#', 'APPPATH . $1', $config);
 
         // Write the config to file
-        if(!file_exists('../vendor/traq/config/database.php') and is_writable('../vendor/traq/config')) {
-            $config_created = file_put_contents('../vendor/traq/config/database.php', $config);
-        }
+        $config_created = file_put_contents('../vendor/traq/config/database.php', $config);
+
         // Tell the user how to create the config file
-        else {
+        if (!$config_created) {
             View::set('config_code', $config);
-            $config_created = false;
         }
 
         View::set('config_created', $config_created);
@@ -225,4 +221,3 @@ post('/step/3', function(){
         render('done');
     }
 });
-

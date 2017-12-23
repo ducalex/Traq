@@ -18,7 +18,8 @@
  * along with Traq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-define("APPPATH", dirname(__DIR__) . '/vendor/traq');
+define("APPPATH", __DIR__);
+define("TRAQPATH", dirname(__DIR__) . '/vendor/traq');
 define("SYSPATH", dirname(__DIR__) . '/vendor/avalon');
 
 require '../vendor/traq/version.php';

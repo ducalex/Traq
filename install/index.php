@@ -102,7 +102,7 @@ post('/step/2', function(){
                 $_SESSION['db'] = array(
                     'driver' => 'pdo',
                     'type'   => 'sqlite',
-                    'path'   => ($_POST['path'][0] == '/') ? $_POST['path'] : APPPATH.'/'.$_POST['path']
+                    'path'   => ($_POST['path'][0] == '/') ? $_POST['path'] : TRAQPATH.'/'.$_POST['path']
                 );
                 break;
         }
@@ -206,7 +206,7 @@ post('/step/3', function(){
         // Config file
         $config = '<?php' . PHP_EOL . 'return $db = ' . var_export($_SESSION['db'], true) . ';';
         // Put the path constants back
-        $config = preg_replace('#([\'"])'.APPPATH.'#', 'APPPATH . $1', $config);
+        $config = preg_replace('#([\'"])'.TRAQPATH.'#', 'APPPATH . $1', $config);
 
         // Write the config to file
         $config_created = file_put_contents('../vendor/traq/config/database.php', $config);

@@ -30,6 +30,7 @@ class Session
         session_start([
             'name' => $name,
             'cookie_lifetime' => $lifetime,
+            'gc_maxlifetime' => $lifetime,
             'cookie_path' => $path,
         ]);
 

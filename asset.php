@@ -19,60 +19,53 @@
  */
 
 $types = [
-    'js' => ['mime' => 'text/javascript', 'ext' => 'js', 'minimize' => false],
-    'css' => ['mime' => 'text/css', 'ext' => 'css', 'minimize' => true],
-    'img' => ['mime' => 'image/png', 'ext' => '{png,jpg,gif}', 'minimize' => false],
+    'js'  => ['mime' => 'text/javascript', 'ext' => 'js', 'dir' => 'js','minimize' => false],
+    'css' => ['mime' => 'text/css', 'ext' => 'css', 'dir' => 'css', 'minimize' => true],
+    'img' => ['mime' => 'image/png', 'ext' => '{png,jpg,gif}', 'dir' => '{images,img}', 'minimize' => false],
 ];
 
 if ($request = array_intersect_key($_GET, $types)) {
     $req_files = reset($request);
-    $type = key($request);
+    extract($types[key($request)]);
+
+    if ($req_files === 'all') {
+        $req_files = '*';
+    }
 } else {
+    header("HTTP/1.0 404 Not Found");
     exit;
 }
 
-// Set content type and charset.
-header('Content-Type: '.$types[$type]['mime'].'; charset: UTF-8;');
+
+header('Content-Type: '.$mime.'; charset: UTF-8;');
 header('Expires: '.gmdate("D, d M Y H:i:s e", time() + 1800));
 header('Pragma: cache');
 header('Cache-Control: max-age=1800');
 
-// Check if we can gzip the page or not/
-if (extension_loaded('zlib')) {
-    // We can!
-    ob_end_clean();
-    ob_start('ob_gzhandler');
-}
+ini_set('zlib.output_compression', 'on');
 
 $files = $search = [];
 
 if (!empty($_GET['plugin'])) {
-    $plugin = basename($_GET['plugin']);
-    $search[] = __DIR__ . "/vendor/traq/plugins/$plugin/assets/$type/";
+    $search[] = __DIR__ . "/vendor/traq/plugins/{$_GET['plugin']}/assets/{$dir}/{{$req_files}}.{$ext}";
 } else {
-    $search[] = __DIR__ . "/assets/$type/";
+    $search[] = __DIR__ . "/assets/{$dir}/{{$req_files}}.{$ext}";
 }
 
 if (!empty($_GET['theme'])) {
-    $theme = basename($_GET['theme']);
-    $search[] = __DIR__ . "/vendor/traq/views/$theme/$type/";
+    $theme_files = isset($_GET['theme_files']) ? $_GET['theme_files'] : 'default';
+    $search[] = __DIR__ . "/vendor/traq/views/{$_GET['theme']}/{$dir}/{{$theme_files}}.{$ext}";
 }
 
-if ($req_files === 'all') {
-    $glob = '*.' . $types[$type]['ext'];
-} else {
-    $req_files = strtr($req_files, ['../' => '/', '{' => '', '}' => '']); // avoid going outside the base
-    $glob = '{' . $req_files . '}.' . $types[$type]['ext'];
-}
-
-
-foreach($search as $base) {
-    $files = array_merge($files, glob($base . $glob, GLOB_BRACE));
+foreach($search as $glob) {
+    if (strpos($glob, '../') === false) { // avoid going outside the base if someone tries to inject a path
+        $files = array_merge($files, glob($glob, GLOB_BRACE));
+    }
 }
 
 $output = array_map('file_get_contents', $files);
 
-if ($types[$type]['minimize']) {
+if ($minimize) {
     $output = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $output);
     $output = preg_replace('/\s*(,|;|:|{|})\s*/', '$1', $output);
     $output = preg_replace('/\s+/', ' ', $output);

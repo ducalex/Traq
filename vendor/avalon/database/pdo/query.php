@@ -167,9 +167,9 @@ class Query
      *    or
      *    where(array(array('count', 5, '>=')));
      *
-     * @param string $columm Column
+     * @param string $column Column
      * @param mixed $value Column value
-     * @param string $cond Condintional (=, !=, >=, <=, !=, etc)
+     * @param string $cond Condition/Comparator (=, !=, >=, <=, !=, etc)
      *
      * @return object
      */

@@ -127,7 +127,7 @@ class Time
         // Format the time from
         $from = $count . " " . (1 == $count ? $name : $names);
 
-        // Get the detailed time from if the detaile variable is true
+        // Get the detailed time from if the detailed variable is true
         if ($detailed && isset($chunks[++$i])) {
             list($seconds2, $name2, $names2) = $chunks[$i];
             if ($count2 = floor(($difference - $seconds * $count) / $seconds2)) {

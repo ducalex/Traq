@@ -72,7 +72,7 @@ class User extends Model
         'save' => array('prepare_password'),
     );
 
-    // Users group and role ermissions
+    // Users group and role permissions
     protected $permissions = array(
         'project' => array(),
         'role' => array()
@@ -128,7 +128,7 @@ class User extends Model
     /**
      * Check if the user can perform the requested action.
      *
-     * @param integer $proejct_id
+     * @param integer $project_id
      * @param string $action
      *
      * @return bool
@@ -281,7 +281,7 @@ class User extends Model
             } elseif (empty($this->_data['new_password'])) {
                 $this->errors['new_password'] = l('errors.users.new_password_blank');
             } elseif (empty($this->_data['confirm_password'])) {
-                $this->errors['cofirm_password'] = l('errors.users.confirm_password_blank');
+                $this->errors['confirm_password'] = l('errors.users.confirm_password_blank');
             } elseif ($this->_data['new_password'] !== $this->_data['confirm_password']) {
                 $this->errors['new_password'] = l('errors.users.invalid_confirm_password');
             } elseif(!$this->verify_password($this->_data['old_password'])) {

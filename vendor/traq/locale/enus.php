@@ -610,7 +610,7 @@ class enUS extends \traq\libraries\Locale
 
             'errors.security_questions.fill_in_fields_marked_red' => "Please fill in the fields marked in red",
             'errors.security_questions.answer_is_wrong'           => "The security answer you provided is incorrect",
-            'help.security_questions.answers'                     => "Accepted answers sperated by a vertical bar: <code>|</code>",
+            'help.security_questions.answers'                     => "Accepted answers separated by a vertical bar: <code>|</code>",
 
             // ----------------------------------------------------------------------------------------------------
             // Custom tabs

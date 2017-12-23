@@ -1,10 +1,10 @@
 <title><?= implode(' - ', array_reverse($traq->title)) ?></title>
 		<meta charset="UTF-8" />
-		<?= HTML::css_link(Request::base('css.php?css=screen&theme=' . settings('theme'))) ?>
-		<?= HTML::css_link(Request::base('css.php?css=print'), 'print') ?>
+		<?= HTML::css_link(Request::base('asset.php?css=screen,default&theme=' . settings('theme'))) ?>
+		<?= HTML::css_link(Request::base('asset.php?css=print'), 'print') ?>
 		<?= HTML::js_inc('//code.jquery.com/jquery-1.11.0.min.js') ?>
 		<?= HTML::js_inc('//code.jquery.com/ui/1.10.4/jquery-ui.min.js') ?>
-		<?= HTML::js_inc(Request::base('js.php?js=all')) ?>
+		<?= HTML::js_inc(Request::base('asset.php?js=all')) ?>
 		<script>
 			traq.base = '<?= Request::base() ?>';
 			language.yes = '<?= l('yes'); ?>';

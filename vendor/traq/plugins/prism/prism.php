@@ -28,8 +28,8 @@ class Prism extends \traq\libraries\Plugin
 		static $inserted = false;
 
 		if ($inserted == false) {
-            echo HTML::js_inc(Request::base('/js.php?plugin=prism&js=all'));
-            echo HTML::css_link(Request::base('/css.php?plugin=prism&css=all'));
+            echo HTML::js_inc(Request::base('asset.php?plugin=prism&js=all'));
+            echo HTML::css_link(Request::base('asset.php?plugin=prism&css=all'));
 			$inserted = true;
 		}
     }

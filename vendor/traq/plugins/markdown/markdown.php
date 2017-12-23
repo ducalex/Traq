@@ -26,8 +26,8 @@ class Markdown extends \traq\libraries\Plugin
     
     public static function head()
     {
-        echo HTML::js_inc(Request::base('/js.php?plugin=markdown&js=all'));
-        echo HTML::css_link(Request::base('/css.php?plugin=markdown&css=all'));
+        echo HTML::js_inc(Request::base('asset.php?plugin=markdown&js=all'));
+        echo HTML::css_link(Request::base('asset.php?plugin=markdown&css=all'));
 
         // Get the locale strings and set the editor strings
         if ($strings = Avalon::app()->locale->get_strings('editor')) {

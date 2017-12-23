@@ -20,12 +20,18 @@ $format = [
 <?php if (empty($commit_diff)) { ?>
 	No changes
 <?php } else { ?>
+	<?php 
+		foreach(array_count_values(array_column($commit_diff, 'status')) as $status => $count) {
+			$list[] = $count.' '.l("diff_$status");
+		}
+		echo implode(', ', $list);
+	?>
 	<table class="diff-changes-list">
 		<?php foreach($commit_diff as $diff) {
 			$name = $diff['file_b'] == '/dev/null' ? $diff['file_a'] : $diff['file_b'];
 			echo '<tr>';
 			echo '<td class="'.$diff['status'].'">' . strtoupper(l("diff_{$diff['status']}")) . '</td>';
-			echo '<td><a href="#' . sha1($diff['diff']) . '">' . htmlentities($name) . '</a></td>';
+			echo '<td><a href="#' . sha1($diff['command']) . '">' . htmlentities($name) . '</a></td>';
 			echo '<td>'.HTML::link('view', $repository->href("browse/$target/$name")).'</td>';
 			echo '<td>'.HTML::link('log', $repository->href("commits/$default_branch/$name")).'</td>';
 			echo '</tr>';

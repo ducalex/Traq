@@ -35,7 +35,6 @@ class Repositories extends AppController
     public function __construct()
     {
         parent::__construct();
-        $this->title(l('repository'));
 
         if (!$this->user->permission($this->project->id, 'scm_browse_repositories')) {
             return $this->show_no_permission(true);
@@ -60,6 +59,8 @@ class Repositories extends AppController
         if (empty($this->repository)) {
             return $this->show_404();
         }
+
+        $this->title(l('repository') . ': ' . $this->repository->slug);
 
         $this->scm = SCM::factory($this->repository->type, $this->repository);
         $branches = $this->scm->branches();
@@ -141,6 +142,8 @@ class Repositories extends AppController
             return $this->show_404();
         }
 
+        $this->title($commit->subject);
+
         View::set(['commit' => $commit, 'nav_title' => $commit->subject, 'commit_diff' => $commit->diff]);
 	}
 
@@ -151,7 +154,7 @@ class Repositories extends AppController
         $commit1 = $this->scm->revision($rev1);
         $commit2 = $this->scm->revision($rev2);
 		$commit_diff = $this->scm->diff($rev1, $rev2);
-		$nav_title = 'Diff ' . $rev1 . ' to '.$rev2;
+		$nav_title = 'Comparing ' . $rev1 . ' to '.$rev2;
 
         if (empty($commit1) || empty($commit2)) {
             return $this->show_404();

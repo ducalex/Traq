@@ -52,7 +52,7 @@ class Load
             }
         }
 
-        Error::halt("Loader Error", "Unable to load config '{$file}'");
+        //Error::halt("Loader Error", "Unable to load config '{$file}'");
         return false;
     }
 

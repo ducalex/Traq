@@ -29,7 +29,10 @@
 		<div id="sqlite"<?php echo (!isset($_POST['type']) or $_POST['type'] != 'sqlite') ? ' style="display: none;"' : ''; ?>>
 			<div class="group<?php echo isset($errors['path']) ? ' error' :'' ?>">
 				<label for="path">Path</label>
-				<input type="text" name="path" id="path" value="database/db.sqlite" placeholder="Database path" title="Use .ht.sqlite" />
+				<input type="text" name="path" id="path" value="<?php echo 'database/db.'.random_hash(6).'.sqlite' ?>" placeholder="Database path" />
+				<div style="font-size:small">
+				Note: Make sure to disable web access to this file or name it .ht.sqlite.
+				</div>
 			</div>
 		</div>
 		<div class="group<?php echo isset($errors['host']) ? ' error' :'' ?>">

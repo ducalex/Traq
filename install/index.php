@@ -155,53 +155,54 @@ post('/step/3', function(){
                     $conn->query($query);
                 }
             }
+
+            // Insert admin account
+            $admin = new User(array(
+                'username' => $_POST['username'],
+                'password' => $_POST['password'],
+                'name'     => $_POST['name'],
+                'email'    => $_POST['email'],
+                'group_id' => 1,
+            ));
+            $admin->save();
+
+            // Create anonymous user
+            $anon = new User(array(
+                'username'   => 'Anonymous',
+                'password'   => random_hash(40),
+                'name'       => 'Anonymous',
+                'email'      => 'anonymous.' . random_hash(8) . '@' . $_SERVER['HTTP_HOST'],
+                'group_id'   => 3,
+                'locale'     => 'enUS',
+                'options'    => '{"watch_created_tickets":null}',
+                'login_hash' => random_hash(40),
+            ));
+            $anon->save();
+
+            // Create setting to save anonymous user ID
+            $anon_id = new Setting(array(
+                'setting' => 'anonymous_user_id',
+                'value'   => $anon->id
+            ));
+            $anon_id->save();
+
+            // Notification from address
+            $setting = new Setting(array(
+                'setting' => "notification_from_email",
+                'value'   => "noreply@{$_SERVER['HTTP_HOST']}"
+            ));
+            $setting->save();
+
+            // Create DB version setting
+            $db_ver = new Setting(array(
+                'setting' => 'db_version',
+                'value'   => TRAQ_VER_CODE
+            ));
+            $db_ver->save();
+
         } catch (Exception $e) {
             InstallError::halt('The following SQL query failed', '<pre>'.$query.'</pre>');
         }
-
-        // Insert admin account
-        $admin = new User(array(
-            'username' => $_POST['username'],
-            'password' => $_POST['password'],
-            'name'     => $_POST['name'],
-            'email'    => $_POST['email'],
-            'group_id' => 1,
-        ));
-        $admin->save();
-
-        // Create anonymous user
-        $anon = new User(array(
-            'username'   => 'Anonymous',
-            'password'   => random_hash(40),
-            'name'       => 'Anonymous',
-            'email'      => 'anonymous' . microtime() . '@' . $_SERVER['HTTP_HOST'],
-            'group_id'   => 3,
-            'locale'     => 'enUS',
-            'options'    => '{"watch_created_tickets":null}',
-            'login_hash' => random_hash(40),
-        ));
-        $anon->save();
-
-        // Create setting to save anonymous user ID
-        $anon_id = new Setting(array(
-            'setting' => 'anonymous_user_id',
-            'value'   => $anon->id
-        ));
-        $anon_id->save();
-
-        // Notification from address
-        $setting = new Setting(array(
-            'setting' => "notification_from_email",
-            'value'   => "noreply@{$_SERVER['HTTP_HOST']}"
-        ));
-        $setting->save();
-
-        // Create DB version setting
-        $db_ver = new Setting(array(
-            'setting' => 'db_version',
-            'value'   => TRAQ_VER_CODE
-        ));
-        $db_ver->save();
 
         // Config file
         $config = '<?php' . PHP_EOL . 'return $db = ' . var_export($_SESSION['db'], true) . ';';

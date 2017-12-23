@@ -158,7 +158,7 @@ class Model
         }
 
         foreach (static::$_properties as $column) {
-            if (is_scalar($column) && isset($this->_data[$column]) && $column !== $primary_key) {
+            if (is_scalar($column) && isset($this->_data[$column])) {
                 if (in_array($column, static::$_escape)) {
                     $data[$column] = htmlspecialchars_decode($this->_data[$column]);
                 } elseif (in_array($column, static::$_serialize)) {
@@ -173,6 +173,7 @@ class Model
 
         // Save
         if ($this->_is_new() === false) {
+            unset($data[$primary_key]);
             static::db()->update(static::$_name)->set($data)->where($primary_key, $this->_data[$primary_key])->exec();
         }
         // Create

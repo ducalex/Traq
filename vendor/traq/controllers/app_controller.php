@@ -30,6 +30,7 @@ use avalon\Database;
 use avalon\http\Request;
 use avalon\http\Router;
 use avalon\http\Session;
+use avalon\http\Cookie;
 use avalon\output\View;
 
 use traq\models\User;
@@ -188,10 +189,13 @@ class AppController extends Controller
      */
     private function _get_user()
     {
-        // Check if the session cookie is set, if so, check if it matches a user
-        // and set set the user info.
+        // Check if the session is set
         if ($user_id = Session::get('user_id')) {
             $user = User::find($user_id);
+        }
+        // Cookie login for backwards compatibility, but it also serves as a "remember me" feature
+        elseif ($login_hash = Cookie::get('_traq')) {
+            $user = User::find('login_hash', $login_hash);
         }
         // Check if the API key is set
         elseif ($api_key = API::get_key()) {
@@ -219,6 +223,7 @@ class AppController extends Controller
             ));
             define("LOGGEDIN", false);
         } else {
+            Session::set('user_id', $user->id);
             define("LOGGEDIN", true);
         }
 

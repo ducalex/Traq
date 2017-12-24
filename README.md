@@ -15,6 +15,14 @@ Installation
 
 In your browser, open the location you placed Traq in and follow the installation steps.
 
+If you aren't using Apache you will need to configure rewriting. See the following example for nginx:
+
+`````
+if ($uri !~ ^/traq/(install|assets|asset\.php)(/|$)) {
+    rewrite "^/traq/(.+)$" /traq/index.php last;
+}
+`````
+
 Licenses
 -------
 

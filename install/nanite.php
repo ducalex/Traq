@@ -85,11 +85,11 @@ class Nanite
      */
     public static function base_uri($segments = null)
     {
-        return str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) . ($segments ? trim($segnebts, '/') : '');
+        return str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) . ($segments ? trim($segments, '/') : '');
     }
 
     /**
-     * Porcesses the route.
+     * Processes the route.
      *
      * @access private
      */

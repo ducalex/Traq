@@ -36,12 +36,6 @@ use traq\models\Subscription;
  */
 class Usercp extends AppController
 {
-    public function __construct()
-    {
-        parent::__construct();
-        View::set('user', $this->user);
-    }
-
     /**
      * The index page.
      */

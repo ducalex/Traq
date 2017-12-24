@@ -36,6 +36,16 @@ use traq\models\Ticket;
  */
 class Subscriptions extends AppController
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        // Although no permission is required, we do need a valid user!
+        if (!LOGGEDIN) {
+            return $this->show_no_permission();
+        }
+    }
+
     /**
      * Toggles the subscription.
      *

@@ -60,7 +60,8 @@ class Tickets extends AppController
         'new' => array('_check_permission'),
         'edit' => array('_check_permission'),
         'update' => array('_check_permission'),
-        'delete' => array('_check_permission')
+        'delete' => array('_check_permission'),
+        'template' => array('_check_permission'),
     );
 
     /**
@@ -275,7 +276,7 @@ class Tickets extends AppController
     public function action_manage_tasks($ticket_id)
     {
         $this->render['view'] = 'tickets/tasks';
-        
+
         if (!$this->user->permission($this->project->id, 'ticket_properties_set_tasks')) {
             return $this->show_no_permission();
         }
@@ -739,6 +740,17 @@ class Tickets extends AppController
     }
 
     /**
+     * Get ticket template
+     */
+    public function action_template($type_id)
+    {
+        $this->render['layout'] = false;
+        $template = Type::find($type_id);
+
+        return $template ? $template->template : '';
+    }
+
+    /**
      * Mass Actions.
      */
     public function action_mass_actions()
@@ -879,6 +891,11 @@ class Tickets extends AppController
             // View ticket
             case 'view':
                 $action = 'view_tickets';
+                break;
+
+            // View templates
+            case 'template':
+                $action = 'create_tickets';
                 break;
 
             // Create ticket

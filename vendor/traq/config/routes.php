@@ -38,10 +38,8 @@ Router::add('/priorities', 'traq::controllers::API.priorities');
 
 // Misc
 Router::add('/_js(?:.js)?', 'traq::controllers::Misc.javascript');
-Router::add('/_ajax/ticket_template/([0-9]+)', 'traq::controllers::Misc.ticket_template/$1');
 Router::add('/_ajax/autocomplete/(username)', 'traq::controllers::Misc.autocomplete_$1');
 Router::add('/_misc/preview_text', 'traq::controllers::Misc.preview_text');
-Router::add('/_misc/ticket_tasks_bit', 'traq::controllers::TicketTasks.form_bit');
 Router::add('/_misc/format_text', 'traq::controllers::Misc.format_text');
 
 // Attachment routes
@@ -64,6 +62,7 @@ Router::add('/' . RTR_PROJSLUG . '/tickets/(?P<ticket_id>[0-9]+)/history/([0-9]+
 Router::add('/' . RTR_PROJSLUG . '/tickets/(?P<ticket_id>[0-9]+)/tasks/manage', 'traq::controllers::Tickets.manage_tasks/$2');
 Router::add('/' . RTR_PROJSLUG . '/tickets/(?P<ticket_id>[0-9]+)/tasks/([0-9]+)', 'traq::controllers::Tickets.toggle_task/$2,$3');
 Router::add('/' . RTR_PROJSLUG . '/tickets/(mass_actions|update_filters|new)', 'traq::controllers::Tickets.$2');
+Router::add('/' . RTR_PROJSLUG . '/tickets/template/([0-9])', 'traq::controllers::Tickets.template/$2');
 Router::add('/' . RTR_PROJSLUG . '/tickets', 'traq::controllers::Tickets.index');
 
 // Wiki routes

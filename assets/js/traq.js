@@ -25,7 +25,7 @@ var traq = {
 	load_ticket_template: function(){
 		var type_id = $("#type option:selected").val();
 
-		$("#description").load(traq.base + '_ajax/ticket_template/' + type_id);
+		$("#description").load(traq.base + traq.project + '/tickets/template/' + type_id);
 
 		traq.show_hide_custom_fields()
 	},
@@ -41,7 +41,7 @@ var traq = {
 };
 
 // Cookies, nom nom nom
-$.cookie.defaults.path = '/';
+$.cookie.defaults.path = traq.base;
 
 // Language object
 var language = {};
@@ -75,7 +75,7 @@ $(document).ready(function(){
 
 	$('[data-preview]').on('click', function(){
 		var data = $($(this).attr('data-preview')).val();
-		$('#overlay').load(traq.base + '_misc/preview_text', { data: data }, function(){
+		$('#overlay').load(traq.base + '_misc/preview_text', { data: data, project: traq.project }, function(){
 			$('#overlay').overlay();
 		});
 	});

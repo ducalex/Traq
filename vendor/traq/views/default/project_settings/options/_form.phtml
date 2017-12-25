@@ -13,6 +13,7 @@
 <div class="group">
 	<label><?php echo l('description'); ?></label>
 	<?php echo Form::textarea('info', array('value' => $proj->info, 'class' => 'editor')); ?>
+	<input type="button" data-preview="#info" value="<?php echo l('preview'); ?>" />
 </div>
 <div class="group">
 	<label><?php echo l('enable_wiki'); ?></label>

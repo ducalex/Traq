@@ -30,6 +30,7 @@ use avalon\core\Load;
 
 use traq\models\Type;
 use traq\models\User;
+use traq\models\Project;
 
 /**
  * Misc controller
@@ -39,45 +40,14 @@ use traq\models\User;
  * @package Traq
  * @subpackage Controllers
  */
-class Misc extends Controller
+class Misc extends AppController
 {
-    /**
-     * Custom constructor, we need to do extra stuff.
-     */
     public function __construct()
     {
-        // Set the theme
-        View::$theme = '_misc';
-
         parent::__construct();
-
-        // Load helpers
-        Load::helper("html");
-        Load::helper('formatting');
-    }
-
-    /**
-     * "Dynamic JavaScript"
-     */
-    public function action_javascript()
-    {
-        // Set the content type to javascript
-        header("Content-type: text/javascript");
-
-        // Set the view without the controller namespace
-        $this->render['view'] = 'javascript';
-    }
-
-    /**
-     * Used to get the ticket template.
-     *
-     * @param integer $type_id
-     */
-    public function action_ticket_template($type_id)
-    {
-        // No view, just print the ticket template
+        View::$theme = '_misc';
         $this->render['view'] = false;
-        return Type::find($type_id)->template;
+        $this->render['layout'] = false;
     }
 
     /**
@@ -86,7 +56,6 @@ class Misc extends Controller
     public function action_autocomplete_username()
     {
         // No view, just json content
-        $this->render['view'] = false;
         header("Content-type: application/json");
 
         // Get the users, and loop over them
@@ -102,12 +71,18 @@ class Misc extends Controller
 
     public function action_preview_text()
     {
-        $this->render['view'] = 'preview_text';
-        View::set('data', format_text(Request::req('data')));
+        $project = Project::find('slug', Request::post('project'));
+
+        if ($project && !$this->user->permission($project->id, 'view_tickets')) {
+            return $this->show_no_permission();
+        }
+        
+        View::set('data', format_text(Request::post('data'), true, $project));
+        return View::render('preview_text');
     }
 
     public function action_format_text()
     {
-        return format_text(Request::req('data'));
+        return format_text(Request::post('data'));
     }
 }

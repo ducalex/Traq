@@ -142,26 +142,32 @@ class Projects extends AppController
      */
     public function action_timeline()
     {
-        $days = array();
+        $timeline_filters = array(
+            'new_tickets'           => array('ticket_created'),
+            'tickets_opened_closed' => array('ticket_closed', 'ticket_reopened'),
+            'ticket_updates'        => array('ticket_updated'),
+            'ticket_comments'       => array('ticket_comment'),
+            'ticket_moves'          => array('ticket_moved_from', 'ticket_moved_to'),
+            'milestones'            => array('milestone_completed', 'milestone_cancelled'),
+            'wiki_pages'            => array('wiki_page_created', 'wiki_page_edited')
+        );
 
-        // Filters
-        $filters = array_keys(timeline_filters());
-        $events = timeline_events();
+        $days = $events = array();
 
         // Check if filters are set
         if ($req_filters = Request::post('filters', Session::get('timeline_filters'))) {
             // Fetch filters
-            $filters = array_keys($req_filters);
-            $events = array();
-
-            // Process filters
-            foreach ($filters as $filter) {
-                $events = array_merge($events, timeline_filters($filter));
-            }
-
+            $filters = array_intersect_key($timeline_filters, $req_filters);
             // Save filters to session
-            Session::set('timeline_filters', $timeline_filters);
+            Session::set('timeline_filters', $req_filters);
+        } 
+        // Otherwise use them all
+        else {
+            $filters = $timeline_filters;
         }
+
+        $events = call_user_func_array('array_merge', $filters); // Merge all selected event categories
+        $filters = array_keys($filters);
 
         // Atom feed
         $this->feeds[] = array(Request::requestUri() . ".atom", l('x_timeline_feed', $this->project->name));
@@ -199,7 +205,7 @@ class Projects extends AppController
         }
 
         // Send the days and events to the view.
-        View::set(compact('days', 'filters', 'events', 'pagination'));
+        View::set(compact('days', 'filters', 'events', 'pagination', 'timeline_filters'));
     }
 
     /**

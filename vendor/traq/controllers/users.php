@@ -27,6 +27,7 @@ use \FishHook;
 use avalon\core\Load;
 use avalon\http\Request;
 use avalon\http\Session;
+use avalon\http\Cookie;
 use avalon\output\View;
 
 use traq\helpers\Notification;
@@ -79,22 +80,23 @@ class Users extends AppController
         // Check if the form has been submitted
         if (Request::method() == 'post') {
             // Try to find the user in the database and verify their password
-            if ($user = User::find('username', Request::post('username'))
-            and $user->verify_password(Request::post('password'))) {
-                // User found and verified, set the cookie and redirect them
-                // to the index page if no "redirect" page was set.
-                if ($user->is_activated()) {
-                    Session::set('user_id', $user->id);
-                    Request::redirect(Request::post('redirect', Request::base()));
-                }
-                // Tell the user to activate
-                else {
-                    View::set('validation_required', true);
-                }
-            }
-            // No user found
-            else {
+            $user = User::find('username', Request::post('username'));
+
+            if (!$user or !$user->verify_password(Request::post('password'))) {
                 View::set('error', true);
+            }
+            elseif (!$user->is_activated()) {
+                View::set('validation_required', true);
+            }
+            // User found and verified, set the cookie and redirect them
+            // to the index page if no "redirect" page was set.
+            else {
+                if (Request::post('remember_me')) {
+                    Cookie::set('_traq', $user->login_hash, time() + (365 * 24 * 3600), Request::base());
+                }
+
+                Session::set('user_id', $user->id);
+                Request::redirect(Request::post('redirect', Request::base()));
             }
         }
     }
@@ -104,6 +106,7 @@ class Users extends AppController
      */
     public function action_logout()
     {
+        Cookie::set('_traq', '', time(), Request::base());
         Session::clear();
         Request::redirectTo();
     }

@@ -271,6 +271,7 @@ class enUS extends \traq\libraries\Locale
             'new_password'         => "New Password",
             'confirm_password'     => "Confirm Password",
             'email'                => "Email",
+            'remember_me'          => "Remember me",
             'xs_profile'           => "{1}'s Profile",
             'assigned_tickets'     => "Assigned tickets",
             'tickets_created'      => "Tickets created",

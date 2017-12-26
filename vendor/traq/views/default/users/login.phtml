@@ -2,20 +2,18 @@
 	<div class="push-6 span-11">
 		<h2 id="page_title"><?php echo l('login'); ?></h2>
 <?php if (!isset($validation_required)) { ?>
-		<?php if (isset($error) and $error) { ?>
+		<?php if (!empty($error)) { ?>
 		<div class="error">
 			<?php echo l('errors.invalid_username_or_password'); ?>
 		</div>
 		<?php } ?>
-		<?php if (isset($validated) and $validated) { ?>
+		<?php if (!empty($validated)) { ?>
 		<div class="success">
 			<?php echo l('account_validated')?>
 		</div>
 		<?php } ?>
 		<form action="<?php echo Request::base('login'); ?>" method="post" class="box">
-			<?php if ($redirect = Request::post('redirect', Request::header('REFERER'))) { ?>
-			<input type="hidden" name="redirect" value="<?php echo htmlentities($redirect); ?>" />
-			<?php } ?>
+			<?php echo Form::input('hidden', 'redirect', ['value' => Request::post('redirect', Request::header('REFERER'))]); ?>
 			<div class="group">
 				<label><?php echo l('username'); ?></label>
 				<?php echo Form::text('username'); ?>
@@ -23,6 +21,10 @@
 			<div class="group">
 				<label><?php echo l('password'); ?></label>
 				<?php echo Form::password('password'); ?>
+			</div>
+			<div class="group">
+				<label></label>	
+				<label><?php echo Form::checkbox('remember_me', 1); ?><?php echo l('remember_me'); ?></label>
 			</div>
 			<div class="group">
 				<input type="submit" value="<?php echo l('login'); ?>" />

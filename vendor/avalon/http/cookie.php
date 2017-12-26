@@ -26,7 +26,7 @@ class Cookie
         return isset($_COOKIE[$key]) ? $_COOKIE[$key] : null;
     }
 
-    public static function set($name, $value, $expire, $path, $domain, $secure)
+    public static function set($name, $value = '', $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false)
     {
         if (\call_user_func_array('setcookie', \func_get_args())) {
             $_COOKIE[$name] = $value;

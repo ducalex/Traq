@@ -200,9 +200,8 @@ class Repositories extends AppController
     {
 		$revision = $revision ?: $this->target;
         $this->render['layout'] = 'plain';
+        $this->render['format'] = 'text/plain';
         $data = $this->scm->patch($revision);
-
-        header('Content-Type: text/plain');
 
         return $data;
     }

@@ -1,6 +1,6 @@
 <?php
 $mode = !!Request::req('split');
-$classes = [' ' => 'diff-equal', '-' => 'diff-sub', '+' => 'diff-add', '*' => 'diff-void'];
+$classes = [' ' => 'diff-equal', '-' => 'diff-sub', '+' => 'diff-add', '*' => 'diff-void', '\\' => 'diff-void'];
 $format = [
 	0 => [ // Unified
 		'name' => 'unified',

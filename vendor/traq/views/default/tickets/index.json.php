@@ -1,1 +1,1 @@
-<?php echo to_json($tickets); ?>
+<?php echo json_encode($tickets); ?>

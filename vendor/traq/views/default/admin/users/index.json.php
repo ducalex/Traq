@@ -1,1 +1,1 @@
-<?php echo to_json($users); ?>
+<?php echo json_encode($users); ?>

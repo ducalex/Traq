@@ -1,1 +1,1 @@
-<?php echo to_json($milestones); ?>
+<?php echo json_encode($milestones); ?>

@@ -1,1 +1,1 @@
-<?php echo to_json($priorities)?>
+<?php echo json_encode($priorities)?>

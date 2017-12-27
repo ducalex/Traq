@@ -33,7 +33,7 @@ use \FishHook;
  * @author Jack P. <nrx@nirix.net>
  * @copyright Copyright (c) Jack P.
  */
-class Model
+class Model implements \JsonSerializable
 {
     // Static information
     protected static $_name; // Table name
@@ -391,25 +391,22 @@ class Model
         }
     }
 
+    public function __sleep() {
+        return array_keys($this->__toArray());
+    }
+
+    public function jsonSerialize() {
+        return $this->__toArray();
+    }
+
     /**
      * Returns the models data as an array.
      *
      * @return array
      */
-    public function __toArray($fields = null) {
-        // Returns the models data for all fields
-        if ($fields == null) {
-            return $this->_data;
-        }
-        // Return only the fields specified
-        else
-        {
-            $data = array();
-            foreach($fields as $field) {
-                $data[$field] = $this->_data[$field];
-            }
-            return $data;
-        }
+    public function __toArray($include = null, $exclude = array()) {
+        $fields = array_diff($include ?: static::$_properties, $exclude);
+        return array_intersect_key($this->_data, array_flip($fields));
     }
 
     /**

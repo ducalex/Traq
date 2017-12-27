@@ -1,1 +1,1 @@
-<?php echo to_json($pages)?>
+<?php echo json_encode($pages)?>

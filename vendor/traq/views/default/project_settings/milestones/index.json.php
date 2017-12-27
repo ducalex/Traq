@@ -1,1 +1,1 @@
-<?php echo to_json($milestones->exec()->fetch_all())?>
+<?php echo json_encode($milestones->exec()->fetch_all())?>

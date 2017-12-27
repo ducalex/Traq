@@ -1,1 +1,1 @@
-<?php echo to_json($statuses)?>
+<?php echo json_encode($statuses)?>

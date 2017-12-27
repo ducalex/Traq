@@ -1,1 +1,1 @@
-<?php echo to_json($roles)?>
+<?php echo json_encode($roles)?>

@@ -340,11 +340,9 @@ class User extends Model
      *
      * @return array
      */
-    public function __toArray($fields = null)
+    public function __toArray($fields = null, $exclude = array())
     {
-        $data = parent::__toArray($fields);
-        unset($data['password'], $data['email'], $data['login_hash']);
-        return $data;
+        return parent::__toArray($fields, array('password', 'email', 'login_hash', 'api_key', 'options'));
     }
 
     /**

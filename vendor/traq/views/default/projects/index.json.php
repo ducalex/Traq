@@ -1,1 +1,1 @@
-<?php echo to_json($projects); ?>
+<?php echo json_encode($projects); ?>

@@ -76,6 +76,6 @@ class API
             header("HTTP/1.1 404 Not Found");
         }
 
-        return to_json(array_merge(array('status' => $status, 'version' => TRAQ_API_VER), $response));
+        return json_encode(array_merge(array('status' => $status, 'version' => TRAQ_API_VER), $response));
     }
 }

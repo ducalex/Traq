@@ -1,1 +1,1 @@
-<?php echo to_json($severities)?>
+<?php echo json_encode($severities)?>

@@ -23,34 +23,6 @@ use avalon\core\Load;
 Load::helper('array');
 
 /**
- * Returns the json encoded version of the passed data.
- *
- * @param mixed $data
- * @param array $options
- *
- * @author Jack P.
- * @copyright Copyright (c) Jack P.
- * @package Traq
- * @subpackage Helpers
- */
-function to_json($data, $options = array())
-{
-    // Merge options with defaults
-    $defaults = array('hide' => array('password', 'login_hash', 'api_key', 'private_key'));
-    $options = array_merge($defaults, $options);
-
-    // Convert the data to an array, if possible..
-    $data = to_array($data);
-
-    // Remove the parts we don't want...
-    if (!empty($options['hide'])) {
-        $data = array_remove_keys($data, $options['hide']);
-    }
-
-    return json_encode($data);
-}
-
-/**
  * Returns the mime type for the specified extension.
  *
  * @param string $extension

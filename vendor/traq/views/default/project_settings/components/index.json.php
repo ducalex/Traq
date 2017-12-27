@@ -1,1 +1,1 @@
-<?php echo to_json($components->exec()->fetch_all())?>
+<?php echo json_encode($components->exec()->fetch_all())?>

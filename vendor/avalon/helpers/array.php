@@ -71,23 +71,3 @@ function array_merge_recursive2(array &$first, array &$second)
 
     return $merged;
 }
-
-/**
- * Converts the given data to an array.
- *
- * @param mixed $data
- *
- * @return array
- */
-function to_array($data)
-{
-    if (is_object($data)) {
-        return method_exists($data, '__toArray') ? $data->__toArray() : get_class_vars($data);
-    }
-    // Array containing other things?
-    elseif (is_array($data)) {
-        return array_map('to_array', $data);
-    }
-
-    return $data;
-}

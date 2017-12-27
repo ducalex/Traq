@@ -1,1 +1,1 @@
-<?php echo to_json($custom_fields)?>
+<?php echo json_encode($custom_fields)?>

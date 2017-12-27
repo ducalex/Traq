@@ -1,1 +1,1 @@
-<?php echo to_json($types)?>
+<?php echo json_encode($types)?>

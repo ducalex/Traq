@@ -484,7 +484,7 @@ class Ticket extends Model
      *
      * @return array
      */
-    public function __toArray($fields = null)
+    public function __toArray($fields = null, $exclude = array())
     {
         $data = parent::__toArray($fields);
         $data['id'] = $data['ticket_id'];

@@ -37,10 +37,9 @@ Router::add('/statuses', 'traq::controllers::API.statuses');
 Router::add('/priorities', 'traq::controllers::API.priorities');
 
 // Misc
-Router::add('/_js(?:.js)?', 'traq::controllers::Misc.javascript');
 Router::add('/_ajax/autocomplete/(username)', 'traq::controllers::Misc.autocomplete_$1');
 Router::add('/_misc/preview_text', 'traq::controllers::Misc.preview_text');
-Router::add('/_misc/format_text', 'traq::controllers::Misc.format_text');
+Router::add('/_misc/traq_news', 'traq::controllers::Misc.traq_news');
 
 // Attachment routes
 Router::add('/attachments/(?P<attachment_id>[0-9]+)/([a-zA-Z0-9\-_.]+)', 'traq::controllers::Attachments.view/$1');

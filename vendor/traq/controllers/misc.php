@@ -81,8 +81,15 @@ class Misc extends AppController
         return View::render('preview_text');
     }
 
-    public function action_format_text()
+    public function action_traq_news()
     {
-        return format_text(Request::post('data'));
+        if ($data = file_get_contents('http://traq.io/news.json')) {
+            $news = json_decode($data);
+            foreach($news as $item) {
+                $item->content = format_text($item->content);
+            }
+            return json_encode($news);
+        }
+        return '[]';
     }
 }

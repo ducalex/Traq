@@ -23,34 +23,14 @@
 $(document).ready(function(){
 	var news_container = $("#traq_news ul");
 
-	var strip = function(text) {
-		return text.replace(/</g, "&lt;");
-	};
-
-	if (window.location.protocol == "http:") {
-		$.getJSON('http://traq.io/news.json?callback=?').done(function(data){
-			$.each(data, function(i, data){
-				var item = $("<li>").addClass('box');
-
-				var summary = $("<h4>");
-				if (data.url) {
-					summary.append($("<a>").attr('href', data.url).append(data.summary));
-				} else {
-					summary.append(data.summary);
-				}
-
-				var created_at = $("<span>").append(data.created_at_relative).attr('title', data.created_at);
-
-				// Format the Markdown text.
-				var content = $("<div>").load(traq.base + '_misc/format_text', { data: data.content });
-
-				item.append(summary);
-				item.append(created_at);
-				item.append(content);
-				news_container.append(item);
-			});
+	$.getJSON(traq.base + '_misc/traq_news.json').done(function(data){
+		$.each(data, function(i, data){
+			news_container.append($("<li>")
+				.addClass('box')
+				.append($("<h4>").append(data.title))
+				.append($("<span>").append(data.created_at).attr('title', data.created_at))
+				.append(data.content)
+			);
 		});
-	} else {
-		$("#traq_news .secure_alert").show();
-	}
+	});
 });

@@ -110,10 +110,13 @@ $(document).ready(function(){
 	$(document).on('click', '[data-ajax-confirm]', function(){
 		var e = $(this);
 
-		popover_confirm(e, e.attr('data-ajax-confirm'), function(){
-			$.ajax({
-				url: e.attr('href'),
-				dataType: 'script'
+		popover_confirm(e, e.attr('data-ajax-confirm'), function() {
+			$.get(e.attr('href'), function(data) {
+				if (sel = e.attr('data-ajax-delete')) {
+					$(sel).slideUp('fast', function() {$(this).remove();});
+				} else {
+					eval(e.attr('data-ajax-callback'));
+				}
 			});
 		});
 

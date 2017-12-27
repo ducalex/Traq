@@ -20,7 +20,7 @@
 	<?php foreach ($day['activity'] as $row) { ?>
 		<dt class="timeline_event_<?php echo $row->id?>">
 <?php if ($current_user->permission($project->id, 'delete_timeline_events')) { ?>
-			<a class="button_delete icon_only" data-ajax-confirm="<?php echo l('confirm.delete')?>" href="<?php echo Request::base($project->href("timeline/{$row->id}/delete"))?>"><span><?php echo l('delete')?></span></a>
+			<a class="button_delete icon_only" data-ajax-delete=".timeline_event_<?php echo $row->id?>" data-ajax-confirm="<?php echo l('confirm.delete')?>" href="<?php echo Request::base($project->href("timeline/{$row->id}/delete"))?>"><span><?php echo l('delete')?></span></a>
 <?php } ?>
 			<span class="time"><?php echo ldate('time', $row->created_at); ?></span>
 <?php if (in_array($row->action, array('ticket_created','ticket_closed','ticket_reopened','ticket_updated'))) { ?>

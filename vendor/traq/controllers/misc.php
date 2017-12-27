@@ -42,22 +42,17 @@ use traq\models\Project;
  */
 class Misc extends AppController
 {
-    public function __construct()
-    {
-        parent::__construct();
-        View::$theme = '_misc';
-        $this->render['view'] = false;
-        $this->render['layout'] = false;
-    }
+    public $render = [
+        'view' => false,
+        'action' => true,
+        'layout' => 'plain',
+    ];
 
     /**
      * Used to autocomplete usernames
      */
     public function action_autocomplete_username()
     {
-        // No view, just json content
-        header("Content-type: application/json");
-
         // Get the users, and loop over them
         $users = User::select('username')->where('username', str_replace('*', '%', Request::req('term')) . "%", 'LIKE')->exec()->fetch_all();
         $options = array();
@@ -71,14 +66,16 @@ class Misc extends AppController
 
     public function action_preview_text()
     {
+        $this->title(l('preview'));
+        $this->render['layout'] = 'overlay';
+
         $project = Project::find('slug', Request::post('project'));
 
         if ($project && !$this->user->permission($project->id, 'view_tickets')) {
             return $this->show_no_permission();
         }
-        
-        View::set('data', format_text(Request::post('data'), true, $project));
-        return View::render('preview_text');
+
+        return format_text(Request::post('data'), true, $project);
     }
 
     public function action_traq_news()

@@ -61,13 +61,15 @@ class Controller
 
         // Set mime type if the output format is known
         if ($this->render['format']) {
-            header('Content-Type: ' . $this->render['format'], false);
+            header('Content-Type: ' . $this->render['format']);
         }
 
         // Render the view
-        $content = '';
         if ($this->render['view']) {
             $content = View::render($this->render['view']);
+        } else {
+            $content = Body::content();
+            Body::clear();
         }
 
         // Are we wrapping the view in a layout?

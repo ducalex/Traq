@@ -1,0 +1,12 @@
+<h3><?php echo end($app->title); ?></h3>
+<form action="<?php echo Request::requestUri(); ?>" method="post">
+	<div class="content">
+		<?php echo $content; ?>
+	</div>
+	<div class="overlay-actions">
+		<?php if (!empty($save_button)) { ?>
+		<input type="submit" value="<?php echo l('save'); ?>" />
+		<?php } ?>
+		<input type="button" value="<?php echo l('close'); ?>" onclick="close_overlay();" />
+	</div>
+</form>

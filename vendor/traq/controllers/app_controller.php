@@ -282,7 +282,7 @@ class AppController extends Controller
 
         if (Router::$extension) {
             if ($mime = mime_type_for(Router::$extension)) {
-                header('Content-type: ' . $mime);
+                $this->render['format'] = $mime;
             }
             if (!empty($this->render['view']) and strpos($this->render['view'], Router::$extension) === false) {
                 $this->render['view'] .= Router::$extension;

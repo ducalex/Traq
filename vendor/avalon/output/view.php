@@ -48,7 +48,7 @@ class View
 
         // Check if the theme has this view
         if (!$_file) {
-            Error::halt("View Error", "Unable to load view '{$_file}'", 'HALT');
+            Error::halt("View Error", "Unable to load view '{$file}'", 'HALT');
         }
 
         extract(self::$vars);

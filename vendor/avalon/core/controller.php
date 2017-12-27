@@ -39,7 +39,8 @@ class Controller
     public $render = array(
         'action' => true,     // Call the routed action, or not
         'view'   => false,    // View to render, set in __construct()
-        'layout' => 'default' // Layout to render
+        'layout' => 'default', // Layout to render
+        'format' => 'text/html', // Content-Type
     );
 
     public $before = array();
@@ -56,6 +57,11 @@ class Controller
         // Don't render the layout for json or xml content
         if (Router::$extension) {
             $this->render['layout'] = false;
+        }
+
+        // Set mime type if the output format is known
+        if ($this->render['format']) {
+            header('Content-Type: ' . $this->render['format'], false);
         }
 
         // Render the view

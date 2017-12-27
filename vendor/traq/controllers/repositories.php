@@ -211,6 +211,7 @@ class Repositories extends AppController
     {
 		$revision = $revision ?: $this->target;
         $this->render['layout'] = 'plain';
+        $this->render['format'] = 'application/zip';
         $data = $this->scm->archive($revision);
 
         header('Content-Disposition: attachment; filename="'.$this->repository->slug.'-'.$revision.'.zip"');

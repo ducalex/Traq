@@ -95,11 +95,10 @@ $(document).ready(function(){
 	// Add a click event to all elements with
 	// the data-ajax attribute and send an ajax
 	// call to the href attrib value.
-	$(document).on('click', '[data-ajax=1]', function(){
+	$(document).on('click', '[data-ajax]', function(){
 		var e = $(this);
-		$.ajax({
-			url: e.attr('href'),
-			dataType: 'script'
+		$.get(e.attr('href'), function(data) {
+			$(e.attr('data-ajax')).html(data);
 		});
 		return false;
 	});

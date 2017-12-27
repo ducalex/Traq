@@ -249,7 +249,8 @@ class Tickets extends AppController
 
         // Don't let the owner vote on their own ticket
         if ($this->user->id == $ticket->user_id) {
-            return false;
+            View::set('error', l('errors.already_voted'));
+            return;
         }
 
         // Does the user have permission to vote on tickets?

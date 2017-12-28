@@ -46,7 +46,7 @@ class Severities extends AppController
      */
     public function action_index()
     {
-        View::set('severities', Severity::fetch_all());
+        $this->response['severities'] = Severity::fetch_all();
     }
 
     /**
@@ -63,16 +63,12 @@ class Severities extends AppController
             $severity->set('name', Request::post('name'));
 
             // Save and redirect
-            if ($severity->save()) {
-                if ($this->is_api) {
-                    return \API::response(1, array('severity' => $severity));
-                } else {
-                    Request::redirectTo('/admin/severities');
-                }
+            if ($this->response['status'] = $severity->save()) {
+                $this->response['redirect'] = '/admin/severities';
             }
         }
 
-        View::set('severity', $severity);
+        $this->response['severity'] = $severity;
     }
 
     /**
@@ -91,16 +87,12 @@ class Severities extends AppController
             $severity->set('name', Request::post('name', $severity->name));
 
             // Save and redirect
-            if ($severity->save()) {
-                if ($this->is_api) {
-                    return \API::response(1, array('severity' => $severity));
-                } else {
-                    Request::redirectTo('/admin/severities');
-                }
+            if ($this->response['status'] = $severity->save()) {
+                $this->response['redirect'] = '/admin/severities';
             }
         }
 
-        View::set('severity', $severity);
+        $this->response['severity'] = $severity;
     }
 
     /**
@@ -111,12 +103,7 @@ class Severities extends AppController
     public function action_delete($id)
     {
         // Get the severity and delete
-        $severity = Severity::find($id)->delete();
-
-        if ($this->is_api) {
-            return \API::response(1);
-        } else {
-            Request::redirectTo('/admin/severities');
-        }
+        $this->response['status'] = Severity::find($id)->delete();
+        $this->response['redirect'] = '/admin/severities';
     }
 }

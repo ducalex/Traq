@@ -4,9 +4,9 @@
 <?php echo View::render('project_settings/_nav'); ?>
 <div class="content">
 	<form action="<?php echo Request::requestUri(); ?>" method="post">
-		<?php echo show_errors($proj->errors); ?>
+		<?php echo show_errors($project->errors); ?>
 		<div class="tabular box">
-			<?php echo View::render('project_settings/options/_form', array('proj' => $proj)); ?>
+			<?php echo View::render('project_settings/options/_form', array('project' => $project)); ?>
 		</div>
 		<div class="actions">
 			<input type="submit" value="<?php echo l('save'); ?>" />

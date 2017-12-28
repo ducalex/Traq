@@ -43,8 +43,7 @@ class Statuses extends AppController
 
     public function action_index()
     {
-        $statuses = Status::fetch_all();
-        View::set('statuses', $statuses);
+        $this->response['statuses'] = Status::fetch_all();
     }
 
     /**
@@ -69,17 +68,14 @@ class Statuses extends AppController
             // Check if the data is valid.
             if ($status->is_valid()) {
                 // Save and redirect.
-                $status->save();
-                if ($this->is_api) {
-                    return \API::response(1, array('status' => $status));
-                } else {
-                    Request::redirectTo('/admin/tickets/statuses');
+                if ($this->response['status'] = $status->save()) {
+                    $this->response['redirect'] = '/admin/tickets/statuses';
                 }
             }
         }
 
-        // Send the data to the view.
-        View::set('status', $status);
+        $this->response['status'] = $status;
+        $this->response['errors'] = $status->errors;
     }
 
     /**
@@ -112,17 +108,14 @@ class Statuses extends AppController
             // Check if the data is valid.
             if ($status->is_valid()) {
                 // Save and redirect.
-                $status->save();
-                if ($this->is_api) {
-                    return \API::response(1, array('status' => $status));
-                } else {
-                    Request::redirectTo('/admin/tickets/statuses');
+                if ($this->response['status'] = $status->save()) {
+                    $this->response['redirect'] = '/admin/tickets/statuses';
                 }
             }
         }
 
-        // Send the data to the view.
-        View::set('status', $status);
+        $this->response['status'] = $status;
+        $this->response['errors'] = $status->errors;
     }
 
     /**
@@ -133,11 +126,9 @@ class Statuses extends AppController
     public function action_delete($id)
     {
         // Fetch the status, delete it and redirect.
-        $status = Status::find($id)->delete();
-        if ($this->is_api) {
-            return \API::response(1);
-        } else {
-            Request::redirectTo('/admin/tickets/statuses');
+        $status = Status::find($id);
+        if ($this->response['status'] = $status->delete()) {
+            $this->response['redirect'] = '/admin/tickets/statuses';
         }
     }
 }

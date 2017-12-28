@@ -87,17 +87,13 @@ class CustomFields extends AppController
             $field->set($data);
 
             // Save and redirect
-            if ($field->save()) {
-                if ($this->is_api) {
-                    return \API::response(1, array('field' => $field));
-                } else {
-                    Request::redirectTo($this->project->href('settings/custom_fields'));
-                }
+            if ($this->response['status'] = $field->save()) {
+                $this->response['redirect'] = $this->project->href('settings/custom_fields');
             }
         }
 
-        // Send field object to view
-        View::set(compact('field'));
+        $this->response['field'] = $field;
+        $this->response['errors'] = $field->errors;
     }
 
     /**
@@ -147,17 +143,13 @@ class CustomFields extends AppController
             $field->set($data);
 
             // Save and redirect
-            if ($field->save()) {
-                if ($this->is_api) {
-                    return \API::response(1, array('field' => $field));
-                } else {
-                    Request::redirectTo($this->project->href('settings/custom_fields'));
-                }
+            if ($this->response['status'] = $field->save()) {
+                $this->response['redirect'] = $this->project->href('settings/custom_fields');
             }
         }
 
-        // Send field object to view
-        View::set(compact('field'));
+        $this->response['field'] = $field;
+        $this->response['errors'] = $field->errors;
     }
 
     /**
@@ -174,12 +166,8 @@ class CustomFields extends AppController
         }
 
         // Delete and redirect
-        $field->delete();
-
-        if ($this->is_api) {
-            return \API::response(1);
-        } else {
-            Request::redirectTo($this->project->href('settings/custom_fields'));
+        if ($this->response['status'] = $field->delete()) {
+            $this->response['redirect'] = $this->project->href('settings/custom_fields');
         }
     }
 }

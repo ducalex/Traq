@@ -1,43 +1,43 @@
 <div class="group">
 	<label><?php echo l('name'); ?></label>
-	<?php echo Form::text('name', array('value' => $proj->name)); ?>
+	<?php echo Form::text('name', array('value' => $project->name)); ?>
 </div>
 <div class="group">
 	<label><?php echo l('slug'); ?></label>
-	<?php echo Form::text('slug', array('value' => $proj->slug)); ?> <abbr title="<?php echo l('help.slug'); ?>">?</abbr>
+	<?php echo Form::text('slug', array('value' => $project->slug)); ?> <abbr title="<?php echo l('help.slug'); ?>">?</abbr>
 </div>
 <div class="group">
 	<label><?php echo l('codename'); ?></label>
-	<?php echo Form::text('codename', array('value' => $proj->codename)); ?>
+	<?php echo Form::text('codename', array('value' => $project->codename)); ?>
 </div>
 <div class="group">
 	<label><?php echo l('description'); ?></label>
-	<?php echo Form::textarea('info', array('value' => $proj->info, 'class' => 'editor')); ?>
+	<?php echo Form::textarea('info', array('value' => $project->info, 'class' => 'editor')); ?>
 	<input type="button" data-preview="#info" value="<?php echo l('preview'); ?>" />
 </div>
 <div class="group">
 	<label><?php echo l('enable_wiki'); ?></label>
-	<?php echo Form::checkbox('enable_wiki', 1, array('checked' => $proj->enable_wiki == 1 ? true : false)); ?> <?php echo Form::label(l('yes'), 'enable_wiki'); ?>
+	<?php echo Form::checkbox('enable_wiki', 1, array('checked' => $project->enable_wiki == 1 ? true : false)); ?> <?php echo Form::label(l('yes'), 'enable_wiki'); ?>
 </div>
 <div class="group">
 	<label><?php echo l('display_order'); ?></label>
-	<?php echo Form::text('displayorder', array('value' => $proj->displayorder)); ?>
+	<?php echo Form::text('displayorder', array('value' => $project->displayorder)); ?>
 </div>
 <div class="group">
 	<label><?php echo l('default_ticket_type'); ?></label>
-	<?php echo Form::select('default_ticket_type_id', traq\models\Type::select_options(), array('value' => $proj->default_ticket_type_id)); ?>
+	<?php echo Form::select('default_ticket_type_id', traq\models\Type::select_options(), array('value' => $project->default_ticket_type_id)); ?>
 </div>
 <div class="group">
 	<label><?php echo l('default_ticket_sorting'); ?></label>
-	<?php echo Form::select('default_ticket_sorting', ticket_sorting_select_options(), array('value' => $proj->default_ticket_sorting)); ?>
+	<?php echo Form::select('default_ticket_sorting', ticket_sorting_select_options(), array('value' => $project->default_ticket_sorting)); ?>
 </div>
 <div class="group">
 	<label><?php echo l('default_ticket_columns'); ?></label>
 	<?php foreach (ticketlist_allowed_columns() as $column) { ?>
 		<div>
-		<?php echo Form::checkbox("default_ticket_columns[{$column}]", $column, array('checked' => in_array($column, $proj->default_ticket_columns))); ?>
+		<?php echo Form::checkbox("default_ticket_columns[{$column}]", $column, array('checked' => in_array($column, $project->default_ticket_columns))); ?>
 		<?php echo Form::label(ticketlist_header($column), "default_ticket_columns[{$column}]"); ?>
 		</div>
 	<?php } ?>
 </div>
-<?php FishHook::run('template:projectsettings/options/_form', array($proj)); ?>
+<?php FishHook::run('template:projectsettings/options/_form', array($project)); ?>

@@ -47,9 +47,7 @@ class Projects extends AppController
      */
     public function action_index()
     {
-        // No need to do anything here as the
-        // AppController fetches the projects
-        // for use with the project switcher.
+        $this->response['projects'] = $this->projects;
     }
 
     /**
@@ -61,6 +59,8 @@ class Projects extends AppController
         if (!$this->project) {
             return $this->show_404();
         }
+
+        $this->response['project'] = $this->project;
 
         // Get open and closed ticket counts.
         View::set('ticket_count', array(
@@ -94,9 +94,8 @@ class Projects extends AppController
             $milestones = $milestones->where('status', 1);
         }
 
-        // Get the milestones and send them to the view
-        $milestones = $milestones->order_by('displayorder', 'ASC')->exec()->fetch_all();
-        View::set('milestones', $milestones);
+        // Get the milestones and send them to the response
+        $this->response['milestones'] = $milestones->order_by('displayorder', 'ASC')->exec()->fetch_all();
     }
 
     /**
@@ -115,8 +114,8 @@ class Projects extends AppController
             return $this->show_404();
         }
 
-        // And send it to the view
-        View::set('milestone', $milestone);
+        // Get the milestone and send it to the response
+        $this->response['milestone'] = $this->milestone;
     }
 
     /**

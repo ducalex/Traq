@@ -65,8 +65,7 @@ class Users extends AppController
         $this->title(l('users'));
         $this->title(l('xs_profile', $user->name));
 
-        Load::helper('tickets');
-        View::set('profile', $user);
+        $this->response['profile'] = $user;
     }
 
     /**

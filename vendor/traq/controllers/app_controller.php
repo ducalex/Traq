@@ -32,6 +32,7 @@ use avalon\http\Router;
 use avalon\http\Session;
 use avalon\http\Cookie;
 use avalon\output\View;
+use avalon\output\Body;
 
 use traq\models\User;
 use traq\models\Project;
@@ -81,6 +82,11 @@ class AppController extends Controller
         // Get the user info
         $this->user = $this->_get_user();
 
+        // Set response format if it's API call
+        if ($this->is_api || Router::$extension === '.json') { // Allowing JSON outside API might be a security issue...
+            $this->response['format'] = 'API';
+        }
+
         // Set user locale if needed
         if ($this->user->locale !== settings('locale') && $locale = Locale::load($this->user->locale)) {
             $this->locale = $locale;
@@ -113,7 +119,6 @@ class AppController extends Controller
         View::set(array(
             'current_user' => $this->user,
             'projects' => $this->projects,
-            'traq' => $this,
             'app' => $this,
         ));
     }
@@ -142,10 +147,11 @@ class AppController extends Controller
      */
     public function show_no_permission($http_auth = false)
     {
-        header("HTTP/1.0 401 Unauthorized");
         if (!LOGGEDIN && $http_auth) {
             header('WWW-Authenticate: Basic realm="Traq"');
         }
+        $this->response['status'] = 401;
+        $this->response['errors'] = [l('errors.no_permission.title')];
         $this->render['view'] = 'error/no_permission';
         $this->render['action'] = false;
     }
@@ -164,10 +170,10 @@ class AppController extends Controller
      */
     public function show_404()
     {
-        header("HTTP/1.0 404 Not Found");
+        $this->response['status'] = 404;
+        $this->response['errors'] = [l('errors.404.message', Request::requestUri())];
         $this->render['view'] = 'error/404';
         $this->render['action'] = false;
-        View::set('request', Request::requestUri());
     }
 
     /**
@@ -175,6 +181,7 @@ class AppController extends Controller
      */
     public function show_error($title, $message, $status = 0)
     {
+        $this->response['errors'] = [$message];
         $this->render['view'] = 'error/generic';
         $this->render['action'] = false;
         View::set(compact('title', 'message', 'status'));
@@ -199,12 +206,9 @@ class AppController extends Controller
         }
         // Check if the API key is set
         elseif ($api_key = API::get_key()) {
-            $user = User::find('api_key', $api_key);
-            // Set is_api and JSON view extension
-            $this->is_api = true;
-            Router::$extension = '.json';
-
-            if (!$user) {
+            if ($user = User::find('api_key', $api_key)) {
+                $this->is_api = true;
+            } else {
                 $this->show_error('api', 'invalid_api_key');
             }
         }
@@ -236,6 +240,19 @@ class AppController extends Controller
 
     public function __shutdown()
     {
+        // Build the API response if format is json
+        if ($this->response['format'] === 'API') {
+            $this->response['format'] = 'application/json';
+            $this->response['content'] = \API::response($this->response['status'], $this->response);
+            $this->render['view'] = false;
+        }
+        // No content, it's a redirection
+        elseif (!empty($this->response['redirect'])) {
+            Request::redirectTo($this->response['redirect']);
+        } else {
+            View::set($this->response);
+        }
+
         // Was the page requested via ajax?
         if ($this->render['view'] and Request::isAjax() and Router::$extension == null) {
             // Is this page being used as an overlay?
@@ -252,7 +269,7 @@ class AppController extends Controller
 
         if (Router::$extension) {
             if ($mime = mime_type_for(Router::$extension)) {
-                $this->render['format'] = $mime;
+                $this->response['format'] = $mime;
             }
             if (!empty($this->render['view']) and strpos($this->render['view'], Router::$extension) === false) {
                 $this->render['view'] .= Router::$extension;

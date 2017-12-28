@@ -69,16 +69,14 @@ class Components extends AppController
             // Check if the data is valid
             if ($component->is_valid()) {
                 // Save and redirect
-                $component->save();
-                if ($this->is_api) {
-                    return \API::response(1, array('component' => $component));
-                } else {
-                    Request::redirectTo("{$this->project->slug}/settings/components");
+                if ($this->response['status'] = $component->save()) {
+                    $this->response['redirect'] = $this->project->href("settings/components");
                 }
             }
         }
 
-        View::set('component', $component);
+        $this->response['component'] = $component;
+        $this->response['errors'] = $component->errors;
     }
 
     /**
@@ -107,16 +105,14 @@ class Components extends AppController
             // Check if the data is valid
             if ($component->is_valid()) {
                 // Save and redirect
-                $component->save();
-                if ($this->is_api) {
-                    return \API::response(1, array('component' => $component));
-                } else {
-                    Request::redirectTo("{$this->project->slug}/settings/components");
+                if ($this->response['status'] = $component->save()) {
+                    $this->response['redirect'] = $this->project->href("settings/components");
                 }
             }
         }
 
-        View::set('component', $component);
+        $this->response['component'] = $component;
+        $this->response['errors'] = $component->errors;
     }
 
     /**
@@ -134,12 +130,8 @@ class Components extends AppController
         }
 
         // Delete component
-        $component->delete();
-
-        if ($this->is_api) {
-            return \API::response(1);
-        } else {
-            Request::redirectTo($this->project->href("settings/components"));
+        if ($this->response['status'] = $component->delete()) {
+            $this->response['redirect'] = $this->project->href("settings/components");
         }
     }
 }

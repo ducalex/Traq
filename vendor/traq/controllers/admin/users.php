@@ -44,8 +44,7 @@ class Users extends AppController
 
     public function action_index()
     {
-        $users = User::fetch_all();
-        View::set('users', $users);
+        $this->response['users'] = User::fetch_all();
     }
 
     /**
@@ -73,19 +72,12 @@ class Users extends AppController
             if ($user->is_valid()) {
                 // Save the users data and redirect
                 // to the user listing page.
-                $user->save();
-
-                // Return JSON for API
-                if ($this->is_api) {
-                    return API::response(1, array('user' => $user));
-                } else {
-                    Request::redirectTo('/admin/users');
-                }
+                $this->response['status'] = $user->save();
+                $this->response['redirect'] = '/admin/users';
             }
         }
-
-        // Send the user object to the view.
-        View::set('user', $user);
+        
+        $this->response['user'] = $user;
     }
 
     /**
@@ -119,19 +111,12 @@ class Users extends AppController
             // Check if the users data is valid.
             if ($user->is_valid()) {
                 // Save and redirect to user listing.
-                $user->save();
-
-                // Return JSON for API
-                if ($this->is_api) {
-                    return API::response(1, array('user' => $user));
-                } else {
-                    Request::redirectTo('/admin/users');
-                }
+                $this->response['status'] = $user->save();
+                $this->response['redirect'] = '/admin/users';
             }
         }
 
-        // Send the user object to the view.
-        View::set('user', $user);
+        $this->response['user'] = $user;
     }
 
     /**
@@ -143,14 +128,8 @@ class Users extends AppController
     {
         // Find and delete the user then
         // redirect to the user listing page.
-        $user = User::find($id)->delete();
-
-        // Return JSON for API, like always...
-        if ($this->is_api) {
-            return API::response(1);
-        } else {
-            Request::redirectTo('/admin/users');
-        }
+        $this->response['status'] = User::find($id)->delete();
+        $this->response['redirect'] = '/admin/users';
     }
 
     /**
@@ -200,6 +179,6 @@ class Users extends AppController
             }
         }
 
-        Request::redirectTo('/admin/users');
+        $this->response['redirect'] = '/admin/users';
     }
 }

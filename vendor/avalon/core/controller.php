@@ -40,7 +40,14 @@ class Controller
         'action' => true,     // Call the routed action, or not
         'view'   => false,    // View to render, set in __construct()
         'layout' => 'default', // Layout to render
-        'format' => 'text/html', // Content-Type
+    );
+
+    public $response = array(
+        'status' => 200,
+        'redirect' => null,
+        'format' => 'text/html',
+        'errors' => null,
+        'content' => '',
     );
 
     public $before = array();
@@ -59,27 +66,29 @@ class Controller
             $this->render['layout'] = false;
         }
 
+        // Set HTTP code
+        $http_code = $this->response['status'] ?: 400;
+        if (in_array($http_code, [200, 400, 401, 402, 403, 404])) {
+            http_response_code($http_code);
+        }
+
         // Set mime type if the output format is known
-        if ($this->render['format']) {
-            header('Content-Type: ' . $this->render['format']);
+        if ($this->response['format']) {
+            header('Content-Type: ' . $this->response['format']);
         }
 
         // Render the view
         if ($this->render['view']) {
             $content = View::render($this->render['view']);
         } else {
-            $content = Body::content();
-            Body::clear();
+            $content = $this->response['content'];
         }
 
         // Are we wrapping the view in a layout?
         if ($this->render['layout']) {
-            Body::append(View::render("layouts/{$this->render['layout']}", compact('content')));
-        } else {
-            Body::append($content);
+            $content = View::render("layouts/{$this->render['layout']}", compact('content'));
         }
 
-        // Render the layout with the content
-        print(Body::content());
+        print($content);
     }
 }

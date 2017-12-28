@@ -43,8 +43,7 @@ class Types extends AppController
 
     public function action_index()
     {
-        $types = Type::fetch_all();
-        View::set('types', $types);
+        $this->response['types'] = Type::fetch_all();
     }
 
     /**
@@ -68,17 +67,14 @@ class Types extends AppController
             // Check if the data is valid
             if ($type->is_valid()) {
                 // Save and redirect
-                $type->save();
-                if ($this->is_api) {
-                    return \API::response(1, array('type' => $type));
-                } else {
-                    Request::redirectTo('/admin/tickets/types');
+                if ($this->response['status'] = $type->save()) {
+                    $this->response['redirect'] = '/admin/tickets/types';
                 }
             }
         }
 
-        // Send the data to the view
-        View::set('type', $type);
+        $this->response['type'] = $type;
+        $this->response['errors'] = $type->errors;
     }
 
     /**
@@ -110,17 +106,14 @@ class Types extends AppController
             // Check if the data is valid
             if ($type->is_valid()) {
                 // Save and redirect.
-                $type->save();
-                if ($this->is_api) {
-                    return \API::response(1, array('type' => $type));
-                } else {
-                    Request::redirectTo('/admin/tickets/types');
+                if ($this->response['status'] = $type->save()) {
+                    $this->response['redirect'] = '/admin/tickets/types';
                 }
             }
         }
 
-        // Send the data to the view.
-        View::set('type', $type);
+        $this->response['type'] = $type;
+        $this->response['errors'] = $type->errors;
     }
 
     /**
@@ -131,11 +124,7 @@ class Types extends AppController
     public function action_delete($id)
     {
         // Find the type, delete and redirect.
-        $type = Type::find($id)->delete();
-        if ($this->is_api) {
-            return \API::response(1);
-        } else {
-            Request::redirectTo('/admin/tickets/types');
-        }
+        $this->response['status'] = Type::find($id)->delete();
+        $this->response['redirect'] = '/admin/tickets/types';
     }
 }

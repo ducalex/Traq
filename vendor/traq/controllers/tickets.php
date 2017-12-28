@@ -164,6 +164,7 @@ class Tickets extends AppController
         // Send the tickets array to the view..
         View::set(compact('pagination', 'tickets', 'filters'));
 
+        $this->response['tickets'] = $tickets;
         // Columns
         $this->get_columns();
     }
@@ -233,8 +234,9 @@ class Tickets extends AppController
 
         // Set title and send ticket to view
         $this->title($ticket->summary);
-        View::set('ticket', $ticket);
-        View::set('ticket_history', $ticket_history);
+
+        $this->response['ticket'] = $ticket;
+        $this->response['ticket_history'] = $ticket_history;
     }
 
     /**
@@ -455,15 +457,12 @@ class Tickets extends AppController
                     $sub->save();
                 }
 
-                if ($this->is_api) {
-                    return \traq\helpers\API::response(1, array('ticket' => $ticket));
-                } else {
-                    Request::redirectTo($ticket->href());
-                }
+                $this->response['redirect'] = $ticket->href();
             }
         }
 
-        View::set('ticket', $ticket);
+        $this->response['ticket'] = $ticket;
+        $this->response['errors'] = $ticket->errors;
     }
 
     /**
@@ -600,15 +599,13 @@ class Tickets extends AppController
         }
 
         // Update the ticket
-        if ($ticket->update_data($data)) {
-            if ($this->is_api) {
-                return \API::response(1, array('ticket' => $ticket));
-            } else {
-                Request::redirectTo($ticket->href());
-            }
+        if ($this->response['status'] = $ticket->update_data($data)) {
+            $this->response['redirect'] = $ticket->href();
         }
 
-        View::set(compact('ticket'));
+        $this->response['ticket'] = $ticket;
+        $this->response['errors'] = $ticket->errors;
+
         $this->render['view'] = 'tickets/view';
     }
 
@@ -656,12 +653,13 @@ class Tickets extends AppController
             $ticket->body = Request::post('body');
 
             // Save and redirect
-            if ($ticket->save()) {
-                Request::redirectTo($ticket->href());
+            if ($this->response['status'] = $ticket->save()) {
+                $this->response['redirect'] = $ticket->href();
             }
         }
 
-        View::set('ticket', $ticket);
+        $this->response['ticket'] = $ticket;
+        $this->response['errors'] = $ticket->errors;
     }
 
     /**

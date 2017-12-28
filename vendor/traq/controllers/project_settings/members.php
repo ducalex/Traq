@@ -70,7 +70,6 @@ class Members extends AppController
         if (count($errors)) {
             $this->action_index();
             $this->render['view'] = 'project_settings/members/index';
-            View::set('errors', $errors);
         }
         // Create role
         else {
@@ -81,8 +80,10 @@ class Members extends AppController
             ));
             $user_role->save();
 
-            Request::redirectTo($this->project->href('settings/members'));
+            $this->response['redirect'] = $this->project->href('settings/members');
         }
+
+        $this->response['errors'] = $errors;
     }
 
     public function action_save()
@@ -93,7 +94,7 @@ class Members extends AppController
                 $role->project_role_id = $value;
                 $role->save();
             }
-            Request::redirectTo($this->project->href('settings/members'));
+            $this->response['redirect'] = $this->project->href('settings/members');
         }
     }
 
@@ -103,14 +104,7 @@ class Members extends AppController
             $user_role->delete();
         }
 
-        if ($this->is_api) {
-            if ($user_role) {
-                return \API::response(1);
-            } else {
-                return \API::response(0);
-            }
-        } else {
-            Request::redirectTo($this->project->href('settings/members'));
-        }
+        $this->response['status'] = (int)$user_role;
+        $this->response['redirect'] = $this->project->href('settings/members');
     }
 }

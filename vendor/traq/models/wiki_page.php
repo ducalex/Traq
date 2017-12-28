@@ -100,6 +100,18 @@ class WikiPage extends Model
     }
 
     /**
+     * Add 'revision' to the array
+     *
+     * @param array $fields
+     * @param array $exclude
+     * @return array
+     */
+    public function __toArray($fields = array(), $exclude = array())
+    {
+        return parent::__toArray($fields ?: array_merge(static::$_properties, ['revision']), $exclude);
+    }
+
+    /**
      * Checks if the pages data is valid.
      *
      * @return bool

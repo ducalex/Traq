@@ -43,9 +43,8 @@ class Projects extends AppController
 
     public function action_index()
     {
-        // Fetch all projects and pass them to the view.
-        $projects = Project::fetch_all();
-        View::set('projects', $projects);
+        // Fetch all projects and pass them to the response.
+        $this->response['projects'] = Project::fetch_all();
     }
 
     /**
@@ -70,18 +69,13 @@ class Projects extends AppController
             ));
 
             // Save project
-            if ($project->save()) {
-                // Is this an API request?
-                if ($this->is_api) {
-                    // Return JSON formatted response
-                    return API::response(1, array('project' => $project));
-                } else {
-                    Request::redirectTo('admin/projects');
-                }
+            if ($this->response['status'] = $project->save()) {
+                $this->response['redirect'] = 'admin/projects';
             }
         }
 
-        View::set('proj', $project);
+        $this->response['project'] = $project;
+        $this->response['errors'] = $project->errors;
     }
 
     /**
@@ -92,13 +86,9 @@ class Projects extends AppController
     public function action_delete($id)
     {
         $project = Project::find('id', $id);
-        $project->delete();
 
-        // Is this an API request?
-        if ($this->is_api) {
-            return API::response(1);
-        } else {
-            Request::redirectTo('admin/projects');
+        if ($this->response['status'] = $project->delete()) {
+            $this->response['redirect'] = 'admin/projects';
         }
     }
 }

@@ -46,7 +46,7 @@ class Error
         
         $app = Kernel::app();
 
-        if ($app && $app->render['format'] === 'application/json') {
+        if ($app && $app->response['format'] === 'application/json') {
             $body = json_encode(array('error' => $title, 'description' => $message));
         } else {
             $message = nl2br(htmlentities($message));

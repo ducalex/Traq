@@ -67,16 +67,14 @@ class Options extends AppController
             // Check if the data is valid
             if ($project->is_valid()) {
                 // Save and redirect
-                $project->save();
-
-                if ($this->is_api) {
-                    return \API::response(1, array('project' => $project));
-                } else {
-                    Request::redirectTo($project->href('settings'));
+                if ($this->response['status'] = $project->save()) {
+                    $this->response['redirect'] = $project->href('settings');
                 }
             }
         }
-
+        
+        $this->response['project'] = $project;
+        $this->response['errors'] = $project->errors;
         View::set('proj', $project);
     }
 }

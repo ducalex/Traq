@@ -404,9 +404,14 @@ class Model implements \JsonSerializable
      *
      * @return array
      */
-    public function __toArray($include = null, $exclude = array()) {
+    public function __toArray($include = array(), $exclude = array()) {
         $fields = array_diff($include ?: static::$_properties, $exclude);
-        return array_intersect_key($this->_data, array_flip($fields));
+        // This is necessary because some data isn't in _data (belongs_to and has_many)
+        $data = [];
+        foreach($fields as $field) {
+            $data[$field] = $this->$field;
+        }
+        return $data;
     }
 
     /**

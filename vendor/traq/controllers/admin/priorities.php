@@ -46,7 +46,7 @@ class Priorities extends AppController
      */
     public function action_index()
     {
-        View::set('priorities', priority::fetch_all());
+        $this->response['priorities'] = Priority::fetch_all();
     }
 
     /**
@@ -61,18 +61,14 @@ class Priorities extends AppController
         if (Request::method() == 'post') {
             // Set the name
             $priority->set('name', Request::post('name'));
-
             // Save and redirect
-            if ($priority->save()) {
-                if ($this->is_api) {
-                    return \API::response(1, array('priority' => $priority));
-                } else {
-                    Request::redirectTo('/admin/priorities');
-                }
+            if ($this->response['status'] = $priority->save()) {
+                $this->response['redirect'] = '/admin/priorities';
             }
         }
 
-        View::set('priority', $priority);
+        $this->response['priority'] = $priority;
+        $this->response['errors'] = $priority->errors;
     }
 
     /**
@@ -89,18 +85,13 @@ class Priorities extends AppController
         if (Request::method() == 'post') {
             // Set the name
             $priority->set('name', Request::post('name', $priority->name));
-
             // Save and redirect
-            if ($priority->save()) {
-                if ($this->is_api) {
-                    return \API::response(1, array('priority' => $priority));
-                } else {
-                    Request::redirectTo('/admin/priorities');
-                }
+            if ($this->response['status'] = $priority->save()) {
+                $this->response['redirect'] = '/admin/priorities';
             }
         }
 
-        View::set('priority', $priority);
+        $this->response['priority'] = $priority;
     }
 
     /**
@@ -111,12 +102,7 @@ class Priorities extends AppController
     public function action_delete($id)
     {
         // Find and delete priority
-        $priority = Priority::find($id)->delete();
-
-        if ($this->is_api) {
-            return \API::response(1);
-        } else {
-            Request::redirectTo('/admin/priorities');
-        }
+        $this->response['status'] = Priority::find($id)->delete();
+        $this->response['redirect'] = '/admin/priorities';
     }
 }

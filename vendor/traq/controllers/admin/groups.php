@@ -64,16 +64,14 @@ class Groups extends AppController
 
             // Make sure the data is valid.
             if ($group->is_valid()) {
-                $group->save();
-
-                // Return API response
-                if ($this->is_api) {
-                    return \API::response(1, array('group' => $group));
-                } else {
-                    Request::redirectTo('/admin/groups');
+                if ($this->response['status'] = $group->save()) {
+                    $this->response['redirect'] = '/admin/groups';
                 }
             }
         }
+
+        $this->response['group'] = $group;
+        $this->response['errors'] = $group->errors;
 
         // Send the group object to the view.
         View::set('group', $group);
@@ -98,16 +96,14 @@ class Groups extends AppController
 
             // Make sure the data is valid.
             if ($group->is_valid()) {
-                $group->save();
-
-                // Return API response
-                if ($this->is_api) {
-                    return \API::response(1, array('group' => $group));
-                } else {
-                    Request::redirectTo('/admin/groups');
+                if ($this->response['status'] = $group->save()) {
+                    $this->response['redirect'] = '/admin/groups';
                 }
             }
         }
+        
+        $this->response['group'] = $group;
+        $this->response['errors'] = $group->errors;
 
         // Send the group object to the view.
         View::set('group', $group);
@@ -122,13 +118,7 @@ class Groups extends AppController
     {
         // Find the group, delete it and redirect
         $group = Group::find($id);
-        $group->delete();
-
-        // Return API response
-        if ($this->is_api) {
-            return \API::response(1);
-        } else {
-            Request::redirectTo('/admin/groups');
-        }
+        $this->response['status'] = $group->delete();
+        $this->response['redirect'] = '/admin/groups';
     }
 }

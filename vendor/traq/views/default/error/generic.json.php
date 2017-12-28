@@ -1,1 +1,0 @@
-<?php echo API::response($status, ['error' => $message]); ?>

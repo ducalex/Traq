@@ -89,7 +89,7 @@ class Kernel
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);
         }
-
+        
         // If an object is returned, use the `response` variable if it's set.
         if (isset($output->response)) {
             $output = $output->response;
@@ -100,8 +100,7 @@ class Kernel
             static::$app->render['view'] = false;
             // Get the content, clear the body
             // and append content to a clean slate.
-            Body::clear();
-            Body::append($output);
+            static::$app->response['content'] = $output;
         }
 
         static::$app->__shutdown();

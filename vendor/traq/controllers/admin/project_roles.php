@@ -46,7 +46,7 @@ class ProjectRoles extends AppController
      */
     public function action_index()
     {
-        View::set('roles', ProjectRole::fetch_all());
+        $this->response['roles'] = ProjectRole::fetch_all();
     }
 
     /**
@@ -66,17 +66,13 @@ class ProjectRoles extends AppController
 
             // Validate the data
             if ($role->is_valid()) {
-                $role->save();
-
-                if ($this->is_api) {
-                    return \API::response(1, array('role' => $role));
-                } else {
-                    Request::redirectTo('/admin/roles');
-                }
+                $this->response['status'] = $role->save();
+                $this->response['redirect'] = '/admin/roles';
             }
         }
 
-        View::set('role', $role);
+        $this->response['role'] = $role;
+        $this->response['errors'] = $role->errors;
     }
 
     /**
@@ -96,17 +92,12 @@ class ProjectRoles extends AppController
 
             // Validate the data
             if ($role->is_valid()) {
-                $role->save();
-
-                if ($this->is_api) {
-                    return \API::response(1, array('role' => $role));
-                } else {
-                    Request::redirectTo('/admin/roles');
-                }
+                $this->response['status'] = $role->save();
+                $this->response['redirect'] = '/admin/roles';
             }
         }
-
-        View::set('role', $role);
+        $this->response['role'] = $role;
+        $this->response['errors'] = $role->errors;
     }
 
     /**
@@ -115,12 +106,7 @@ class ProjectRoles extends AppController
     public function action_delete($id)
     {
         // Fetch and delete the role, then redirect
-        $role = ProjectRole::find($id)->delete();
-
-        if ($this->is_api) {
-            return \API::response(1);
-        } else {
-            Request::redirectTo('/admin/roles');
-        }
+        $this->response['status'] = ProjectRole::find($id)->delete();
+        $this->response['redirect'] = '/admin/roles';
     }
 }

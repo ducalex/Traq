@@ -64,17 +64,13 @@ class Usercp extends AppController
             $user->option('watch_created_tickets', Request::post('watch_created_tickets'));
 
             // Save the user
-            if ($user->save()) {
-                // Redirect if successful
-                if ($this->is_api) {
-                    return \API::response(1, array('user' => $user));
-                } else {
-                    Request::redirect(Request::requestUri());
-                }
+            if ($this->response['status'] = $user->save()) {
+                $this->response['redirect'] = Request::requestUri();
             }
         }
 
-        View::set('user', $user);
+        $this->response['user'] = $user;
+        $this->response['errors'] = $user->errors;
     }
 
     /**
@@ -106,14 +102,14 @@ class Usercp extends AppController
                 $user->set_password($data['new_password']);
 
                 // Save the user
-                if ($user->save()) {
-                    // Redirect if successful
-                    Request::redirect(Request::requestUri());
+                if ($this->response['status'] = $user->save()) {
+                    $this->response['redirect'] = Request::requestUri();
                 }
             }
         }
 
-        View::set('user', $user);
+        $this->response['user'] = $user;
+        $this->response['errors'] = $user->errors;
     }
 
     /**
@@ -122,8 +118,8 @@ class Usercp extends AppController
     public function action_create_api_key()
     {
         $this->user->generate_api_key();
-        $this->user->save();
-        Request::redirectTo('usercp');
+        $this->response['status'] = $this->user->save();
+        $this->response['redirect'] = 'usercp';
     }
 
     /**
@@ -131,7 +127,6 @@ class Usercp extends AppController
      */
     public function action_subscriptions()
     {
-        $subscriptions = Subscription::select()->where('user_id', $this->user->id)->exec()->fetch_all();
-        View::set('subscriptions', $subscriptions);
+        $this->response['subscriptions'] = Subscription::select()->where('user_id', $this->user->id)->exec()->fetch_all();
     }
 }

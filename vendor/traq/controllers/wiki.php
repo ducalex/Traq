@@ -77,7 +77,7 @@ class Wiki extends AppController
             return $this->user->permission($this->project->id, 'create_wiki_page') ? $this->_new_page($slug) : $this->show_404();
         }
 
-        View::set('page', $page->fetch());
+        $this->response['page'] = $page->fetch();
     }
 
     /**
@@ -141,15 +141,12 @@ class Wiki extends AppController
                 ));
                 $timeline->save();
 
-                if ($this->is_api) {
-                    return \API::response(1, array('page' => $page));
-                } else {
-                    Request::redirectTo($page->href());
-                }
+                $this->response['redirect'] = $page->href();
             }
         }
 
-        View::set('page', $page);
+        $this->response['page'] = $page;
+        $this->response['errors'] = $page->errors;
     }
 
     /**
@@ -184,7 +181,7 @@ class Wiki extends AppController
             }
 
             // Save and redirect
-            if ($page->save()) {
+            if ($this->response['status'] = $page->save()) {
                 // Update revision
                 $page->revision->save();
                 $page->revision_id = $page->revision->id;
@@ -199,15 +196,12 @@ class Wiki extends AppController
                 ));
                 $timeline->save();
 
-                if ($this->is_api) {
-                    return \API::response(1, array('page' => $page));
-                } else {
-                    Request::redirectTo($page->href());
-                }
+                $this->response['redirect'] = $page->href();
             }
         }
-
-        View::set('page', $page);
+        
+        $this->response['page'] = $page;
+        $this->response['errors'] = $page->errors;
     }
 
     /**
@@ -221,12 +215,7 @@ class Wiki extends AppController
         // Delete the page
         $this->project->wiki_pages->where('slug', $slug)->exec()->fetch()->delete();
 
-        // Redirect to main page
-        if ($this->is_api) {
-            return \API::response(1);
-        } else {
-            Request::redirectTo($this->project->href('wiki'));
-        }
+        $this->response['redirect'] = $this->project->href('wiki');
     }
 
     /**
@@ -237,7 +226,7 @@ class Wiki extends AppController
     public function action_revisions($slug)
     {
         $page = WikiPage::select()->where('project_id', $this->project->id)->where('slug', $slug)->exec()->fetch();
-        View::set(compact('page'));
+        $this->response['page'] = $page;
     }
 
     /**
@@ -251,7 +240,7 @@ class Wiki extends AppController
         $page = WikiPage::select()->where('project_id', $this->project->id)->where('slug', $slug)->exec()->fetch();
         $page->revision = $page->revisions->where('revision', $revision)->exec()->fetch();
 
-        View::set(compact('page'));
+        $this->response['page'] = $page;
 
         $this->render['view'] = 'wiki/view';
     }

@@ -236,11 +236,6 @@ class AppController extends Controller
 
     public function __shutdown()
     {
-        // Plain layout for JSON and API requests and Atom feed
-        if (Router::$extension or $this->is_api) {
-            $this->render['layout'] = 'plain';
-        }
-
         // Was the page requested via ajax?
         if ($this->render['view'] and Request::isAjax() and Router::$extension == null) {
             // Is this page being used as an overlay?

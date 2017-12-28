@@ -22,15 +22,16 @@
 
 $(document).ready(function(){
 	var news_container = $("#traq_news ul");
-
-	$.getJSON(traq.base + '_misc/traq_news.json').done(function(data){
-		$.each(data, function(i, data){
-			news_container.append($("<li>")
-				.addClass('box')
-				.append($("<h4>").append(data.title))
-				.append($("<span>").append(data.created_at).attr('title', data.created_at))
-				.append(data.content)
-			);
-		});
-	});
+	if (news_container.length) {
+		$.getJSON(traq.base + '_misc/traq_news').done(function(data){
+			$.each(data, function(i, data){
+				news_container.append($("<li>")
+					.addClass('box')
+					.append($("<h4>").append(data.title))
+					.append($("<span>").append(data.created_at).attr('title', data.created_at))
+					.append(data.content)
+				);
+			});
+		});	
+	}
 });

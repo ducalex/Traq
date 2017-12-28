@@ -173,11 +173,11 @@ class AppController extends Controller
     /**
      * Used to display the generic error page.
      */
-    public function show_error($title, $message, $code = null)
+    public function show_error($title, $message, $status = 0)
     {
         $this->render['view'] = 'error/generic';
         $this->render['action'] = false;
-        View::set(compact('title', 'message', 'code'));
+        View::set(compact('title', 'message', 'status'));
     }
 
     /**
@@ -203,6 +203,10 @@ class AppController extends Controller
             // Set is_api and JSON view extension
             $this->is_api = true;
             Router::$extension = '.json';
+
+            if (!$user) {
+                $this->show_error('api', 'invalid_api_key');
+            }
         }
         // Check if there's an HTTP Basic Auth header going on
         elseif ($username = Request::auth('username')) {
@@ -230,34 +234,11 @@ class AppController extends Controller
         return $user;
     }
 
-    /**
-     * Display a bad API request.
-     *
-     * @param string $error Error message
-     */
-    protected function bad_api_request($message)
-    {
-        $this->render = array_merge(
-            $this->render,
-            array(
-                'action' => false,
-                'view'   => "api/bad_request.json",
-                'layout' => "plain"
-            )
-        );
-
-        View::set(compact('message'));
-    }
-
     public function __shutdown()
     {
         // Plain layout for JSON and API requests and Atom feed
         if (Router::$extension or $this->is_api) {
             $this->render['layout'] = 'plain';
-        }
-        // Bad API request?
-        if (API::get_key() === false) {
-            $this->bad_api_request('invalid_api_key');
         }
 
         // Was the page requested via ajax?

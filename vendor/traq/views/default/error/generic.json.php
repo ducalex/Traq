@@ -1,1 +1,1 @@
-<?php echo API::response(0, compact('title', 'code', 'message')); ?>
+<?php echo API::response($status, ['error' => $message]); ?>

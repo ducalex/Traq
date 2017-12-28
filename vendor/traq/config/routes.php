@@ -22,8 +22,12 @@ use avalon\http\Router;
 
 define("RTR_PROJSLUG", '(?P<project_slug>[a-zA-Z0-9\-\_]+)');
 
-Router::add('root', 'traq::controllers::Projects.index');
+// Internal
 Router::add('404', 'traq::controllers::Error.404');
+
+// Root
+Router::add('/', 'traq::controllers::Projects.index');
+
 Router::add('/(login|logout|register)', 'traq::controllers::Users.$1');
 Router::add('/login/resetpassword', 'traq::controllers::Users.reset_password');
 Router::add('/login/resetpassword/([a-zA-Z0-9]+)', 'traq::controllers::Users.reset_password/$1');

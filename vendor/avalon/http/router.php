@@ -69,10 +69,6 @@ class Router
     public static function route(Request $request)
     {
         $uri = "/" . trim($request->getUri(), '/');
-        // Is this the root route?
-        if ($uri === '/' and isset(static::$routes['root'])) {
-            return static::setRoute(static::$routes['root']);
-        }
 
         // Do we have an exact match?
         if (isset(static::$routes[$uri])) {

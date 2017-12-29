@@ -27,6 +27,7 @@ Router::add('404', 'traq::controllers::Error.404');
 
 // Root
 Router::add('/', 'traq::controllers::Projects.index');
+Router::add('/projects', 'traq::controllers::Projects.index');
 
 Router::add('/(login|logout|register)', 'traq::controllers::Users.$1');
 Router::add('/login/resetpassword', 'traq::controllers::Users.reset_password');
@@ -37,8 +38,7 @@ Router::add('/users/([0-9]+)', 'traq::controllers::Users.view/$1');
 Router::add('/users/validate/(.*)', 'traq::controllers::Users.validate/$1');
 
 // API
-Router::add('/statuses', 'traq::controllers::API.statuses');
-Router::add('/priorities', 'traq::controllers::API.priorities');
+Router::add('/api/(statuses|priorities|types)', 'traq::controllers::API.$1');
 
 // Misc
 Router::add('/_ajax/autocomplete/(username)', 'traq::controllers::Misc.autocomplete_$1');
@@ -51,7 +51,6 @@ Router::add('/attachments/(?P<attachment_id>[0-9]+)/([a-zA-Z0-9\-_.\s]+)/delete'
 
 // ------------------------------------------------
 // Project routes
-Router::add('/projects', 'traq::controllers::Projects.index');
 Router::add('/' . RTR_PROJSLUG . '/milestone/(?P<milestone_slug>[a-zA-Z0-9\-_.]+?)', 'traq::controllers::Projects.milestone/$2');
 Router::add('/' . RTR_PROJSLUG . '/(timeline|roadmap|changelog)', 'traq::controllers::Projects.$2');
 Router::add('/' . RTR_PROJSLUG . '/timeline/([0-9]+)/delete', 'traq::controllers::Projects.delete_timeline_event/$2');

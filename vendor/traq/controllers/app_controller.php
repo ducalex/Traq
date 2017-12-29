@@ -238,6 +238,7 @@ class AppController extends Controller
         if ($this->response['format'] === 'API') {
             $this->response['format'] = 'application/json';
             $this->response['content'] = \API::response($this->response['status'], $this->response);
+            $this->render['layout'] = 'plain';
             $this->render['view'] = false;
         }
         // No content, it's a redirection

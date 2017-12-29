@@ -25,6 +25,7 @@ use avalon\output\View;
 use avalon\core\Load;
 use traq\models\Status;
 use traq\models\Priority;
+use traq\models\Type;
 
 /**
  * API controller.
@@ -36,6 +37,11 @@ use traq\models\Priority;
  */
 class API extends AppController
 {
+    public function __construct()
+    {
+        $this->is_api = true;
+        parent::__construct();
+    }
     /**
      * Ticket statuses.
      *
@@ -43,7 +49,7 @@ class API extends AppController
      */
     public function action_statuses()
     {
-        View::set('statuses', Status::fetch_all());
+        $this->response['statuses'] = Status::fetch_all();
     }
 
     /**
@@ -53,6 +59,16 @@ class API extends AppController
      */
     public function action_priorities()
     {
-        View::set('priorities', Priority::fetch_all());
+        $this->response['priorities'] = Priority::fetch_all();
+    }
+
+    /**
+     * Ticket types.
+     *
+     * @return string
+     */
+    public function action_types()
+    {
+        $this->response['types'] = Type::fetch_all();
     }
 }

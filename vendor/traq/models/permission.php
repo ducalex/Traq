@@ -80,7 +80,7 @@ class Permission extends Model
     public static function defaults($project_id = 0, $type_id = 0, $type = 'usergroup')
     {
         // Fetch the defaults
-        $defaults = static::select()->custom_sql("WHERE `type` = '{$type}' AND `type_id` = '{$type_id}' and `project_id` IN (" . ($project_id > 0 ? "0,{$project_id}" : '0') . ")")->exec()->fetch_all();
+        $defaults = static::select()->where('type', $type)->where('type_id', $type_id)->where('project_id', [0, $project_id], 'IN')->exec()->fetch_all();
 
         // If we're fetching a specific group,
         // also fetch the defaults for all groups.

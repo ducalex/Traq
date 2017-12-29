@@ -192,7 +192,7 @@ class Projects extends AppController
             $fetch_activity = Timeline::select()
                 ->where('project_id', $this->project->id)
                 ->where('created_at', "{$info['date']} %", "LIKE")
-                ->custom_sql("AND `action` IN ('" . implode("','", $events) . "')")
+                ->where('action', $events, "IN")
                 ->order_by('created_at', 'DESC');
 
             // Push the days data to the

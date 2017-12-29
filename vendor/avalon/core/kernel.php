@@ -97,9 +97,8 @@ class Kernel
 
         // Check if we have any content
         if (static::$app->render['action'] and isset($output)) {
+            // If the controller returns something then this value replaces the view!
             static::$app->render['view'] = false;
-            // Get the content, clear the body
-            // and append content to a clean slate.
             static::$app->response['content'] = $output;
         }
 

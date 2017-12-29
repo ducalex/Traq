@@ -45,6 +45,7 @@ class Query
     private $custom_sql = array();
     private $set;
     private $_model;
+    private $bind = array();
 
     /**
      * PDO Query builder constructor.
@@ -133,6 +134,20 @@ class Query
     }
 
     /**
+     * Bind value
+     *
+     * @param string $parameter
+     * @param mixed $value
+     *
+     * @return object
+     */
+    public function bind($parameter, $value)
+    {
+        $this->bind[':'.ltrim($parameter, ':')] = $value;
+        return $this;
+    }
+
+    /**
      * Orders the query rows.
      *
      * @param string $col Column
@@ -212,10 +227,17 @@ class Query
     {
         $result = $this->connection->prepare($this->_assemble());
 
-        if ($this->type != 'INSERT') {
-            foreach ($this->where as $where) {
-                $result->bind_value(':'. $where[0], $where[2]);
+        foreach ($this->bind as $key => $value) {
+            if (is_int($value)) {
+                $type = \PDO::PARAM_INT;
+            } elseif (is_bool($value)) {
+                $type = \PDO::PARAM_BOOL;
+            } elseif (is_null($value)) {
+                $type = \PDO::PARAM_NULL;
+            } else {
+                $type = \PDO::PARAM_STR; // Default
             }
+            $result->bind_value($key, $value, $type);
         }
 
         return $result->_model($this->_model)->exec();
@@ -306,15 +328,15 @@ class Query
         else if($this->type == "INSERT INTO" || $this->type == "REPLACE INTO" ) {
             $query[] = "`{$this->prefix}{$this->table}`";
 
-            $keys = array();
+            $columns = array();
             $values = array();
 
-            foreach($this->data as $key => $value) {
-                $keys[] = "`{$key}`";
-                $values[] = $this->_process_value($value);
+            foreach($this->data as $column => $value) {
+                $this->bind($values[] = ":i_{$column}", $value);
+                $columns[] = "`{$column}`";
             }
 
-            $query[] = '(' . implode(', ', $keys) . ')';
+            $query[] = '(' . implode(', ', $columns) . ')';
             $query[] = 'VALUES(' . implode(', ', $values) . ')';
         }
         // Update query
@@ -324,8 +346,8 @@ class Query
             $query[] = "SET";
             $set = array();
             foreach ($this->data as $column => $value) {
-                $value = $this->_process_value($value);
-                $set[] = "`{$column}` = {$value}";
+                $this->bind($key = ":u_{$column}", $value);
+                $set[] = "`$column` = $key";
             }
             $query[] = implode(', ', $set);
 
@@ -338,35 +360,25 @@ class Query
 
     private function _build_where()
     {
-        $query = array();
+        if (empty($this->where)) {
+            return array();
+        }
 
-        // Where
-        if (count($this->where)) {
-            $where = array();
+        $where = array();
 
-            foreach ($this->where as $param) {
-                $where[] = "`{$param[0]}` {$param[1]} :{$param[0]}";
+        foreach ($this->where as $i => list($column, $cond, $value)) {
+            if (strtoupper($cond) === 'IN') {
+                foreach((array)$value as $j => $value) {
+                    $this->bind($IN[] = ":w{$i}_{$column}_in_$j", $value);
+                }
+                $where[] = "`{$column}` IN (" . implode(',', $IN) . ")";
+            } else {
+                $where[] = "`{$column}` {$cond} :w{$i}_{$column}";
+                $this->bind(":w{$i}_{$column}", $value);
             }
-
-            $query[] = "WHERE " . implode(' AND ', $where);
-            unset($where);
         }
 
-        return $query;
-    }
-
-    /**
-     * Processes the value.
-     *
-     * @return mixed
-     */
-    private function _process_value($value)
-    {
-        if ($value === null) {
-            return 'NULL';
-        } else {
-            return $this->connection->quote($value);
-        }
+        return array("WHERE " . implode(' AND ', $where));
     }
 
     /**

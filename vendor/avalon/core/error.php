@@ -36,14 +36,15 @@ class Error
         set_exception_handler(function($e) {
             $message = preg_replace('/(\(\d+\))\:.+$/m', '$1', $e); // Remove argument display for safety
             $message = str_replace(DOCROOT, '', $message); // Remove full path for safety
-            \avalon\core\Error::halt(get_class($e), $message);
+            static::halt(get_class($e), $message);
         });
     }
 
     public static function halt($title, $message = '')
     {
         @ob_end_clean();
-        
+        @http_response_code(500);
+
         $app = Kernel::app();
 
         if ($app && $app->response['format'] === 'application/json') {
@@ -51,7 +52,7 @@ class Error
         } else {
             $message = nl2br(htmlentities($message));
 
-            $body  = '<html><body>';
+            $body  = '<html><head><title>Server Error</title></head><body>';
             $body .= '<blockquote style="font-family:\'Helvetica Neue\', Arial, Helvetica, sans-serif;background:#fbe3e4;color:#8a1f11;padding:0.8em;margin-bottom:1em;border:2px solid #fbc2c4;">';
 
             if ($title !== null) {

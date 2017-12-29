@@ -1,4 +1,4 @@
 <?php
-$subbed = is_subscribed($current_user, $object);
+$subbed = is_subscribed($app->user, $object);
 echo HTML::link(l(($subbed ? 'un' : '') . 'subscribe'), $object->href(($subbed ? 'un' : '') . 'subscribe'));
 ?>

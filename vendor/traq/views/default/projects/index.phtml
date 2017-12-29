@@ -1,7 +1,7 @@
 <div class="content">
 	<h2 id="page_title"><?php echo l('projects'); ?></h2>
 	<ul id="project_list">
-		<?php foreach($projects as $project) { ?>
+		<?php foreach($app->projects as $project) { ?>
 		<li>
 			<h3><?php echo HTML::link($project->name, $project->slug); ?><?php echo ($project->codename ? " <em>\"{$project->codename}\"</em>" : ''); ?></h3>
 			<nav>

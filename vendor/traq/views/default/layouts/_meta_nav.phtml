@@ -2,10 +2,10 @@
 	<ul id="user_nav">
 		<?php FishHook::run('template:layouts/_meta_nav/user_nav'); ?>
 	<?php if (LOGGEDIN) { ?>
-		<li<?php echo active_nav($current_user->href(), ' class="active"')?>><?php echo HTML::link(l('profile'), $current_user->href()) ?></li>
+		<li<?php echo active_nav($app->user->href(), ' class="active"')?>><?php echo HTML::link(l('profile'), $app->user->href()) ?></li>
 		<li<?php echo active_nav('/usercp', ' class="active"')?>><?php echo HTML::link(l('usercp'), '/usercp'); ?></li>
 		<li><?php echo HTML::link(l('logout'), '/logout'); ?></li>
-		<?php if ($current_user->group->is_admin) { ?>
+		<?php if ($app->user->group->is_admin) { ?>
 		<li<?php echo active_nav('/admin(.*)', ' class="active"')?>><?php echo HTML::link(l('admincp'), '/admin'); ?></li>
 		<?php } ?>
 	<?php } else { ?>

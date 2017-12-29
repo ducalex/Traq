@@ -32,7 +32,6 @@ use avalon\http\Router;
 use avalon\http\Session;
 use avalon\http\Cookie;
 use avalon\output\View;
-use avalon\output\Body;
 
 use traq\models\User;
 use traq\models\Project;
@@ -101,7 +100,6 @@ class AppController extends Controller
             } elseif ($this->user->permission($this->project->id, 'view')) {
                 // Add project name to page title
                 $this->title($this->project->name);
-                View::set('project', $this->project);
             } else {
                 $this->show_no_permission();
             }
@@ -116,11 +114,7 @@ class AppController extends Controller
             }
         }
 
-        View::set(array(
-            'current_user' => $this->user,
-            'projects' => $this->projects,
-            'app' => $this,
-        ));
+        View::set('app', $this);
     }
 
     /**

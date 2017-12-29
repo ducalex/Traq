@@ -20,6 +20,8 @@
 
 namespace traq\controllers\ProjectSettings;
 
+use avalon\output\View;
+
 /**
  * Project settings controller
  *
@@ -46,5 +48,6 @@ class AppController extends \traq\controllers\AppController
         or (!$this->user->permission($this->project->id, 'project_settings') and !$this->user->group->is_admin)) {
             $this->show_no_permission();
         }
+        View::set('project', $this->project);
     }
 }

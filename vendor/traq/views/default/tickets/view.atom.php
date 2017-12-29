@@ -38,7 +38,7 @@ foreach (array_reverse($updates) as $update) {
 // Make feed
 $entries = array_reverse($entries);
 $feed = new Atom(array(
-    'title' => l('x_x_history_feed', $project->name, $ticket->summary),
+    'title' => l('x_x_history_feed', $app->project->name, $ticket->summary),
     'link' => Request::base('', true),
     'feed_link' => Request::base(Request::requestUri(), true),
     'updated' => $entries[0]['updated'],

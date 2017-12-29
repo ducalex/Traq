@@ -1,7 +1,7 @@
 <div class="timeline content">
 	<h2 id="page_title"><?php echo l('timeline'); ?></h2>
 	<div class="timeline_filters">
-		<form action="<?php echo Request::base($project->href('timeline'))?>" method="post">
+		<form action="<?php echo Request::base($app->project->href('timeline'))?>" method="post">
 			<fieldset>
 				<legend><?php echo l('filter_events')?></legend>
 				<?php foreach ($timeline_filters as $filter => $filter_events) { ?>
@@ -19,8 +19,8 @@
 	<dl>
 	<?php foreach ($day['activity'] as $row) { ?>
 		<dt class="timeline_event_<?php echo $row->id?>">
-<?php if ($current_user->permission($project->id, 'delete_timeline_events')) { ?>
-			<a class="button_delete icon_only" data-ajax-delete=".timeline_event_<?php echo $row->id?>" data-ajax-confirm="<?php echo l('confirm.delete')?>" href="<?php echo Request::base($project->href("timeline/{$row->id}/delete"))?>"><span><?php echo l('delete')?></span></a>
+<?php if ($app->user->permission($app->project->id, 'delete_timeline_events')) { ?>
+			<a class="button_delete icon_only" data-ajax-delete=".timeline_event_<?php echo $row->id?>" data-ajax-confirm="<?php echo l('confirm.delete')?>" href="<?php echo Request::base($app->project->href("timeline/{$row->id}/delete"))?>"><span><?php echo l('delete')?></span></a>
 <?php } ?>
 			<span class="time"><?php echo ldate('time', $row->created_at); ?></span>
 <?php if (in_array($row->action, array('ticket_created','ticket_closed','ticket_reopened','ticket_updated'))) { ?>

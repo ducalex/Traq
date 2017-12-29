@@ -29,7 +29,7 @@
 		<div class="box">
 			<h3><?php echo l('projects'); ?></h3>
 			<?php foreach ($profile->projects() as $project) {
-				if (!$current_user->permission($project[0]->id, 'view')) { continue; }
+				if (!$app->user->permission($project[0]->id, 'view')) { continue; }
 				?>
 				<li><?php echo HTML::link($project[0]->name, $project[0]->href()); ?>, <?php echo $project[1]->name; ?></li>
 			<?php } ?>
@@ -51,7 +51,7 @@
 			</thead>
 			<tbody>
 			<?php foreach ($profile->assigned_tickets->order_by('is_closed', 'ASC')->exec()->fetch_all() as $ticket) {
-				if (!$current_user->permission($ticket->project_id, 'view')) { continue; }
+				if (!$app->user->permission($ticket->project_id, 'view')) { continue; }
 				?>
 				<tr>
 					<td><?php echo HTML::link($ticket->summary, $ticket->href()); ?></td>

@@ -11,43 +11,43 @@
 		<div id="wrapper" class="container">
 			<?php echo View::render('layouts/_meta_nav'); ?>
 			<header id="header">
-				<h1><?php echo (isset($project)) ? HTML::link($project->name, $project->slug) : HTML::link(settings('title'), null); ?></h1>
+				<h1><?php echo isset($app->project) ? HTML::link($app->project->name, $app->project->slug) : HTML::link(settings('title'), ''); ?></h1>
 				<?php echo View::render('layouts/_project_switcher'); ?>
-				<?php if (isset($project)) { ?>
-				<form action="<?php echo Request::base($project->slug.'/tickets') ?>"  id="search">
+				<?php if (isset($app->project)) { ?>
+				<form action="<?php echo Request::base($app->project->href('tickets')) ?>"  id="search">
 					<input type="search" name="search" placeholder="<?= l('search') ?>" />
 				</form>
 				<?php } ?>
 			</header>
 			<nav id="nav">
 				<ul id="main_nav">
-				<?php if (isset($project)) { ?>
-					<li<?php echo active_nav('/:slug', ' class="active"')?>><?php echo HTML::link(l('project_info'), $project->href()); ?></li>
-					<li<?php echo active_nav('/:slug/timeline', ' class="active"')?>><?php echo HTML::link(l('timeline'), $project->href("timeline")); ?></li>
-					<li<?php echo active_nav('/:slug/(roadmap|milestone)(.*)', ' class="active"')?>><?php echo HTML::link(l('roadmap'), $project->href("roadmap")); ?></li>
-					<li<?php echo active_nav('/:slug/tickets(?:/[0-9]+)?', ' class="active"')?>><?php echo HTML::link(l('tickets'), $project->href("tickets")); ?></li>
-					<?php if($current_user->permission($project->id, 'create_tickets')) { ?>
-					<li<?php echo active_nav('/:slug/tickets/new(.*)', ' class="active"')?>><?php echo HTML::link(l('new_ticket'), $project->href('tickets/new')); ?></li>
+				<?php if (isset($app->project)) { ?>
+					<li<?php echo active_nav('/:slug', ' class="active"')?>><?php echo HTML::link(l('project_info'), $app->project->href()); ?></li>
+					<li<?php echo active_nav('/:slug/timeline', ' class="active"')?>><?php echo HTML::link(l('timeline'), $app->project->href("timeline")); ?></li>
+					<li<?php echo active_nav('/:slug/(roadmap|milestone)(.*)', ' class="active"')?>><?php echo HTML::link(l('roadmap'), $app->project->href("roadmap")); ?></li>
+					<li<?php echo active_nav('/:slug/tickets(?:/[0-9]+)?', ' class="active"')?>><?php echo HTML::link(l('tickets'), $app->project->href("tickets")); ?></li>
+					<?php if($app->user->permission($app->project->id, 'create_tickets')) { ?>
+					<li<?php echo active_nav('/:slug/tickets/new(.*)', ' class="active"')?>><?php echo HTML::link(l('new_ticket'), $app->project->href('tickets/new')); ?></li>
 					<?php } ?>
-					<li<?php echo active_nav('/:slug/changelog', ' class="active"')?>><?= HTML::link(l('changelog'), $project->href('changelog')) ?></li>
-					<?php if($current_user->permission($project->id, 'scm_browse_repositories')) { ?>
-					<li<?php echo active_nav('/:slug/repository(.*)', ' class="active"')?>><?= HTML::link(l('repository'), $project->href("repository")) ?></li>
+					<li<?php echo active_nav('/:slug/changelog', ' class="active"')?>><?= HTML::link(l('changelog'), $app->project->href('changelog')) ?></li>
+					<?php if($app->user->permission($app->project->id, 'scm_browse_repositories')) { ?>
+					<li<?php echo active_nav('/:slug/repository(.*)', ' class="active"')?>><?= HTML::link(l('repository'), $app->project->href("repository")) ?></li>
 					<?php } ?>
-					<?php if ($project->enable_wiki) { ?>
-					<li<?php echo active_nav('/:slug/wiki(.*)', ' class="active"')?>><?php echo HTML::link(l('wiki'), $project->href("wiki")); ?></li>
+					<?php if ($app->project->enable_wiki) { ?>
+					<li<?php echo active_nav('/:slug/wiki(.*)', ' class="active"')?>><?php echo HTML::link(l('wiki'), $app->project->href("wiki")); ?></li>
 					<?php } ?>
-					<?php if($current_user->permission($project->id, 'project_settings')) { ?>
-					<li<?php echo active_nav('/:slug/settings(.*)', ' class="active"')?>><?php echo HTML::link(l('settings'), $project->href("settings")); ?></li>
+					<?php if($app->user->permission($app->project->id, 'project_settings')) { ?>
+					<li<?php echo active_nav('/:slug/settings(.*)', ' class="active"')?>><?php echo HTML::link(l('settings'), $app->project->href("settings")); ?></li>
 					<?php } ?>
 				<?php } else { ?>
 					<li<?php echo active_nav('/', ' class="active"')?>><?php echo HTML::link(l('projects'), null); ?></li>
 				<?php } ?>
-				<?php FishHook::run('template:layouts/default/main_nav', array(isset($project) ? $project : false)); ?>
+				<?php FishHook::run('template:layouts/default/main_nav', array(isset($app->project) ? $app->project : false)); ?>
 				</ul>
 			</nav>
 			<div id="page">
 
-				<?php if ($current_user->password_ver == 'sha1') : ?>
+				<?php if ($app->user->password_ver == 'sha1') : ?>
 				<div id="password-change-prompt">
 					<div class="error" style="text-align: center;">
 						<h3><?=l('password_change_prompt')?></h3>

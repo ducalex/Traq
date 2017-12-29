@@ -3,7 +3,7 @@
 </span>
 <div id="project_switcher_popover" class="popover project_switcher">
 	<ul>
-	<?php foreach ($projects as $p) { ?>
+	<?php foreach ($app->projects as $p) { ?>
 		<li><?php echo HTML::link($p->name, $p->href()); ?>
 	<?php } ?>
 	</ul>

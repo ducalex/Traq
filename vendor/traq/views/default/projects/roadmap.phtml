@@ -3,9 +3,9 @@
 </div>
 <nav id="project_roadmap_nav" class="tabs">
 	<ul>
-		<li<?php echo active_nav('/:slug/roadmap', ' class="active"')?>><?php echo HTML::link(l('active'), $project->href('roadmap')); ?></li>
-		<li<?php echo active_nav('/:slug/roadmap/completed', ' class="active"')?>><?php echo HTML::link(l('completed'), $project->href('roadmap/completed')); ?></li>
-		<li<?php echo active_nav('/:slug/roadmap/all', ' class="active"')?>><?php echo HTML::link(l('all'), $project->href('roadmap/all')); ?></li>
+		<li<?php echo active_nav('/:slug/roadmap', ' class="active"')?>><?php echo HTML::link(l('active'), $app->project->href('roadmap')); ?></li>
+		<li<?php echo active_nav('/:slug/roadmap/completed', ' class="active"')?>><?php echo HTML::link(l('completed'), $app->project->href('roadmap/completed')); ?></li>
+		<li<?php echo active_nav('/:slug/roadmap/all', ' class="active"')?>><?php echo HTML::link(l('all'), $app->project->href('roadmap/all')); ?></li>
 	</ul>
 </nav>
 <div class="roadmap content">

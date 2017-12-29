@@ -1,4 +1,4 @@
-<form action="<?php echo Request::base($project->href('tickets/update_filters')); ?>" method="post" id="ticket_filters">
+<form action="<?php echo Request::base($app->project->href('tickets/update_filters')); ?>" method="post" id="ticket_filters">
 	<fieldset>
 		<legend><a href="#"><?php echo l('filters'); ?></a> (<?php echo count($filters) ?>)</legend>
 		<div id="ticket_filters_content"<?php echo (Cookie::get('hide_filters') && !Request::req('search')) ? ' style="display:none;"' : ''; ?>>
@@ -26,7 +26,7 @@
 							?>
 						</td>
 						<td class="value">
-							<?php echo Form::multiselect("filters[{$filter}][values][]", ticket_filter_options_for($filter, $project->id), $info['values']); ?>
+							<?php echo Form::multiselect("filters[{$filter}][values][]", ticket_filter_options_for($filter, $app->project->id), $info['values']); ?>
 						</td>
 						<?php } ?>
 						<td class="ticket_filter_action">
@@ -70,7 +70,7 @@
 							</td>
 							<td class="value">
 							<?php
-								if (in_array($filter, array_merge(array('summary', 'description'), array_keys(ticket_filters_for($project))))) {
+								if (in_array($filter, array_merge(array('summary', 'description'), array_keys(ticket_filters_for($app->project))))) {
 									echo Form::text("filters[{$filter}][values][]", array('value' => $value, 'id' => false));
 								} elseif (in_array($filter, array('owner', 'assigned_to'))) {
 									echo Form::text("filters[{$filter}][values][]", array('value' => $value, 'data-autocomplete' => Request::base('/_ajax/autocomplete/username'), 'id' => false));
@@ -89,7 +89,7 @@
 							<input type="submit" value="<?php echo l('update'); ?>" name="update">
 						</td>
 						<td colspan="3" id="ticket_filter_actions">
-							<?php echo Form::select('new_filter', ticket_filters_select_options($project)); ?>
+							<?php echo Form::select('new_filter', ticket_filters_select_options($app->project)); ?>
 							<button type="submit" class="button_new" name="add_filter">+</button>
 						</td>
 					</tr>

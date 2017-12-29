@@ -7,7 +7,7 @@ $updated = 0;
 foreach ($milestones as $milestone) {
     $entry = array(
         'title' => $milestone->name,
-        'id' => "changelog:{$project->slug}:milestone:{$milestone->slug}",
+        'id' => "changelog:{$app->project->slug}:milestone:{$milestone->slug}",
         'link' => Request::base($milestone->href(), true),
         'updated' => Time::date("c", $milestone->completed_on),
         'content' => array(
@@ -33,7 +33,7 @@ foreach ($milestones as $milestone) {
 
 // Make feed
 $feed = new Atom(array(
-    'title'     => l('x_changelog_feed', $project->name),
+    'title'     => l('x_changelog_feed', $app->project->name),
     'link'      => Request::base('', true),
     'feed_link' => Request::base(Request::uri(), true),
     'updated'   => $updated == 0 ? Time::date("c") : Time::date("c", $updated),

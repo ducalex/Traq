@@ -149,16 +149,6 @@ function active_nav($uri, $true = true, $false = null)
 }
 
 /**
- * Returns the logged in users model.
- *
- * @return object
- */
-function current_user()
-{
-    return Avalon::app()->user;
-}
-
-/**
  * Returns an array of the available permissions.
  *
  * @return array

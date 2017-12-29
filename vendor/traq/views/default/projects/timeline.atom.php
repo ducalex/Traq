@@ -56,7 +56,7 @@ foreach ($days as $day) {
 $feed = new Atom(array(
     'title' => l('x_timeline_feed', $app->project->name),
     'link' => Request::base('', true),
-    'feed_link' => Request::base(Request::requestUri(), true),
+    'feed_link' => Request::base(Request::uri(), true),
     'updated' => $entries[0]['updated'],
     'entries' => $entries,
 ));

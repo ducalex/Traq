@@ -29,7 +29,7 @@ foreach (array_reverse($updates) as $update) {
             'name' => $update->user->name
         ),
         'content' => array(
-            'type' => "XHTML",
+            'type' => "html",
             'data' => implode(PHP_EOL, $content)
         ),
     );
@@ -40,7 +40,7 @@ $entries = array_reverse($entries);
 $feed = new Atom(array(
     'title' => l('x_x_history_feed', $app->project->name, $ticket->summary),
     'link' => Request::base('', true),
-    'feed_link' => Request::base(Request::requestUri(), true),
+    'feed_link' => Request::base(Request::uri(), true),
     'updated' => $entries[0]['updated'],
     'entries' => $entries,
 ));

@@ -72,21 +72,23 @@ class Atom
 
             // Summary
             if (isset($entry['summary'])) {
-                $feed[] = "    <summary>{$entry['summary']}</summary>";
+                $feed[] = "    <summary>";
+                $feed[] = "        " . htmlspecialchars($entry['summary']);
+                $feed[] = "    </summary>";
             }
 
             // Author
             if (isset($entry['author'])) {
                 $feed[] = "    <author>";
-                $feed[] = "      <name>{$entry['author']['name']}</name>";
+                $feed[] = "        <name>{$entry['author']['name']}</name>";
                 $feed[] = "    </author>";
             }
 
             // Content
             if (isset($entry['content'])) {
                 $feed[] = "    <content" . (array_key_exists('type', $entry['content']) ? " type=\"{$entry['content']['type']}\"" :'' ) . ">";
-                $feed[] = "      {$entry['content']['data']}";
-                $feed[] = "    </author>";
+                $feed[] = "        " . htmlspecialchars($entry['content']['data']);
+                $feed[] = "    </content>";
             }
 
             $feed[] = "  </entry>";

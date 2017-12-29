@@ -13,7 +13,7 @@ foreach ($tickets as $ticket) {
             'name' => $ticket->user->name
         ),
         'content' => array(
-            'type' => "XHTML",
+            'type' => "html",
             'data' => $ticket->body
         ),
     );
@@ -23,7 +23,7 @@ foreach ($tickets as $ticket) {
 $feed = new Atom(array(
     'title' => l('x_ticket_feed', $app->project->name),
     'link' => Request::base('', true),
-    'feed_link' => Request::base(Request::requestUri()),
+    'feed_link' => Request::base(Request::uri(), true),
     'updated' => $entries[0]['updated'],
     'entries' => $entries,
 ));

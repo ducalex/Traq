@@ -114,7 +114,7 @@ class AppController extends Controller
             }
         }
 
-        View::set('app', $this);
+        View::set('app', $this, true);
     }
 
     /**

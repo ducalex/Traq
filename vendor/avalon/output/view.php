@@ -34,6 +34,7 @@ class View
     public static $theme;
     public static $inherit_from;
     private static $vars = array();
+    private static $protected = array();
 
     /**
      * Renders the specified file.
@@ -90,14 +91,23 @@ class View
      *
      * @param string $var The variable name.
      * @param mixed $val The variables value.
+     * @param bool $protected Whether the variable can be overwritten or not
      */
-    public static function set($var, $val = null)
+    public static function set($var, $val = null, $protected = false)
     {
         // Mass set
         if (is_array($var)) {
-            self::$vars = $var + self::$vars;
-        } else {
+            foreach($var as $key => $val) {
+                self::set($key, $val, $protected);
+            }
+        } elseif (!in_array($var, self::$protected)) {
             self::$vars[$var] = $val;
+            if ($protected) {
+                self::$protected[] = $var;
+            }
+        } else {
+            throw new \Exception("View: '$var' is a protected variable and can't be overwritten.");
+            return false;
         }
     }
 

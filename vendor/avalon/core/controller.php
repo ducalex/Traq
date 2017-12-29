@@ -47,7 +47,7 @@ class Controller
         'redirect' => null,
         'format' => 'text/html',
         'errors' => null,
-        'content' => '',
+        'content' => null,
     );
 
     public $before = array();

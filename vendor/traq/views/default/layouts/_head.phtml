@@ -7,7 +7,7 @@
 		<?= HTML::js_inc(Request::base('asset.php?js=all')) ?>
 		<script>
 			traq.base = '<?= Request::base() ?>';
-			traq.project = '<?= isset($app->project) ? $app->project->slug : ''; ?>';
+			traq.project = '<?= $app->project ? $app->project->slug : ''; ?>';
 			language.yes = '<?= l('yes'); ?>';
 			language.no = '<?= l('no'); ?>';
 		</script>

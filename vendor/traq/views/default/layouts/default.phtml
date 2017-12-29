@@ -11,9 +11,9 @@
 		<div id="wrapper" class="container">
 			<?php echo View::render('layouts/_meta_nav'); ?>
 			<header id="header">
-				<h1><?php echo isset($app->project) ? HTML::link($app->project->name, $app->project->slug) : HTML::link(settings('title'), ''); ?></h1>
+				<h1><?php echo $app->project ? HTML::link($app->project->name, $app->project->slug) : HTML::link(settings('title'), ''); ?></h1>
 				<?php echo View::render('layouts/_project_switcher'); ?>
-				<?php if (isset($app->project)) { ?>
+				<?php if ($app->project) { ?>
 				<form action="<?php echo Request::base($app->project->href('tickets')) ?>"  id="search">
 					<input type="search" name="search" placeholder="<?= l('search') ?>" />
 				</form>
@@ -21,7 +21,7 @@
 			</header>
 			<nav id="nav">
 				<ul id="main_nav">
-				<?php if (isset($app->project)) { ?>
+				<?php if ($app->project) { ?>
 					<li<?php echo active_nav('/:slug', ' class="active"')?>><?php echo HTML::link(l('project_info'), $app->project->href()); ?></li>
 					<li<?php echo active_nav('/:slug/timeline', ' class="active"')?>><?php echo HTML::link(l('timeline'), $app->project->href("timeline")); ?></li>
 					<li<?php echo active_nav('/:slug/(roadmap|milestone)(.*)', ' class="active"')?>><?php echo HTML::link(l('roadmap'), $app->project->href("roadmap")); ?></li>
@@ -40,9 +40,9 @@
 					<li<?php echo active_nav('/:slug/settings(.*)', ' class="active"')?>><?php echo HTML::link(l('settings'), $app->project->href("settings")); ?></li>
 					<?php } ?>
 				<?php } else { ?>
-					<li<?php echo active_nav('/', ' class="active"')?>><?php echo HTML::link(l('projects'), null); ?></li>
+					<li<?php echo active_nav('/', ' class="active"')?>><?php echo HTML::link(l('projects'), 'projects'); ?></li>
 				<?php } ?>
-				<?php FishHook::run('template:layouts/default/main_nav', array(isset($app->project) ? $app->project : false)); ?>
+				<?php FishHook::run('template:layouts/default/main_nav', array($app->project ?: false)); ?>
 				</ul>
 			</nav>
 			<div id="page">

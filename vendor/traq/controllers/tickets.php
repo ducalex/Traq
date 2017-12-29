@@ -297,11 +297,13 @@ class Tickets extends AppController
      */
     public function action_toggle_task($ticket_id, $task_id)
     {
+        $this->render['layout'] = false;
+
         if ($this->user->permission($this->project->id, 'ticket_properties_complete_tasks')) {
             // Get ticket, update task and save
             $ticket = Ticket::select()->where('project_id', $this->project->id)->where('ticket_id', $ticket_id)->exec()->fetch();
             $ticket->toggle_task($task_id, Request::req('completed') === 'true');
-            $ticket->save();
+            return $ticket->save();
         }
     }
 

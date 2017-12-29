@@ -37,11 +37,24 @@ use traq\models\Attachment;
  */
 class Attachments extends AppController
 {
-    // Before filters
-    public $before = array(
-        'view' => array('_check_permission'),
-        'delete' => array('_check_permission')
-    );
+    /**
+     * Used to check the permission for the requested action.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        // Get the attachment
+        $this->attachment = Attachment::find(Router::$params[0]);
+
+        if (!$this->attachment) {
+            $this->show_404();
+        }
+        // Check if the user has permission
+        elseif (!$this->user->permission($this->attachment->ticket->project_id, Router::$params[1]."_attachments")) {
+            $this->show_no_permission();
+        }
+    }
 
     /**
      * View attachment page
@@ -50,19 +63,8 @@ class Attachments extends AppController
      */
     public function action_view($attachment_id)
     {
-        // Don't try to load a view
-        $this->render['view'] = false;
-
-        header("Content-type: {$this->attachment->type}");
-        $content_type = explode('/', $this->attachment->type);
-
         // Check what type of file we're dealing with.
-        if($content_type[0] == 'text' or $content_type[0] == 'image') {
-            // If the mime-type is text, we can just display it
-            // as plain text. I hate having to download files.
-            if ($content_type[0] == 'text') {
-                header("Content-type: text/plain");
-            }
+        if (preg_match('/^(image|text)/i', $this->attachment->type)) {
             header("Content-Disposition: filename=\"{$this->attachment->name}\"");
         }
         // Anything else should be downloaded
@@ -70,9 +72,12 @@ class Attachments extends AppController
             header("Content-Disposition: attachment; filename=\"{$this->attachment->name}\"");
         }
 
-        // Decode the contents and display it
-        print(base64_decode($this->attachment->contents));
-        exit;
+        // No template rendering
+        $this->render['layout'] = $this->render['view'] = false;
+        // If the mime-type is text, we can just display it as plain text.
+        $this->response['format'] = preg_replace('#^text/.+$#i', 'text/plain', $this->attachment->type);
+        // Attachment Content
+        $this->response['content'] = base64_decode($this->attachment->contents);
     }
 
     /**
@@ -85,21 +90,5 @@ class Attachments extends AppController
         // Delete and redirect
         $this->attachment->delete();
         Request::redirectTo($this->attachment->ticket->href());
-    }
-
-    /**
-     * Used to check the permission for the requested action.
-     */
-    public function _check_permission($action)
-    {
-        // Get the attachment
-        $this->attachment = Attachment::find(Router::$params[0]);
-
-        // Check if the user has permission
-        if (!$this->user->permission($this->attachment->ticket->project_id, "{$action}_attachments")) {
-            // oh noes! display the no permission page.
-            $this->show_no_permission();
-            return false;
-        }
     }
 }

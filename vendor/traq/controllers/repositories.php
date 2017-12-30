@@ -130,6 +130,8 @@ class Repositories extends AppController
             $commit->user = $users[$commit->email];
         }
 
+        $this->response['revisions'] = $revisions;
+
         View::set(compact('revisions', 'pagination', 'nav_title'));
     }
 
@@ -141,6 +143,8 @@ class Repositories extends AppController
         if (empty($commit)) {
             return $this->show_404();
         }
+
+        $this->response['commit'] = $commit;
 
         $this->title($commit->subject);
 
@@ -169,6 +173,9 @@ class Repositories extends AppController
         $target = $target ?: $this->target;
 
         $files = $this->scm->list_dir($path.'/', $target);
+
+        $this->response['files'] = $files;
+
         $nav_title = $path;
 
 		View::set(compact('target', 'files', 'path', 'nav_title'));

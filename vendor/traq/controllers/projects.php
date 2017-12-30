@@ -115,7 +115,7 @@ class Projects extends AppController
         }
 
         // Get the milestone and send it to the response
-        $this->response['milestone'] = $this->milestone;
+        $this->response['milestone'] = $milestone;
     }
 
     /**

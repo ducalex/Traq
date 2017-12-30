@@ -178,9 +178,13 @@ class Query
      * Easily add a "table = something" to the query.
      *
      * @example
-     *    where("count", 5, ">=")
+     *    1: where("count", 5, ">=")
      *    or
-     *    where(array(array('count', 5, '>=')));
+     *    2: where(array(array('count', 5, '>='), array('other', 'abc', '>=')));
+     *    or
+     *    3: where(array(array('count', 5), array('other', 'abc')), '>=');
+     *    or
+     *    4: where(array('count' => 5, 'other' => 'abc'), '>=');
      *
      * @param string $column Column
      * @param mixed $value Column value
@@ -192,13 +196,19 @@ class Query
     {
         // Check if this is a mass add
         if (is_array($column)) {
-            foreach($column as $where) {
-                call_user_func_array([$this, 'where'], $where);
+            $cond = $value ?: $cond;
+            foreach($column as $column => $value) {
+                if (is_int($column) && is_array($value)) { // (Example 2-3)
+                    $this->where[] = $value + array(null, null, $cond);
+                }
+                else { // (Example 4)
+                    $this->where[] = array($column, $value, $cond);
+                }
             }
         }
-        // Just one, add it.
+        // Just one, add it. (Example 1)
         else {
-            $this->where[] = array($column, $cond, $value);
+            $this->where[] = array($column, $value, $cond);
         }
 
         return $this;
@@ -366,7 +376,7 @@ class Query
 
         $where = array();
 
-        foreach ($this->where as $i => list($column, $cond, $value)) {
+        foreach ($this->where as $i => list($column, $value, $cond)) {
             if (strtoupper($cond) === 'IN') {
                 foreach((array)$value as $j => $value) {
                     $this->bind($IN[] = ":w{$i}_{$column}_in_$j", $value);

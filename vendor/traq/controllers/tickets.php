@@ -71,7 +71,7 @@ class Tickets extends AppController
     {
         parent::__construct();
 
-        // Set the title and load the helper
+        // Set the title
         $this->title(l('tickets'));
 
         // Custom fields
@@ -214,29 +214,25 @@ class Tickets extends AppController
             return $this->show_404();
         }
 
-        // Ticket history
-        $ticket_history = $ticket->history;
-
-        switch(settings('ticket_history_sorting')) {
-            case 'oldest_first':
-                $ticket_history->order_by('created_at', 'ASC');
-                break;
-
-            case 'newest_first':
-                $ticket_history->order_by('created_at', 'DESC');
-                break;
-        }
-
-        $ticket_history = $ticket_history->exec()->fetch_all();
+        // Set the title
+        $this->title($ticket->summary);
 
         // Atom feed
         $this->feeds[] = array(Request::requestUri() . ".atom", l('x_x_history_feed', $this->project->name, $ticket->summary));
 
-        // Set title and send ticket to view
-        $this->title($ticket->summary);
+        // Ticket history
+        switch(settings('ticket_history_sorting')) {
+            case 'oldest_first':
+                $ticket->history->order_by('created_at', 'ASC');
+                break;
 
+            case 'newest_first':
+                $ticket->history->order_by('created_at', 'DESC');
+                break;
+        }
+
+        $this->response['ticket_history'] = $ticket->history->exec()->fetch_all();
         $this->response['ticket'] = $ticket;
-        $this->response['ticket_history'] = $ticket_history;
     }
 
     /**
@@ -317,14 +313,11 @@ class Tickets extends AppController
         // Get the ticket
         $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
 
-        $voters = array();
-
         // Have there been any votes?
-        if (isset($ticket->extra['voted']) and is_array($ticket->extra['voted'])) {
-            // Populate the voters array
-            foreach ($ticket->extra['voted'] as $voter) {
-                $voters[] = User::find($voter);
-            }
+        if (empty($ticket->extra['voted'])) {
+            $voters = array();
+        } else {
+            $voters = array_map('User::find', $ticket->extra['voted']);
         }
 
         View::set('voters', $voters);
@@ -554,31 +547,24 @@ class Tickets extends AppController
 
         // Related tickets
         if ($this->user->permission($this->project->id, 'ticket_properties_change_related_tickets')) {
-            $related_tickets = $ticket->related_ticket_tids();
-            $posted_related_tickets = array();
-
-            foreach (explode(',', Request::post('related_tickets')) as $posted_related_ticket) {
-                $posted_related_tickets[] = trim($posted_related_ticket);
-            }
-
+            $posted_related_tickets = preg_split('/[-\s,]+/', Request::post('related_tickets'));
+            $new_relations = array_diff($posted_related_tickets, $ticket->related_ticket_tids());
+            
             // New relations
-            foreach ($posted_related_tickets as $related_tid) {
-                // Make sure it's not already a relation
-                if (!in_array($related_tid, $related_tickets)) {
-                    // Fetch ticket info
-                    $related_ticket = Ticket::select('id')
-                        ->where('project_id', $this->project->id)
-                        ->where('ticket_id', $related_tid)
-                        ->exec()->fetch();
+            foreach ($new_relations as $related_tid) {
+                // Fetch ticket info
+                $related_ticket = Ticket::select('id')
+                    ->where('project_id', $this->project->id)
+                    ->where('ticket_id', $related_tid)
+                    ->exec()->fetch();
 
-                    // Make sure the ticket exists
-                    if ($related_ticket) {
-                        $relation = new TicketRelationship(array(
-                            'ticket_id' => $ticket->id,
-                            'related_ticket_id' => $related_ticket->id
-                        ));
-                        $relation->save();
-                    }
+                // Make sure the ticket exists
+                if ($related_ticket) {
+                    $relation = new TicketRelationship(array(
+                        'ticket_id' => $ticket->id,
+                        'related_ticket_id' => $related_ticket->id
+                    ));
+                    $relation->save();
                 }
             }
 
@@ -607,6 +593,7 @@ class Tickets extends AppController
 
         $this->response['ticket'] = $ticket;
         $this->response['errors'] = $ticket->errors;
+        $this->response['ticket_history'] = $ticket->history->exec()->fetch_all();
 
         $this->render['view'] = 'tickets/view';
     }
@@ -726,7 +713,7 @@ class Tickets extends AppController
             }
         }
 
-        View::set(array('ticket' => $ticket, 'next_step' => $next_step));
+        View::set(compact('ticket', 'next_step'));
     }
 
     /**
@@ -814,12 +801,10 @@ class Tickets extends AppController
             );
         }
 
-        foreach ($filters as $name => $filter) {
-            // Don't bother if this isn't a valid filter.
-            if (!in_array($name, array_keys(ticket_filters_for($this->project)))) {
-                continue;
-            }
+        // Remove invalid filters
+        $filters = array_intersect_key($filters, ticket_filters_for($this->project));
 
+        foreach ($filters as $name => $filter) {
             if (!isset($filter['values'])) $filter['values'] = array();
 
             // Process filters

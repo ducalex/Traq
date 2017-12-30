@@ -75,7 +75,7 @@ class Statement
     public function fetch_all()
     {
         $this->cursor = 0;
-        $rows = array();
+        $rows = [];
 
         while($row = $this->fetch()) {
             $rows[] = $row;
@@ -120,7 +120,7 @@ class Statement
      *
      * @return object
      */
-    public function bind_param($param, &$value, $type = \PDO::PARAM_STR, $length = 0, $options = array())
+    public function bind_param($param, &$value, $type = \PDO::PARAM_STR, $length = 0, $options = [])
     {
         $this->statement->bindParam($param, $value, $type, $length, $options);
         return $this;

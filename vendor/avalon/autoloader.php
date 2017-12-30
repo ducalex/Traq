@@ -31,8 +31,8 @@ namespace avalon;
  */
 class Autoloader
 {
-    private static $aliases = array();
-    private static $prefixes = array();
+    private static $aliases = [];
+    private static $prefixes = [];
 
     /**
      * Registers the class as the autoloader.
@@ -89,7 +89,7 @@ class Autoloader
         $vendor = trim($vendor, '\\');
 
         if (!isset(static::$prefixes[$vendor]) || $overwrite) {
-            static::$prefixes[$vendor] = array();
+            static::$prefixes[$vendor] = [];
         }
 
         static::$prefixes[$vendor][] = $location;

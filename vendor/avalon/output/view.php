@@ -33,8 +33,8 @@ class View
 {
     public static $theme;
     public static $inherit_from;
-    private static $vars = array();
-    private static $protected = array();
+    private static $vars = [];
+    private static $protected = [];
 
     /**
      * Renders the specified file.
@@ -42,7 +42,7 @@ class View
      * @param string $file
      * @param array $vars Variables to be passed to the view.
      */
-    public static function render($file, array $vars = array())
+    public static function render($file, array $vars = [])
     {
         // Get the file name/path
         $_file = static::find($file);
@@ -66,7 +66,7 @@ class View
      *
      * @deprecated Deprecated since 0.6
      */
-    public static function get($file, array $vars = array())
+    public static function get($file, array $vars = [])
     {
         return static::render($file, $vars);
     }
@@ -80,7 +80,7 @@ class View
     public static function find($name)
     {
         // Add the theme and inherit path
-        $dirs = array_filter(array(APPPATH . '/views/' . static::$theme . '/', static::$inherit_from));
+        $dirs = array_filter([APPPATH . '/views/' . static::$theme . '/', static::$inherit_from]);
         $view = Load::find("$name.{phtml,php}", $dirs, 'views');
 
         return $view ? $view[0] : false;

@@ -28,7 +28,7 @@
 class FishHook
 {
     private static $_version = '4.0';
-    private static $_plugins = array();
+    private static $_plugins = [];
 
     /**
      * Adds a plugin to the library
@@ -40,7 +40,7 @@ class FishHook
     {
         // Make sure the hook index exists
         if (!isset(static::$_plugins[$hook])) {
-            static::$_plugins[$hook] = array();
+            static::$_plugins[$hook] = [];
         }
 
         // Add the plugin
@@ -53,7 +53,7 @@ class FishHook
      * @param string $hook
      * @param array $params Parameters to be passed to the plugins method.
      */
-    public static function run($hook, array $params = array())
+    public static function run($hook, array $params = [])
     {
         // Make sure the hook index exists
         if (!isset(static::$_plugins[$hook])) {

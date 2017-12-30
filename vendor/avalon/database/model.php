@@ -39,19 +39,19 @@ class Model implements \JsonSerializable
     protected static $_name; // Table name
     protected static $_primary_key = 'id'; // Primary key
     protected static $_has_many; // Has many relationship array
-    protected static $_properties = array('*'); // Table columns
+    protected static $_properties = ['*']; // Table columns
     protected static $_belongs_to; // Belongs to relationship array
-    protected static $_filters_before = array(); // Before filters
-    protected static $_filters_after = array(); // After filters
+    protected static $_filters_before = []; // Before filters
+    protected static $_filters_after = []; // After filters
     protected static $_connection_name = 'main'; // Name of the connection to use
-    protected static $_serialize = array(); // Fields to serialize to json when reading/writing database
-    protected static $_escape = array(); // Fields to escape when reading from database
+    protected static $_serialize = []; // Fields to serialize to json when reading/writing database
+    protected static $_escape = []; // Fields to escape when reading from database
 
     // Information different per table row
-    protected $_changed_properties = array(); // Properties that have been changed
-    protected $_data = array();
+    protected $_changed_properties = []; // Properties that have been changed
+    protected $_data = [];
     protected $_is_new = true; // Used to determine if this is a new row or not.
-    protected $errors = array();
+    protected $errors = [];
 
     /**
      * Used to build to assign the row data to the class as variables.
@@ -79,15 +79,15 @@ class Model implements \JsonSerializable
         }
 
         // Create filter arrays if they aren't already
-        foreach (array('construct', 'create', 'save') as $filter) {
+        foreach (['construct', 'create', 'save'] as $filter) {
             // Before filters
             if (!isset(static::$_filters_before[$filter])) {
-                static::$_filters_before[$filter] = array();
+                static::$_filters_before[$filter] = [];
             }
 
             // After filters
             if (!isset(static::$_filters_after[$filter])) {
-                static::$_filters_after[$filter] = array();
+                static::$_filters_after[$filter] = [];
             }
         }
 
@@ -109,7 +109,7 @@ class Model implements \JsonSerializable
         }
 
         // Plugin hook
-        FishHook::run('model::__construct', array(static::class, $this, &static::$_properties, &static::$_escape));
+        FishHook::run('model::__construct', [static::class, $this, &static::$_properties, &static::$_escape]);
     }
 
     /**
@@ -122,7 +122,7 @@ class Model implements \JsonSerializable
      */
     public static function find($find, $value = null) {
         if ($value == null) {
-            list($find, $value) = array(static::$_primary_key, $find);
+            list($find, $value) = [static::$_primary_key, $find];
         }
 
         $data = static::select()->where($find, $value)->limit(1)->exec()->fetch();
@@ -132,7 +132,7 @@ class Model implements \JsonSerializable
         }
 
         // Plugin hook
-        FishHook::run('model::find', array(static::class, $find, $value));
+        FishHook::run('model::find', [static::class, $find, $value]);
 
         return $data;
     }
@@ -148,7 +148,7 @@ class Model implements \JsonSerializable
 
         $primary_key = static::$_primary_key;
         $action = $this->_is_new() ? 'create' : 'save';
-        $data = array();
+        $data = [];
 
         // Before save filters
         if (!empty(static::$_filters_before[$action])) {
@@ -169,7 +169,7 @@ class Model implements \JsonSerializable
             }
         }
 
-        FishHook::run('model::save/'.$action, array(static::class, &$data));
+        FishHook::run('model::save/'.$action, [static::class, &$data]);
 
         // Save
         if ($this->_is_new() === false) {
@@ -218,7 +218,7 @@ class Model implements \JsonSerializable
      * @param mixed $col Either the column or an array to update multiple columns.
      * @param mixed $val The value of the column if only updating one column.
      *
-     * @example $model->set(array('col1'=>'val1', 'col2'=>'val2'));
+     * @example $model->set(['col1'=>'val1', 'col2'=>'val2']);
      *          $model->set('col1', 'val1');
      */
     public function set($col, $val = null) {
@@ -235,7 +235,7 @@ class Model implements \JsonSerializable
             }
 
             // Plugin hook
-            FishHook::run('model::set', array(static::class, $col, $val));
+            FishHook::run('model::set', [static::class, $col, $val]);
         }
     }
 
@@ -293,13 +293,13 @@ class Model implements \JsonSerializable
             $val = isset($this->_data[$var]) ? $this->_data[$var] : '';
 
             // Plugin hook
-            FishHook::run('model::__get', array(static::class, $var, $this->_data, &$val));
+            FishHook::run('model::__get', [static::class, $var, $this->_data, &$val]);
 
             return $val;
         }
         // Has many
         elseif (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var]))) {
-            $has_many = array();
+            $has_many = [];
             if (isset(static::$_has_many[$var])) {
                 $has_many = static::$_has_many[$var];
             }
@@ -336,7 +336,7 @@ class Model implements \JsonSerializable
         }
         // Belongs to
         else if (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var]))) {
-            $belongs_to = array();
+            $belongs_to = [];
             if (isset(static::$_belongs_to[$var])) {
                 $belongs_to = static::$_belongs_to[$var];
             }
@@ -372,7 +372,7 @@ class Model implements \JsonSerializable
             $val = $this->$var;
 
             // Plugin hook
-            FishHook::run('model::__get', array(static::class, $var, $this->_data, &$val));
+            FishHook::run('model::__get', [static::class, $var, $this->_data, &$val]);
 
             return $val;
         }
@@ -383,7 +383,7 @@ class Model implements \JsonSerializable
      */
     public function __set($var, $val) {
         if (in_array($var, static::$_properties)) {
-            FishHook::run('model::__set', array(static::class, $var, &$val));
+            FishHook::run('model::__set', [static::class, $var, &$val]);
             $this->_data[$var] = $val;
             $this->_set_changed($var);
         } else {
@@ -404,7 +404,7 @@ class Model implements \JsonSerializable
      *
      * @return array
      */
-    public function __toArray($include = array(), $exclude = array()) {
+    public function __toArray($include = [], $exclude = []) {
         $fields = array_diff($include ?: static::$_properties, $exclude);
         // This is necessary because some data isn't in _data (belongs_to and has_many)
         $data = [];
@@ -456,7 +456,7 @@ class Model implements \JsonSerializable
      * to local time from gmt time.
      */
     private function _date_time_convert() {
-        foreach (array('created_at', 'updated_at', 'published_at') as $var) {
+        foreach (['created_at', 'updated_at', 'published_at'] as $var) {
             if (!$this->_is_new() and isset($this->_data[$var])) {
                 $this->_data[$var] = Time::gmt_to_local($this->_data[$var]);
             }

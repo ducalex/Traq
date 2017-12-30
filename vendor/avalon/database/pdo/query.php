@@ -38,14 +38,14 @@ class Query
     private $type;
     private $cols;
     private $table;
-    private $group_by = array();
-    private $where = array();
+    private $group_by = [];
+    private $where = [];
     private $limit;
-    private $order_by = array();
-    private $custom_sql = array();
+    private $order_by = [];
+    private $custom_sql = [];
     private $set;
     private $_model;
-    private $bind = array();
+    private $bind = [];
 
     /**
      * PDO Query builder constructor.
@@ -58,7 +58,7 @@ class Query
     public function __construct($type, $data = null, $connection_name = 'main')
     {
         if ($type == 'SELECT') {
-            $this->cols = (is_array($data) ? $data : array('*'));
+            $this->cols = (is_array($data) ? $data : ['*']);
         } else if ($type == 'INSERT INTO' || $type == 'REPLACE INTO') {
             $this->data = $data;
         } else if ($type == 'UPDATE') {
@@ -157,7 +157,7 @@ class Query
      */
     public function order_by($col, $dir = 'ASC')
     {
-        $this->order_by = array($col, $dir);
+        $this->order_by = [$col, $dir];
         return $this;
     }
 
@@ -180,11 +180,11 @@ class Query
      * @example
      *    1: where("count", 5, ">=")
      *    or
-     *    2: where(array(array('count', 5, '>='), array('other', 'abc', '>=')));
+     *    2: where([['count', 5, '>='], ['other', 123, '>=']]);
      *    or
-     *    3: where(array(array('count', 5), array('other', 'abc')), '>=');
+     *    3: where([['count', 5], ['other', 123]], '>=');
      *    or
-     *    4: where(array('count' => 5, 'other' => 'abc'), '>=');
+     *    4: where(['count' => 5, 'other' => 123], '>=');
      *
      * @param string $column Column
      * @param mixed $value Column value
@@ -199,16 +199,16 @@ class Query
             $cond = $value ?: $cond;
             foreach($column as $column => $value) {
                 if (is_int($column) && is_array($value)) { // (Example 2-3)
-                    $this->where[] = $value + array(null, null, $cond);
+                    $this->where[] = $value + [null, null, $cond];
                 }
                 else { // (Example 4)
-                    $this->where[] = array($column, $value, $cond);
+                    $this->where[] = [$column, $value, $cond];
                 }
             }
         }
         // Just one, add it. (Example 1)
         else {
-            $this->where[] = array($column, $value, $cond);
+            $this->where[] = [$column, $value, $cond];
         }
 
         return $this;
@@ -280,11 +280,11 @@ class Query
      */
     public function _assemble()
     {
-        $query = array();
+        $query = [];
         $query[] = $this->type;
 
-        if (in_array($this->type, array("SELECT", "SELECT DISTINCT"))) {
-            $cols = array();
+        if (in_array($this->type, ["SELECT", "SELECT DISTINCT"])) {
+            $cols = [];
             foreach ($this->cols as $col => $as) {
                 // Check for `table.*` or `table.column`
                 if (strpos($as, '.')) {
@@ -308,7 +308,7 @@ class Query
         }
 
         // Select or Delete query
-        if (in_array($this->type, array("SELECT", "SELECT DISTINCT", "DELETE"))) {
+        if (in_array($this->type, ["SELECT", "SELECT DISTINCT", "DELETE"])) {
             $query[] = "FROM `{$this->prefix}{$this->table}`";
 
             // Where
@@ -338,8 +338,8 @@ class Query
         else if($this->type == "INSERT INTO" || $this->type == "REPLACE INTO" ) {
             $query[] = "`{$this->prefix}{$this->table}`";
 
-            $columns = array();
-            $values = array();
+            $columns = [];
+            $values = [];
 
             foreach($this->data as $column => $value) {
                 $this->bind($values[] = ":i_{$column}", $value);
@@ -354,7 +354,7 @@ class Query
             $query[] = "`{$this->prefix}{$this->table}`";
 
             $query[] = "SET";
-            $set = array();
+            $set = [];
             foreach ($this->data as $column => $value) {
                 $this->bind($key = ":u_{$column}", $value);
                 $set[] = "`$column` = $key";
@@ -371,10 +371,10 @@ class Query
     private function _build_where()
     {
         if (empty($this->where)) {
-            return array();
+            return [];
         }
 
-        $where = array();
+        $where = [];
 
         foreach ($this->where as $i => list($column, $value, $cond)) {
             if (strtoupper($cond) === 'IN') {
@@ -388,7 +388,7 @@ class Query
             }
         }
 
-        return array("WHERE " . implode(' AND ', $where));
+        return ["WHERE " . implode(' AND ', $where)];
     }
 
     /**

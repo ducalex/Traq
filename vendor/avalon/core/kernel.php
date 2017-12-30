@@ -54,7 +54,7 @@ class Kernel
         Router::route(static::$request);
 
         // Check if the routed controller and method exists
-        if (!is_callable(array(Router::$controller, 'action_' . Router::$method))) {
+        if (!is_callable([Router::$controller, 'action_' . Router::$method])) {
             Router::set404();
         }
     }
@@ -69,8 +69,8 @@ class Kernel
 
         // Before filters
         $filters = array_merge(
-            isset(static::$app->before['*']) ? static::$app->before['*'] : array(),
-            isset(static::$app->before[Router::$method]) ? static::$app->before[Router::$method] : array()
+            isset(static::$app->before['*']) ? static::$app->before['*'] : [],
+            isset(static::$app->before[Router::$method]) ? static::$app->before[Router::$method] : []
         );
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);
@@ -78,13 +78,13 @@ class Kernel
 
         // Call the method
         if (static::$app->render['action']) {
-            $output = call_user_func_array(array(static::$app, 'action_' . Router::$method), Router::$vars);
+            $output = call_user_func_array([static::$app, 'action_' . Router::$method], Router::$vars);
         }
 
         // After filters
         $filters = array_merge(
-            isset(static::$app->after['*']) ? static::$app->after['*'] : array(),
-            isset(static::$app->after[Router::$method]) ? static::$app->after[Router::$method] : array()
+            isset(static::$app->after['*']) ? static::$app->after['*'] : [],
+            isset(static::$app->after[Router::$method]) ? static::$app->after[Router::$method] : []
         );
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);

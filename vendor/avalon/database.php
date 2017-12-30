@@ -29,8 +29,8 @@ namespace avalon;
  */
 class Database
 {
-    private static $connections = array();
-    private static $initiated = array();
+    private static $connections = [];
+    private static $initiated = [];
 
     /**
      * Create a new database connection based off the passed

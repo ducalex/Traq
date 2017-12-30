@@ -36,7 +36,7 @@ class Form
      *
      * @return string
      */
-    public static function label($text, $for = null, $attributes = array())
+    public static function label($text, $for = null, $attributes = [])
     {
         if ($for !== null) {
             $attributes['for'] = $for;
@@ -52,7 +52,7 @@ class Form
      *
      * @return string
      */
-    public static function text($name, $attributes = array())
+    public static function text($name, $attributes = [])
     {
         return self::input('text', $name, $attributes);
     }
@@ -65,7 +65,7 @@ class Form
      *
      * @return string
      */
-    public static function password($name, $attributes = array())
+    public static function password($name, $attributes = [])
     {
         return self::input('password', $name, $attributes);
     }
@@ -80,7 +80,7 @@ class Form
      */
     public static function hidden($name, $value)
     {
-        return self::input('hidden', $name, array('value' => $value));
+        return self::input('hidden', $name, ['value' => $value]);
     }
 
     /**
@@ -92,9 +92,9 @@ class Form
      *
      * @return string
      */
-    public static function submit($text, $name = 'submit', $attributes = array())
+    public static function submit($text, $name = 'submit', $attributes = [])
     {
-        return self::input('submit', $name, array_merge(array('value' => $text), $attributes));
+        return self::input('submit', $name, array_merge(['value' => $text], $attributes));
     }
 
     /**
@@ -105,7 +105,7 @@ class Form
      *
      * @return string
      */
-    public static function textarea($name, $attributes = array())
+    public static function textarea($name, $attributes = [])
     {
         return self::input('textarea', $name, $attributes);
     }
@@ -119,7 +119,7 @@ class Form
      *
      * @return string
      */
-    public static function checkbox($name, $value, $attributes = array())
+    public static function checkbox($name, $value, $attributes = [])
     {
         $attributes['value'] = $value;
         return self::input('checkbox', $name, $attributes);
@@ -134,7 +134,7 @@ class Form
      *
      * @return string
      */
-    public static function radio($name, $value, $attributes = array())
+    public static function radio($name, $value, $attributes = [])
     {
         $attributes['value'] = $value;
         return self::input('radio', $name, $attributes);
@@ -149,7 +149,7 @@ class Form
      *
      * @return string
      */
-    public static function select($name, $options, $attributes = array())
+    public static function select($name, $options, $attributes = [])
     {
         // Extract the value
         $value = isset($attributes['value']) ? $attributes['value'] : null;
@@ -165,7 +165,7 @@ class Form
         }
 
         // Opening tag
-        $select = array();
+        $select = [];
         $select[] = "<select " . HTML::build_attributes($attributes) . ">";
 
         // Options
@@ -197,9 +197,9 @@ class Form
      *
      * @return string
      */
-    public static function multiselect($name, $options, $values, $attributes = array()) {
+    public static function multiselect($name, $options, $values, $attributes = []) {
         // Set attributes
-        $attributes = array_merge(array('class' => 'multiselect', 'name' => $name), $attributes);
+        $attributes = array_merge(['class' => 'multiselect', 'name' => $name], $attributes);
 
         // Set ID if not already set
         if (!isset($attributes['id'])) {
@@ -207,7 +207,7 @@ class Form
         }
 
         // Opening tag
-        $select = array();
+        $select = [];
         $select[] = "<select multiple " . HTML::build_attributes($attributes) . ">";
 
         // Options
@@ -242,7 +242,7 @@ class Form
     private static function select_option($option, $selected)
     {
         // Set value
-        $attributes = array('value' => $option['value']);
+        $attributes = ['value' => $option['value']];
 
         // Return option
         return "<option " . HTML::build_attributes($attributes) . ($selected ? ' selected' :'') . ">{$option['label']}</option>";
@@ -272,7 +272,7 @@ class Form
         }
 
         // Add selected or checked attribute?
-        foreach (array('selected', 'checked') as $attr) {
+        foreach (['selected', 'checked'] as $attr) {
             if (isset($attributes[$attr]) and !$attributes[$attr]) {
                 unset($attributes[$attr]);
             } elseif (isset($attributes[$attr])) {

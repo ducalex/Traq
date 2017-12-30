@@ -106,15 +106,15 @@ class Time
         $now = time(); // Get the time right now...
     
         // Time chunks...
-        $chunks = array(
-            array(60 * 60 * 24 * 365, 'year', 'years'),
-            array(60 * 60 * 24 * 30, 'month', 'months'),
-            array(60 * 60 * 24 * 7, 'week', 'weeks'),
-            array(60 * 60 * 24, 'day', 'days'),
-            array(60 * 60, 'hour', 'hours'),
-            array(60, 'minute', 'minutes'),
-            array(1, 'second', 'seconds'),
-        );
+        $chunks = [
+            [60 * 60 * 24 * 365, 'year', 'years'],
+            [60 * 60 * 24 * 30, 'month', 'months'],
+            [60 * 60 * 24 * 7, 'week', 'weeks'],
+            [60 * 60 * 24, 'day', 'days'],
+            [60 * 60, 'hour', 'hours'],
+            [60, 'minute', 'minutes'],
+            [1, 'second', 'seconds'],
+        ];
     
         // Get the difference
         $difference = abs($original - $now);

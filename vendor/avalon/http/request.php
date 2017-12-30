@@ -82,7 +82,7 @@ class Request
         static::$request_uri = static::requestPath();
 
         // Set relative uri without query string
-        static::$uri = preg_replace(array('#^'.preg_quote(static::$base).'#', '/\?.*$/'), '', static::$request_uri);
+        static::$uri = preg_replace(['#^'.preg_quote(static::$base).'#', '/\?.*$/'], '', static::$request_uri);
 
         // Request segments
         static::$segments = explode('/', trim(static::$uri, '/'));
@@ -393,7 +393,7 @@ class Request
     private function baseUrl()
     {
         $filename = basename(static::$server['SCRIPT_FILENAME']);
-        $try = array('SCRIPT_NAME', 'PHP_SELF', 'ORIG_SCRIPT_NAME');
+        $try = ['SCRIPT_NAME', 'PHP_SELF', 'ORIG_SCRIPT_NAME'];
 
         foreach ($try as $key) {
             if (basename(static::$server[$key]) === $filename) {
@@ -406,7 +406,7 @@ class Request
 
     private function requestPath()
     {
-        $try = array('HTTP_X_ORIGINAL_URL', 'HTTP_X_REWRITE_URL', 'UNENCODED_URL', 'REQUEST_URI', 'ORIG_PATH_INFO');
+        $try = ['HTTP_X_ORIGINAL_URL', 'HTTP_X_REWRITE_URL', 'UNENCODED_URL', 'REQUEST_URI', 'ORIG_PATH_INFO'];
 
         foreach ($try as $key) {
             if (!empty(static::$server[$key])) {

@@ -29,10 +29,10 @@ namespace avalon\core;
  */
 class Load
 {
-    private static $undo = array('my_sql' => 'mysql', 'java_script' => 'javascript');
-    private static $libs = array();
-    private static $helpers = array();
-    private static $search_paths = array();
+    private static $undo = ['my_sql' => 'mysql', 'java_script' => 'javascript'];
+    private static $libs = [];
+    private static $helpers = [];
+    private static $search_paths = [];
 
     /**
      * Loads the specified configuration file.
@@ -44,9 +44,7 @@ class Load
     public static function config($file)
     {
         $file = basename(strtolower($file), '.php');
-        $paths = array(APPPATH, SYSPATH);
-
-        foreach ($paths as $dir) {
+        foreach ([APPPATH, SYSPATH] as $dir) {
             if (file_exists("$dir/config/$file.php")) {
                 return require "$dir/config/$file.php";
             }
@@ -63,11 +61,11 @@ class Load
      *
      * @return string
      */
-    public static function find($name, $paths = array(), $default_subdir = '')
+    public static function find($name, $paths = [], $default_subdir = '')
     {
-        $default_paths = array_merge(array(APPPATH, SYSPATH), self::$search_paths);
+        $default_paths = array_merge([APPPATH, SYSPATH], self::$search_paths);
         $name = self::lowercase($name);
-        $files = array();
+        $files = [];
 
         foreach ($paths as $path) {
             if ($file = glob("$path/$name", GLOB_BRACE)) {

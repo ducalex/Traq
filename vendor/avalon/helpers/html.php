@@ -36,7 +36,7 @@ class HTML
      */
     public static function css_link($path, $media = 'screen')
     {
-        $options = static::build_attributes(array('rel' => 'stylesheet', 'href' => $path, 'media' => $media));
+        $options = static::build_attributes(['rel' => 'stylesheet', 'href' => $path, 'media' => $media]);
         return "<link $options>\n";
     }
 
@@ -49,7 +49,7 @@ class HTML
      */
     public static function js_inc($path)
     {
-        $options = static::build_attributes(array('src' => $path));
+        $options = static::build_attributes(['src' => $path]);
         return "<script $options></script>\n";
     }
 
@@ -62,7 +62,7 @@ class HTML
      */
     public static function feed_link($path)
     {
-        $options = static::build_attributes(array('rel' => 'alternate', 'href' => $path, 'type' => 'application/atom+xml'));
+        $options = static::build_attributes(['rel' => 'alternate', 'href' => $path, 'type' => 'application/atom+xml']);
         return "<link $options>\n";
     }
 
@@ -76,7 +76,7 @@ class HTML
      *
      * @return string
      */
-    public static function link($label, $url = null, array $attributes = array(), $prepend_base = true)
+    public static function link($label, $url = null, array $attributes = [], $prepend_base = true)
     {
         $url = $url === null ? $label : $url;
         $label = htmlentities($label);
@@ -95,9 +95,9 @@ class HTML
      */
     public static function build_attributes($attributes)
     {
-        $options = array();
+        $options = [];
         foreach ($attributes as $attr => $val) {
-            if (in_array($attr, array('id', 'checked', 'disabled')) and $val === false) {
+            if (in_array($attr, ['id', 'checked', 'disabled']) and $val === false) {
                 continue;
             }
             $options[] = $attr.'="'.htmlentities($val).'"';

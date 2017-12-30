@@ -36,22 +36,22 @@ use avalon\output\View;
  */
 class Controller
 {
-    public $render = array(
+    public $render = [
         'action' => true,     // Call the routed action, or not
         'view'   => false,    // View to render, set in __construct()
         'layout' => 'default', // Layout to render
-    );
+    ];
 
-    public $response = array(
+    public $response = [
         'status' => 200,
         'redirect' => null,
         'format' => 'text/html',
         'errors' => null,
         'content' => null,
-    );
+    ];
 
-    public $before = array();
-    public $after = array();
+    public $before = [];
+    public $after = [];
 
     public function __construct()
     {

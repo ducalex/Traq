@@ -32,15 +32,15 @@ use \Exception;
  */
 class Router
 {
-    private static $routes = array();
+    private static $routes = [];
 
     // Routed values
     public static $controller;
     public static $method;
-    public static $params = array();
-    public static $vars = array();
+    public static $params = [];
+    public static $vars = [];
     public static $extension;
-    public static $extensions = array('.json', '.xml', '.atom');
+    public static $extensions = ['.json', '.xml', '.atom'];
 
     /**
      * Adds a route to be routed.
@@ -49,15 +49,15 @@ class Router
      * @param string $value  Controller/method to route to
      * @param array  $params Default params to pass to the method
      */
-    public static function add($route, $value, array $params = array())
+    public static function add($route, $value, array $params = [])
     {
         // Don't overwrite the route
         if (!isset(static::$routes[$route])) {
-            static::$routes[$route] = array(
+            static::$routes[$route] = [
                 'route'  => $route,
                 'value'  => $value,
                 'params' => $params
-            );
+            ];
         }
     }
 
@@ -112,7 +112,7 @@ class Router
     {
         $value = explode('.', $route['value']);
         $method = explode('/', implode('.', array_slice($value, 1)), 2);
-        $vars = isset($method[1]) ? explode(',', $method[1]) : array();
+        $vars = isset($method[1]) ? explode(',', $method[1]) : [];
 
         static::$controller = str_replace('::', '\\', '\\'.$value[0]);
         static::$method = $method[0];

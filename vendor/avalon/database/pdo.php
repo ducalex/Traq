@@ -113,7 +113,7 @@ class PDO extends Driver
      *
      * @return object
      */
-    public function prepare($query, array $options = array())
+    public function prepare($query, array $options = [])
     {
         $this->query_count++;
         $this->last_query = $query;
@@ -127,7 +127,7 @@ class PDO extends Driver
      *
      * @return object
      */
-    public function select($cols = array('*'))
+    public function select($cols = ['*'])
     {
         if (!is_array($cols)) {
             $cols = func_get_args();

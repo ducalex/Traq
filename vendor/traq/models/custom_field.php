@@ -188,40 +188,18 @@ class CustomField extends Model
     {
         switch($this->type) {
             case 'text':
-                if ($this->validate_min_length($value)
-                and $this->validate_max_length($value)
-                and $this->validate_regex($value)) {
-                    return true;
-                }
-                break;
+                return $this->validate_min_length($value) and $this->validate_max_length($value) and $this->validate_regex($value);
 
             case 'integer':
-                if ($this->validate_min_length($value)
-                and $this->validate_max_length($value)
-                and $this->validate_regex($value)
-                and is_numeric($value)) {
-                    return true;
-                }
-                break;
+                return $this->validate_min_length($value) and $this->validate_max_length($value) and ctype_digit($value);
 
             case 'select':
-                // Multiple select
-                if ($this->multiple) {
-                    foreach ($value as $v) {
-                        if (!in_array($v, explode("\n", $this->values))) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-                // Single select
-                else {
-                    return in_array($value, explode("\n", $this->values));
-                }
-                break;
+                $value = (array)$value; // If single value
+                return array_intersect($value, explode("\n", $this->values)) === $value;
+            
+            default:
+                return false;
         }
-
-        return false;
     }
 
     /**
@@ -233,13 +211,7 @@ class CustomField extends Model
      */
     private function validate_min_length($value)
     {
-        if ($this->min_length != "0") {
-            if (strlen($value) < $this->min_length) {
-                return false;
-            }
-        }
-
-        return true;
+        return empty($this->min_length) || strlen($value) > $this->min_length;
     }
 
     /**
@@ -251,13 +223,7 @@ class CustomField extends Model
      */
     private function validate_max_length($value)
     {
-        if ($this->max_length != "0") {
-            if (strlen($value) > $this->max_length) {
-                return false;
-            }
-        }
-
-        return true;
+        return empty($this->max_length) || strlen($value) <= $this->max_length;
     }
 
     /**
@@ -269,11 +235,7 @@ class CustomField extends Model
      */
     private function validate_regex($value)
     {
-        if (preg_match("#{$this->regex}#", $value)) {
-            return true;
-        }
-
-        return false;
+        return preg_match("#{$this->regex}#", $value) >= 0;
     }
 
     /**
@@ -295,7 +257,7 @@ class CustomField extends Model
             $errors['slug'] = l('errors.slug_blank');
         }
 
-        // Make sure the slug isnt in use
+        // Make sure the slug isn't in use
         $slug = static::select('id')->where('id', ($this->_is_new() ? 0 : $this->id), '!=')->where('slug', $this->_data['slug'])->where('project_id', $this->_data['project_id']);
         if ($slug->exec()->row_count()) {
             $errors['slug'] = l('errors.slug_in_use');
@@ -307,7 +269,7 @@ class CustomField extends Model
         }
 
         // Text and integer field
-        if ($this->type == 'text' or $this->type == 'integer') {
+        if ($this->type == 'text') {
             // Make sure regex is set
             if (empty($this->_data['regex'])) {
                 $errors['regex'] = l('errors.regex_blank');

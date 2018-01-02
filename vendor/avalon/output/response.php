@@ -20,39 +20,59 @@
 
 namespace avalon\output;
 
-class Response
+class Response implements \ArrayAccess
 {
-    private $status = 200;
-    private $format = 'text/html';
-    private $redirect = null;
-    private $errors = [];
-    private $objects = [];
-    private $body = '';
+    public $status = 200;
+    public $format = 'text/html';
+    public $redirect;
+    public $errors = [];
+    public $objects = [];
+    public $body = '';
 
-    public function __set($var, $val)
+
+    public function __construct($status = 200, array $options = [])
     {
-        if (isset($this->$var)) {
-            $this->$var = $val;
-        } else {
-            $this->objects[$var] = $val;
+        $this->status = $status;
+        foreach($options as $key => $val) {
+            $this->$key = $val;
         }
     }
 
-    public static function __get($var)
+    public function body()
     {
-        if (isset($this->$var)) {
-            return $this->$var;
-        } elseif (isset($this->objects[$var])) {
-            return $this->objects[$var];
-        }
-    }
-
-    public static function body()
-    {
-        if ($format === 'application/json') {
-            return json_encode($this, JSON_UNESCAPED_SLASHES);
+        if ($this->format === 'application/json' && $this->body === '') {
+            return json_encode($this->objects, JSON_UNESCAPED_SLASHES);
         } else {
             return $this->body;
         }
+    }
+
+    public function offsetExists($offset)
+    {
+        return isset($this->objects[$offset]);
+    }
+
+    public function offsetGet($offset)
+    {
+        return isset($this->objects[$offset]) ? $this->objects[$offset] : null;
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        if (is_null($offset)) {
+            $this->body .= $value; // $this->response[] = 'text...';
+        } else {
+            $this->objects[$offset] = $value; // $this->response['object'] = 'value...';
+        }
+    }
+
+    public function offsetUnset($offset)
+    {
+        unset($this->objects[$offset]);
+    }
+
+    public function from(Response $response)
+    {
+        return new static($response->status, (array)$response);
     }
 }

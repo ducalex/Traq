@@ -23,7 +23,7 @@ namespace avalon\core;
 use avalon\http\Router;
 use avalon\http\Request;
 use avalon\http\Session;
-use avalon\output\Body;
+use avalon\output\Response;
 use avalon\output\View;
 
 /**
@@ -68,10 +68,7 @@ class Kernel
         static::$app = new Router::$controller;
 
         // Before filters
-        $filters = array_merge(
-            isset(static::$app->before['*']) ? static::$app->before['*'] : [],
-            isset(static::$app->before[Router::$method]) ? static::$app->before[Router::$method] : []
-        );
+        $filters = array_get_keys(static::$app->before, ['*', Router::$method], true);
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);
         }
@@ -79,29 +76,24 @@ class Kernel
         // Call the method
         if (static::$app->render['action']) {
             $output = call_user_func_array([static::$app, 'action_' . Router::$method], Router::$vars);
+            
+            // If the controller returns something then this value replaces the view!
+            if ($output !== null) {
+                if ($output instanceOf Response) {
+                    static::$app->response = $output;
+                } else {
+                    static::$app->response->body = $output;
+                }
+                static::$app->render['view'] = false;
+            }
         }
 
         // After filters
-        $filters = array_merge(
-            isset(static::$app->after['*']) ? static::$app->after['*'] : [],
-            isset(static::$app->after[Router::$method]) ? static::$app->after[Router::$method] : []
-        );
+        $filters = array_get_keys(static::$app->after, ['*', Router::$method], true);
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);
         }
         
-        // If an object is returned, use the `response` variable if it's set.
-        if (isset($output->response)) {
-            $output = $output->response;
-        }
-
-        // Check if we have any content
-        if (static::$app->render['action'] and isset($output)) {
-            // If the controller returns something then this value replaces the view!
-            static::$app->render['view'] = false;
-            static::$app->response['content'] = $output;
-        }
-
         static::$app->__shutdown();
     }
 

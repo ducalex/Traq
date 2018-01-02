@@ -22,7 +22,7 @@ namespace avalon\core;
 
 use avalon\http\Request;
 use avalon\http\Router;
-use avalon\output\Body;
+use avalon\output\Response;
 use avalon\output\View;
 
 /**
@@ -42,13 +42,7 @@ class Controller
         'layout' => 'default', // Layout to render
     ];
 
-    public $response = [
-        'status' => 200,
-        'redirect' => null,
-        'format' => 'text/html',
-        'errors' => null,
-        'content' => null,
-    ];
+    public $response;
 
     public $before = [];
     public $after = [];
@@ -57,38 +51,42 @@ class Controller
     {
         $called_class = array_slice(explode('\\', static::class), 2);
         $this->render['view'] = implode('/', $called_class) . '/' . Router::$method;
+        $this->response = new Response(200);
     }
 
     public function __shutdown()
     {
-        // Don't render the layout for json or xml content
-        if (Router::$extension) {
-            $this->render['layout'] = false;
+        // It's a redirection
+        if ($this->response->redirect) {
+            Request::redirectTo($this->response->redirect);
         }
 
         // Set HTTP code
-        $http_code = $this->response['status'] ?: 400;
+        $http_code = $this->response->status ?: 400;
         if (in_array($http_code, [200, 400, 401, 402, 403, 404])) {
             http_response_code($http_code);
         }
 
         // Set mime type if the output format is known
-        if ($this->response['format']) {
-            header('Content-Type: ' . $this->response['format']);
+        if ($this->response->format) {
+            header('Content-Type: ' . $this->response->format);
         }
+
+        // We add the response objects to the view
+        View::set($this->response->objects);
 
         // Render the view
         if ($this->render['view']) {
             $content = View::render($this->render['view']);
         } else {
-            $content = $this->response['content'];
+            $content = $this->response->body();
         }
 
         // Are we wrapping the view in a layout?
         if ($this->render['layout']) {
-            $content = View::render("layouts/{$this->render['layout']}", compact('content'));
+            echo View::render("layouts/{$this->render['layout']}", compact('content'));
+        } else {
+            echo $content;
         }
-
-        print($content);
     }
 }

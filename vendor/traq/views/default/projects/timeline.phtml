@@ -4,8 +4,8 @@
 		<form action="<?php echo Request::base($app->project->href('timeline'))?>" method="post">
 			<fieldset>
 				<legend><?php echo l('filter_events')?></legend>
-				<?php foreach ($timeline_filters as $filter => $filter_events) { ?>
-					<?php echo Form::checkbox("filters[{$filter}]", 1, array('checked' => in_array($filter, $filters)))?>
+				<?php foreach ($filters as $filter => $enabled) { ?>
+					<?php echo Form::checkbox("filters[{$filter}]", 1, array('checked' => $enabled))?>
 					<?php echo Form::label(l("timeline.filters.{$filter}"), "filters[{$filter}]")?><br />
 				<?php } ?>
 				<div class="actions">

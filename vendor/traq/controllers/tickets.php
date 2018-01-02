@@ -85,7 +85,10 @@ class Tickets extends AppController
     public function action_index()
     {
         // Atom feed
-        $this->feeds[] = array(Request::requestUri() . ".atom", l('x_ticket_feed', $this->project->name));
+        $this->feeds[] = array(Request::requestUri() . ".atom?order_by=created_at.desc", l('x_ticket_feed', $this->project->name));
+
+        // Valid columns
+        $allowed_columns = ticketlist_allowed_columns();
 
         // Create ticket filter query
         $filter_query = new TicketFilterQuery($this->project);
@@ -97,51 +100,30 @@ class Tickets extends AppController
             $filter_query->process($filter, $value);
         }
 
+
+        // Check query's order_by, then use project's default
+        list($column, $direction) = explode('.', Request::req('order_by', $this->project->default_ticket_sorting));
+
+        $foreign_keys = ['user', 'milestone', 'version', 'component', 'type', 'status', 'priority', 'severity', 'assigned_to'];
+
+        if (in_array($column, $foreign_keys)) {
+            $column = "{$column}_id";
+        } elseif (in_array($column, $allowed_columns)) {
+            $column = $column;
+        } else {
+            $column = 'ticket_id';
+        }
+
+        $direction = (strtolower($direction) === 'asc') ? 'asc' : 'desc';
+        $column = ($column === 'ticket_id') ? 'id' : $column; // It is better to use the primary key
+
+
         // Fetch tickets
-        $rows = Ticket::select('tickets.*')->custom_sql($filter_query->sql());
-
-        // Order by creation date for atom feed
-        if (Router::$extension == '.atom') {
-            $order = array('created_at', 'desc');
-        }
-        // Sort from URI, if set
-        else {
-            // field.direction
-            $order = explode('.', ticket_sort_order($this->project->default_ticket_sorting));
-        }
-        // Check if we need to do
-        // anything with the field.
-        switch($order[0]) {
-            case 'summary':
-            case 'body':
-            case 'votes':
-            case 'created_at':
-            case 'updated_at':
-                $property = $order[0];
-                break;
-
-            case 'user':
-            case 'milestone':
-            case 'version':
-            case 'component':
-            case 'type':
-            case 'status':
-            case 'priority':
-            case 'severity':
-            case 'assigned_to':
-                $property = "{$order[0]}_id";
-                break;
-
-            case 'id':
-                $property = "ticket_id";
-                break;
-
-            default:
-                $property = 'ticket_id';
-        }
-
-        // Order rows
-        $rows->order_by($property, (strtolower($order[1]) == 'asc' ? "ASC" : "DESC"));
+        
+        $rows = Ticket::select(['tickets.*', 'users.name' => 'owner'])
+            ->custom_sql('LEFT JOIN users ON users.id = tickets.user_id')
+            ->custom_sql($filter_query->sql())
+            ->custom_sql("ORDER BY `$column` $direction");
 
         $page = (int)Request::req('page') ?: 1;
         $per_page = settings('tickets_per_page');
@@ -161,17 +143,6 @@ class Tickets extends AppController
 
         $filters = $filter_query->filters();
 
-        // Send the tickets array to the view..
-        View::set(compact('pagination', 'tickets', 'filters'));
-
-        $this->response['tickets'] = $tickets;
-        // Columns
-        $this->get_columns();
-    }
-
-    private function get_columns()
-    {
-        $allowed_columns = ticketlist_allowed_columns();
 
         // Add custom fields
         foreach ($this->custom_fields as $field) {
@@ -195,8 +166,13 @@ class Tickets extends AppController
             $columns = ticket_columns();
         }
 
-        // Send columns to view
-        View::set('columns', $columns);
+
+        $this->response['tickets'] = $tickets;
+        $this->response['filters'] = $filters;
+        $this->response['order'] = "$column.$direction";
+
+        // Send the tickets array to the view..
+        View::set(compact('pagination', 'columns'));
     }
 
     /**
@@ -231,8 +207,8 @@ class Tickets extends AppController
                 break;
         }
 
-        $this->response['ticket_history'] = $ticket->history->exec()->fetch_all();
         $this->response['ticket'] = $ticket;
+        $this->response['ticket_history'] = $ticket->history->exec()->fetch_all();
     }
 
     /**
@@ -274,15 +250,13 @@ class Tickets extends AppController
      */
     public function action_manage_tasks($ticket_id)
     {
-        $this->render['view'] = 'tickets/tasks';
-
         if (!$this->user->permission($this->project->id, 'ticket_properties_set_tasks')) {
             return $this->show_no_permission();
         }
 
         $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
-        $tasks = $ticket->tasks ?: array();
-        View::set('tasks', $tasks);
+        $this->response['tasks'] = $ticket->tasks ?: array();
+        $this->render['view'] = 'tickets/tasks';
     }
 
   /**
@@ -452,12 +426,12 @@ class Tickets extends AppController
                     $sub->save();
                 }
 
-                $this->response['redirect'] = $ticket->href();
+                $this->response->redirect = $ticket->href();
             }
         }
 
         $this->response['ticket'] = $ticket;
-        $this->response['errors'] = $ticket->errors;
+        $this->response->errors = $ticket->errors;
     }
 
     /**
@@ -549,7 +523,7 @@ class Tickets extends AppController
         if ($this->user->permission($this->project->id, 'ticket_properties_change_related_tickets')) {
             $posted_related_tickets = preg_split('/[-\s,]+/', Request::post('related_tickets'));
             $new_relations = array_diff($posted_related_tickets, $ticket->related_ticket_tids());
-            
+
             // New relations
             foreach ($new_relations as $related_tid) {
                 // Fetch ticket info
@@ -587,13 +561,13 @@ class Tickets extends AppController
         }
 
         // Update the ticket
-        if ($this->response['status'] = $ticket->update_data($data)) {
-            $this->response['redirect'] = $ticket->href();
+        if ($this->response->status = $ticket->update_data($data)) {
+            $this->response->redirect = $ticket->href();
         }
 
         $this->response['ticket'] = $ticket;
-        $this->response['errors'] = $ticket->errors;
         $this->response['ticket_history'] = $ticket->history->exec()->fetch_all();
+        $this->response->errors = $ticket->errors;
 
         $this->render['view'] = 'tickets/view';
     }
@@ -642,13 +616,13 @@ class Tickets extends AppController
             $ticket->body = Request::post('body');
 
             // Save and redirect
-            if ($this->response['status'] = $ticket->save()) {
-                $this->response['redirect'] = $ticket->href();
+            if ($this->response->status = $ticket->save()) {
+                $this->response->redirect = $ticket->href();
             }
         }
 
         $this->response['ticket'] = $ticket;
-        $this->response['errors'] = $ticket->errors;
+        $this->response->errors = $ticket->errors;
     }
 
     /**

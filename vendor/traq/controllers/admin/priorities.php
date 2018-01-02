@@ -62,13 +62,13 @@ class Priorities extends AppController
             // Set the name
             $priority->set('name', Request::post('name'));
             // Save and redirect
-            if ($this->response['status'] = $priority->save()) {
-                $this->response['redirect'] = '/admin/priorities';
+            if ($this->response->status = $priority->save()) {
+                $this->response->redirect = '/admin/priorities';
             }
         }
 
         $this->response['priority'] = $priority;
-        $this->response['errors'] = $priority->errors;
+        $this->response->errors = $priority->errors;
     }
 
     /**
@@ -86,8 +86,8 @@ class Priorities extends AppController
             // Set the name
             $priority->set('name', Request::post('name', $priority->name));
             // Save and redirect
-            if ($this->response['status'] = $priority->save()) {
-                $this->response['redirect'] = '/admin/priorities';
+            if ($this->response->status = $priority->save()) {
+                $this->response->redirect = '/admin/priorities';
             }
         }
 
@@ -102,7 +102,7 @@ class Priorities extends AppController
     public function action_delete($id)
     {
         // Find and delete priority
-        $this->response['status'] = Priority::find($id)->delete();
-        $this->response['redirect'] = '/admin/priorities';
+        $this->response->status = Priority::find($id)->delete();
+        $this->response->redirect = '/admin/priorities';
     }
 }

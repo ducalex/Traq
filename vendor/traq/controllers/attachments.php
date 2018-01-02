@@ -75,9 +75,9 @@ class Attachments extends AppController
         // No template rendering
         $this->render['layout'] = $this->render['view'] = false;
         // If the mime-type is text, we can just display it as plain text.
-        $this->response['format'] = preg_replace('#^text/.+$#i', 'text/plain', $this->attachment->type);
+        $this->response->format = preg_replace('#^text/.+$#i', 'text/plain', $this->attachment->type);
         // Attachment Content
-        $this->response['content'] = base64_decode($this->attachment->contents);
+        $this->response->body = base64_decode($this->attachment->contents);
     }
 
     /**

@@ -74,14 +74,14 @@ class Milestones extends AppController
             // Make sure the data is valid
             if ($milestone->is_valid()) {
                 // Save and redirect
-                if ($this->response['status'] = $milestone->save()) {
-                    $this->response['redirect'] = "{$this->project->slug}/settings/milestones";
+                if ($this->response->status = $milestone->save()) {
+                    $this->response->redirect = "{$this->project->slug}/settings/milestones";
                 }
             }
         }
 
         $this->response['milestone'] = $milestone;
-        $this->response['errors'] = $milestone->errors;
+        $this->response->errors = $milestone->errors;
     }
 
     /**
@@ -116,14 +116,14 @@ class Milestones extends AppController
             // Make sure the data is valid
             if ($milestone->is_valid()) {
                 // Save and redirect
-                if ($this->response['status'] = $milestone->save()) {
-                    $this->response['redirect'] = "{$this->project->slug}/settings/milestones";
+                if ($this->response->status = $milestone->save()) {
+                    $this->response->redirect = "{$this->project->slug}/settings/milestones";
                 }
             }
         }
 
         $this->response['milestone'] = $milestone;
-        $this->response['errors'] = $milestone->errors;
+        $this->response->errors = $milestone->errors;
     }
 
     /**
@@ -158,7 +158,7 @@ class Milestones extends AppController
             $milestone->delete();
 
             // Redirect
-            $this->response['redirect'] = "{$this->project->slug}/settings/milestones";
+            $this->response->redirect = "{$this->project->slug}/settings/milestones";
         }
 
         View::set(compact('milestone', 'milestones'));

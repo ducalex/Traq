@@ -69,13 +69,13 @@ class Projects extends AppController
             ));
 
             // Save project
-            if ($this->response['status'] = $project->save()) {
-                $this->response['redirect'] = 'admin/projects';
+            if ($this->response->status = $project->save()) {
+                $this->response->redirect = 'admin/projects';
             }
         }
 
         $this->response['project'] = $project;
-        $this->response['errors'] = $project->errors;
+        $this->response->errors = $project->errors;
     }
 
     /**
@@ -87,8 +87,8 @@ class Projects extends AppController
     {
         $project = Project::find('id', $id);
 
-        if ($this->response['status'] = $project->delete()) {
-            $this->response['redirect'] = 'admin/projects';
+        if ($this->response->status = $project->delete()) {
+            $this->response->redirect = 'admin/projects';
         }
     }
 }

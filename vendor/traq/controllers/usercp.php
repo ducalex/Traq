@@ -64,13 +64,13 @@ class Usercp extends AppController
             $user->option('watch_created_tickets', Request::post('watch_created_tickets'));
 
             // Save the user
-            if ($this->response['status'] = $user->save()) {
-                $this->response['redirect'] = Request::requestUri();
+            if ($this->response->status = $user->save()) {
+                $this->response->redirect = Request::requestUri();
             }
         }
 
         $this->response['user'] = $user;
-        $this->response['errors'] = $user->errors;
+        $this->response->errors = $user->errors;
     }
 
     /**
@@ -102,14 +102,14 @@ class Usercp extends AppController
                 $user->set_password($data['new_password']);
 
                 // Save the user
-                if ($this->response['status'] = $user->save()) {
-                    $this->response['redirect'] = Request::requestUri();
+                if ($this->response->status = $user->save()) {
+                    $this->response->redirect = Request::requestUri();
                 }
             }
         }
 
         $this->response['user'] = $user;
-        $this->response['errors'] = $user->errors;
+        $this->response->errors = $user->errors;
     }
 
     /**
@@ -118,8 +118,8 @@ class Usercp extends AppController
     public function action_create_api_key()
     {
         $this->user->generate_api_key();
-        $this->response['status'] = $this->user->save();
-        $this->response['redirect'] = 'usercp';
+        $this->response->status = $this->user->save();
+        $this->response->redirect = 'usercp';
     }
 
     /**

@@ -64,14 +64,14 @@ class Groups extends AppController
 
             // Make sure the data is valid.
             if ($group->is_valid()) {
-                if ($this->response['status'] = $group->save()) {
-                    $this->response['redirect'] = '/admin/groups';
+                if ($this->response->status = $group->save()) {
+                    $this->response->redirect = '/admin/groups';
                 }
             }
         }
 
         $this->response['group'] = $group;
-        $this->response['errors'] = $group->errors;
+        $this->response->errors = $group->errors;
 
         // Send the group object to the view.
         View::set('group', $group);
@@ -96,14 +96,14 @@ class Groups extends AppController
 
             // Make sure the data is valid.
             if ($group->is_valid()) {
-                if ($this->response['status'] = $group->save()) {
-                    $this->response['redirect'] = '/admin/groups';
+                if ($this->response->status = $group->save()) {
+                    $this->response->redirect = '/admin/groups';
                 }
             }
         }
         
         $this->response['group'] = $group;
-        $this->response['errors'] = $group->errors;
+        $this->response->errors = $group->errors;
 
         // Send the group object to the view.
         View::set('group', $group);
@@ -118,7 +118,7 @@ class Groups extends AppController
     {
         // Find the group, delete it and redirect
         $group = Group::find($id);
-        $this->response['status'] = $group->delete();
-        $this->response['redirect'] = '/admin/groups';
+        $this->response->status = $group->delete();
+        $this->response->redirect = '/admin/groups';
     }
 }

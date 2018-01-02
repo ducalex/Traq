@@ -68,14 +68,14 @@ class Statuses extends AppController
             // Check if the data is valid.
             if ($status->is_valid()) {
                 // Save and redirect.
-                if ($this->response['status'] = $status->save()) {
-                    $this->response['redirect'] = '/admin/tickets/statuses';
+                if ($this->response->status = $status->save()) {
+                    $this->response->redirect = '/admin/tickets/statuses';
                 }
             }
         }
 
-        $this->response['status'] = $status;
-        $this->response['errors'] = $status->errors;
+        $this->response->status = $status;
+        $this->response->errors = $status->errors;
     }
 
     /**
@@ -108,14 +108,14 @@ class Statuses extends AppController
             // Check if the data is valid.
             if ($status->is_valid()) {
                 // Save and redirect.
-                if ($this->response['status'] = $status->save()) {
-                    $this->response['redirect'] = '/admin/tickets/statuses';
+                if ($this->response->status = $status->save()) {
+                    $this->response->redirect = '/admin/tickets/statuses';
                 }
             }
         }
 
-        $this->response['status'] = $status;
-        $this->response['errors'] = $status->errors;
+        $this->response->status = $status;
+        $this->response->errors = $status->errors;
     }
 
     /**
@@ -127,8 +127,8 @@ class Statuses extends AppController
     {
         // Fetch the status, delete it and redirect.
         $status = Status::find($id);
-        if ($this->response['status'] = $status->delete()) {
-            $this->response['redirect'] = '/admin/tickets/statuses';
+        if ($this->response->status = $status->delete()) {
+            $this->response->redirect = '/admin/tickets/statuses';
         }
     }
 }

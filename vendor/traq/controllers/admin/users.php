@@ -72,8 +72,8 @@ class Users extends AppController
             if ($user->is_valid()) {
                 // Save the users data and redirect
                 // to the user listing page.
-                $this->response['status'] = $user->save();
-                $this->response['redirect'] = '/admin/users';
+                $this->response->status = $user->save();
+                $this->response->redirect = '/admin/users';
             }
         }
         
@@ -111,8 +111,8 @@ class Users extends AppController
             // Check if the users data is valid.
             if ($user->is_valid()) {
                 // Save and redirect to user listing.
-                $this->response['status'] = $user->save();
-                $this->response['redirect'] = '/admin/users';
+                $this->response->status = $user->save();
+                $this->response->redirect = '/admin/users';
             }
         }
 
@@ -128,8 +128,8 @@ class Users extends AppController
     {
         // Find and delete the user then
         // redirect to the user listing page.
-        $this->response['status'] = User::find($id)->delete();
-        $this->response['redirect'] = '/admin/users';
+        $this->response->status = User::find($id)->delete();
+        $this->response->redirect = '/admin/users';
     }
 
     /**
@@ -179,6 +179,6 @@ class Users extends AppController
             }
         }
 
-        $this->response['redirect'] = '/admin/users';
+        $this->response->redirect = '/admin/users';
     }
 }

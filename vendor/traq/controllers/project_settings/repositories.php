@@ -87,8 +87,8 @@ class Repositories extends AppController
         }
 
         // Delete milestone
-        $this->response['status'] = $repo->delete();
-        $this->response['redirect'] = $this->project->href("settings/repositories");
+        $this->response->status = $repo->delete();
+        $this->response->redirect = $this->project->href("settings/repositories");
     }
 
     /**
@@ -105,7 +105,7 @@ class Repositories extends AppController
         }
 
         if (Request::method() == 'post') {
-            $this->response['status'] = $this->_save($repo);
+            $this->response->status = $this->_save($repo);
         }
 
         // Pass the repo info to the view.

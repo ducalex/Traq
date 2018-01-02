@@ -67,14 +67,14 @@ class Types extends AppController
             // Check if the data is valid
             if ($type->is_valid()) {
                 // Save and redirect
-                if ($this->response['status'] = $type->save()) {
-                    $this->response['redirect'] = '/admin/tickets/types';
+                if ($this->response->status = $type->save()) {
+                    $this->response->redirect = '/admin/tickets/types';
                 }
             }
         }
 
         $this->response['type'] = $type;
-        $this->response['errors'] = $type->errors;
+        $this->response->errors = $type->errors;
     }
 
     /**
@@ -106,14 +106,14 @@ class Types extends AppController
             // Check if the data is valid
             if ($type->is_valid()) {
                 // Save and redirect.
-                if ($this->response['status'] = $type->save()) {
-                    $this->response['redirect'] = '/admin/tickets/types';
+                if ($this->response->status = $type->save()) {
+                    $this->response->redirect = '/admin/tickets/types';
                 }
             }
         }
 
         $this->response['type'] = $type;
-        $this->response['errors'] = $type->errors;
+        $this->response->errors = $type->errors;
     }
 
     /**
@@ -124,7 +124,7 @@ class Types extends AppController
     public function action_delete($id)
     {
         // Find the type, delete and redirect.
-        $this->response['status'] = Type::find($id)->delete();
-        $this->response['redirect'] = '/admin/tickets/types';
+        $this->response->status = Type::find($id)->delete();
+        $this->response->redirect = '/admin/tickets/types';
     }
 }

@@ -63,8 +63,8 @@ class Severities extends AppController
             $severity->set('name', Request::post('name'));
 
             // Save and redirect
-            if ($this->response['status'] = $severity->save()) {
-                $this->response['redirect'] = '/admin/severities';
+            if ($this->response->status = $severity->save()) {
+                $this->response->redirect = '/admin/severities';
             }
         }
 
@@ -87,8 +87,8 @@ class Severities extends AppController
             $severity->set('name', Request::post('name', $severity->name));
 
             // Save and redirect
-            if ($this->response['status'] = $severity->save()) {
-                $this->response['redirect'] = '/admin/severities';
+            if ($this->response->status = $severity->save()) {
+                $this->response->redirect = '/admin/severities';
             }
         }
 
@@ -103,7 +103,7 @@ class Severities extends AppController
     public function action_delete($id)
     {
         // Get the severity and delete
-        $this->response['status'] = Severity::find($id)->delete();
-        $this->response['redirect'] = '/admin/severities';
+        $this->response->status = Severity::find($id)->delete();
+        $this->response->redirect = '/admin/severities';
     }
 }

@@ -87,13 +87,13 @@ class CustomFields extends AppController
             $field->set($data);
 
             // Save and redirect
-            if ($this->response['status'] = $field->save()) {
-                $this->response['redirect'] = $this->project->href('settings/custom_fields');
+            if ($this->response->status = $field->save()) {
+                $this->response->redirect = $this->project->href('settings/custom_fields');
             }
         }
 
         $this->response['field'] = $field;
-        $this->response['errors'] = $field->errors;
+        $this->response->errors = $field->errors;
     }
 
     /**
@@ -143,13 +143,13 @@ class CustomFields extends AppController
             $field->set($data);
 
             // Save and redirect
-            if ($this->response['status'] = $field->save()) {
-                $this->response['redirect'] = $this->project->href('settings/custom_fields');
+            if ($this->response->status = $field->save()) {
+                $this->response->redirect = $this->project->href('settings/custom_fields');
             }
         }
 
         $this->response['field'] = $field;
-        $this->response['errors'] = $field->errors;
+        $this->response->errors = $field->errors;
     }
 
     /**
@@ -166,8 +166,8 @@ class CustomFields extends AppController
         }
 
         // Delete and redirect
-        if ($this->response['status'] = $field->delete()) {
-            $this->response['redirect'] = $this->project->href('settings/custom_fields');
+        if ($this->response->status = $field->delete()) {
+            $this->response->redirect = $this->project->href('settings/custom_fields');
         }
     }
 }

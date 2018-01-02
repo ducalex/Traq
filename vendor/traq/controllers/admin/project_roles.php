@@ -66,13 +66,13 @@ class ProjectRoles extends AppController
 
             // Validate the data
             if ($role->is_valid()) {
-                $this->response['status'] = $role->save();
-                $this->response['redirect'] = '/admin/roles';
+                $this->response->status = $role->save();
+                $this->response->redirect = '/admin/roles';
             }
         }
 
         $this->response['role'] = $role;
-        $this->response['errors'] = $role->errors;
+        $this->response->errors = $role->errors;
     }
 
     /**
@@ -92,12 +92,12 @@ class ProjectRoles extends AppController
 
             // Validate the data
             if ($role->is_valid()) {
-                $this->response['status'] = $role->save();
-                $this->response['redirect'] = '/admin/roles';
+                $this->response->status = $role->save();
+                $this->response->redirect = '/admin/roles';
             }
         }
         $this->response['role'] = $role;
-        $this->response['errors'] = $role->errors;
+        $this->response->errors = $role->errors;
     }
 
     /**
@@ -106,7 +106,7 @@ class ProjectRoles extends AppController
     public function action_delete($id)
     {
         // Fetch and delete the role, then redirect
-        $this->response['status'] = ProjectRole::find($id)->delete();
-        $this->response['redirect'] = '/admin/roles';
+        $this->response->status = ProjectRole::find($id)->delete();
+        $this->response->redirect = '/admin/roles';
     }
 }

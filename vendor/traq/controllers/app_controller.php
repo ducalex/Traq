@@ -36,7 +36,8 @@ use avalon\output\View;
 use traq\models\User;
 use traq\models\Project;
 use traq\libraries\Locale;
-use traq\helpers\API;
+use traq\libraries\ApiResponse;
+use traq\libraries\AtomResponse;
 
 /**
  * App controller
@@ -83,7 +84,7 @@ class AppController extends Controller
 
         // Set response format if it's API call
         if ($this->is_api || Router::$extension === '.json') { // Allowing JSON outside API might be a security issue...
-            $this->response['format'] = 'API';
+            $this->response = ApiResponse::from($this->response);
         }
 
         // Set user locale if needed
@@ -144,8 +145,8 @@ class AppController extends Controller
         if (!LOGGEDIN && $http_auth) {
             header('WWW-Authenticate: Basic realm="Traq"');
         }
-        $this->response['status'] = 401;
-        $this->response['errors'] = [l('errors.no_permission.title')];
+        $this->response->status = 401;
+        $this->response->errors = [l('errors.no_permission.title')];
         $this->render['view'] = 'error/no_permission';
         $this->render['action'] = false;
     }
@@ -164,8 +165,8 @@ class AppController extends Controller
      */
     public function show_404()
     {
-        $this->response['status'] = 404;
-        $this->response['errors'] = [l('errors.404.message', Request::requestUri())];
+        $this->response->status = 404;
+        $this->response->errors = [l('errors.404.message', Request::requestUri())];
         $this->render['view'] = 'error/404';
         $this->render['action'] = false;
     }
@@ -175,7 +176,7 @@ class AppController extends Controller
      */
     public function show_error($title, $message, $status = 0)
     {
-        $this->response['errors'] = [$message];
+        $this->response->errors = [$message];
         $this->render['view'] = 'error/generic';
         $this->render['action'] = false;
         View::set(compact('title', 'message', 'status'));
@@ -199,7 +200,7 @@ class AppController extends Controller
             $user = User::find('login_hash', $login_hash);
         }
         // Check if the API key is set
-        elseif ($api_key = API::get_key()) {
+        elseif ($api_key = Request::req('access_token', Request::header('ACCESS_TOKEN'))) {
             if ($user = User::find('api_key', $api_key)) {
                 $this->is_api = true;
             } else {
@@ -235,17 +236,9 @@ class AppController extends Controller
     public function __shutdown()
     {
         // Build the API response if format is json
-        if ($this->response['format'] === 'API') {
-            $this->response['format'] = 'application/json';
-            $this->response['content'] = \API::response($this->response['status'], $this->response);
-            $this->render['layout'] = 'plain';
+        if ($this->response instanceOf ApiResponse) {
+            $this->render['layout'] = false;
             $this->render['view'] = false;
-        }
-        // No content, it's a redirection
-        elseif (!empty($this->response['redirect'])) {
-            Request::redirectTo($this->response['redirect']);
-        } else {
-            View::set($this->response);
         }
 
         // Was the page requested via ajax?
@@ -264,11 +257,13 @@ class AppController extends Controller
 
         if (Router::$extension) {
             if ($mime = mime_type_for(Router::$extension)) {
-                $this->response['format'] = $mime;
+                $this->response->format = $mime;
             }
             if (!empty($this->render['view']) and strpos($this->render['view'], Router::$extension) === false) {
                 $this->render['view'] .= Router::$extension;
             }
+            // Don't render the layout for json or xml content
+            $this->render['layout'] = false;
         }
 
         // Call the controllers shutdown method.

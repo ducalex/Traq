@@ -141,12 +141,12 @@ class Wiki extends AppController
                 ));
                 $timeline->save();
 
-                $this->response['redirect'] = $page->href();
+                $this->response->redirect = $page->href();
             }
         }
 
         $this->response['page'] = $page;
-        $this->response['errors'] = $page->errors;
+        $this->response->errors = $page->errors;
     }
 
     /**
@@ -181,7 +181,7 @@ class Wiki extends AppController
             }
 
             // Save and redirect
-            if ($this->response['status'] = $page->save()) {
+            if ($this->response->status = $page->save()) {
                 // Update revision
                 $page->revision->save();
                 $page->revision_id = $page->revision->id;
@@ -196,12 +196,12 @@ class Wiki extends AppController
                 ));
                 $timeline->save();
 
-                $this->response['redirect'] = $page->href();
+                $this->response->redirect = $page->href();
             }
         }
         
         $this->response['page'] = $page;
-        $this->response['errors'] = $page->errors;
+        $this->response->errors = $page->errors;
     }
 
     /**
@@ -215,7 +215,7 @@ class Wiki extends AppController
         // Delete the page
         $this->project->wiki_pages->where('slug', $slug)->exec()->fetch()->delete();
 
-        $this->response['redirect'] = $this->project->href('wiki');
+        $this->response->redirect = $this->project->href('wiki');
     }
 
     /**

@@ -69,14 +69,14 @@ class Components extends AppController
             // Check if the data is valid
             if ($component->is_valid()) {
                 // Save and redirect
-                if ($this->response['status'] = $component->save()) {
-                    $this->response['redirect'] = $this->project->href("settings/components");
+                if ($this->response->status = $component->save()) {
+                    $this->response->redirect = $this->project->href("settings/components");
                 }
             }
         }
 
         $this->response['component'] = $component;
-        $this->response['errors'] = $component->errors;
+        $this->response->errors = $component->errors;
     }
 
     /**
@@ -105,14 +105,14 @@ class Components extends AppController
             // Check if the data is valid
             if ($component->is_valid()) {
                 // Save and redirect
-                if ($this->response['status'] = $component->save()) {
-                    $this->response['redirect'] = $this->project->href("settings/components");
+                if ($this->response->status = $component->save()) {
+                    $this->response->redirect = $this->project->href("settings/components");
                 }
             }
         }
 
         $this->response['component'] = $component;
-        $this->response['errors'] = $component->errors;
+        $this->response->errors = $component->errors;
     }
 
     /**
@@ -130,8 +130,8 @@ class Components extends AppController
         }
 
         // Delete component
-        if ($this->response['status'] = $component->delete()) {
-            $this->response['redirect'] = $this->project->href("settings/components");
+        if ($this->response->status = $component->delete()) {
+            $this->response->redirect = $this->project->href("settings/components");
         }
     }
 }

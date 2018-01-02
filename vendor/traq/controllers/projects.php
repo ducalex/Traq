@@ -132,8 +132,8 @@ class Projects extends AppController
             $types[$type->id] = $type;
         }
 
-        View::set('milestones', $this->project->milestones->where('status', 2)->order_by('displayorder', 'DESC')->exec()->fetch_all());
-        View::set('types', $types);
+        $this->response['milestones'] = $this->project->milestones->where('status', 2)->order_by('displayorder', 'DESC')->exec()->fetch_all();
+        $this->response['types'] = $types;
     }
 
     /**
@@ -166,8 +166,11 @@ class Projects extends AppController
         }
 
         $events = call_user_func_array('array_merge', $filters); // Merge all selected event categories
-        $filters = array_keys($filters);
-
+        $filters = array_merge(
+            array_fill_keys(array_keys($timeline_filters), false), // Set all filters to false
+            array_fill_keys(array_keys($filters), true) // Then set enabled filters to true
+        );
+        
         // Atom feed
         $this->feeds[] = array(Request::requestUri() . ".atom", l('x_timeline_feed', $this->project->name));
 
@@ -203,8 +206,7 @@ class Projects extends AppController
             );
         }
 
-        // Send the days and events to the view.
-        View::set(compact('days', 'filters', 'events', 'pagination', 'timeline_filters'));
+        $this->response->objects = compact('days', 'filters', 'pagination');
     }
 
     /**

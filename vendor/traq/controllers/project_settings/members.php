@@ -80,10 +80,10 @@ class Members extends AppController
             ));
             $user_role->save();
 
-            $this->response['redirect'] = $this->project->href('settings/members');
+            $this->response->redirect = $this->project->href('settings/members');
         }
 
-        $this->response['errors'] = $errors;
+        $this->response->errors = $errors;
     }
 
     public function action_save()
@@ -94,7 +94,7 @@ class Members extends AppController
                 $role->project_role_id = $value;
                 $role->save();
             }
-            $this->response['redirect'] = $this->project->href('settings/members');
+            $this->response->redirect = $this->project->href('settings/members');
         }
     }
 
@@ -104,7 +104,7 @@ class Members extends AppController
             $user_role->delete();
         }
 
-        $this->response['status'] = (int)$user_role;
-        $this->response['redirect'] = $this->project->href('settings/members');
+        $this->response->status = (int)$user_role;
+        $this->response->redirect = $this->project->href('settings/members');
     }
 }

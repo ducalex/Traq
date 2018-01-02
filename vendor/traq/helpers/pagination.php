@@ -30,10 +30,10 @@ use avalon\http\Request;
  * @package Traq
  * @subpackage Helpers
  */
-class Pagination
+class Pagination implements \JsonSerializable
 {
     public $paginate = false;
-    public $rows = 0;
+    public $total_rows = 0;
     public $per_page = 25;
     public $next_page;
     public $prev_page;
@@ -49,16 +49,16 @@ class Pagination
      * @param integer $per_page Rows per page
      * @param integer $rows     Rows in the database
      */
-    public function __construct($page, $per_page, $rows)
+    public function __construct($page, $per_page, $total_rows)
     {
         // Set information
-        $this->per_page = $per_page;
-        $this->total_pages = ceil($rows / $per_page);
+        $this->total_rows = (int)$total_rows;
+        $this->per_page = (int)$per_page;
+        $this->total_pages = ceil($total_rows / $per_page);
         $this->page = min(max($page, 1), $this->total_pages);
-        $this->rows = $rows;
 
         // More than per-page limit?
-        if ($rows > $per_page) {
+        if ($total_rows > $per_page) {
             $this->paginate = true;
 
             // Next/prev pages
@@ -88,5 +88,15 @@ class Pagination
                 $this->pages[$page] = Request::url('', ['page' => $page] + Request::get());
             }
         }
+    }
+    
+    public function jsonSerialize()
+    {
+        return [
+            'rowsTotalCount' => $this->total_rows,
+            'rowsPerPage' => $this->per_page,
+            'pagesTotalCount' => $this->total_pages,
+            'pagesCurrent' => $this->page,
+        ];
     }
 }

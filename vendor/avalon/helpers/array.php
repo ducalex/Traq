@@ -48,6 +48,19 @@ function array_remove_keys(array $array, array $keys, $recursive = true)
 }
 
 /**
+ * Get values identified by keys
+ *
+ * @param array $array
+ * @param array $keys Keys to get
+ *
+ * @return array
+ */
+function array_get_keys(array $array, array $keys)
+{
+    return array_intersect_key($array, array_flip($keys));
+}
+
+/**
  * Merges two arrays recursively.
  * Unlike the standard array_merge_recursive which converts values with duplicate keys to arrays
  * this one overwrites them.

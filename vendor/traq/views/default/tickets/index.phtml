@@ -11,7 +11,7 @@
 <?php } ?>
 	<?php foreach ($columns as $column) { ?>
 			<th>
-				<?php echo ticketlist_sort_indicator($column == 'ticket_id' ? 'id' : $column); ?>
+				<?php echo ticketlist_sort_indicator($column == 'ticket_id' ? 'id' : $column, $order); ?>
 				<a href="<?php echo ticket_sort_url_for($column == 'ticket_id' ? 'id' : $column); ?>"><?php echo ticketlist_header($column)?></a>
 			</th>
 	<?php } ?>

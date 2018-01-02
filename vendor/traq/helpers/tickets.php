@@ -396,10 +396,10 @@ function ticket_filter_options_for($filter, $project_id = null) {
  *
  * @param string $column
  */
-function ticketlist_sort_indicator($column)
+function ticketlist_sort_indicator($column, $order = 'priority_id.ASC')
 {
     // Default
-    $order = Request::req('order_by', 'priority_id.ASC');
+    $order =  Request::req('order_by', $order);
 
     // Split column and order
     $order = explode('.', $order);
@@ -424,22 +424,6 @@ function ticket_history_sorting_options()
         array('label' => l('oldest_first'), 'value' => 'oldest_first'),
         array('label' => l('newest_first'), 'value' => 'newest_first')
     );
-}
-
-/**
- * Checks if the `order_by` query string is set and returns it
- * and falls back to the passed value if it isn't.
- *
- * @param string $fallback
- *
- * @return string
- *
- * @author Jack P.
- * @package Traq
- */
-function ticket_sort_order($fallback)
-{
-    return Request::req('order_by', $fallback);
 }
 
 /**

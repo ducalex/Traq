@@ -38,14 +38,15 @@ class Query
     private $type;
     private $cols;
     private $table;
+    private $limit;
     private $group_by = [];
     private $where = [];
-    private $limit;
+    private $joins = [];
     private $order_by = [];
     private $custom_sql = [];
+    private $bind = [];
     private $set;
     private $_model;
-    private $bind = [];
 
     /**
      * PDO Query builder constructor.
@@ -117,6 +118,21 @@ class Query
     public function into($table)
     {
         $this->table = $table;
+        return $this;
+    }
+
+
+    /**
+     * SQL LEFT JOIN
+     *
+     * @param string $table
+     * @param string $constraint
+     * @return void
+     */
+    public function join($table, $constraint = '1')
+    {
+        $this->joins[$table] = $constraint;
+
         return $this;
     }
 
@@ -280,28 +296,17 @@ class Query
      */
     public function _assemble()
     {
-        $query = [];
         $query[] = $this->type;
 
         if (in_array($this->type, ["SELECT", "SELECT DISTINCT"])) {
             $cols = [];
             foreach ($this->cols as $col => $as) {
-                // Check for `table.*` or `table.column`
-                if (strpos($as, '.')) {
-                    $col = explode('.', $as);
-                    $cols[] = "`{$this->prefix}{$col[0]}`." . ($col[1] == '*' ? '*' : "`{$col[1]}`");
+                if (is_numeric($col)) {
+                    $cols[] = $this->_parse_field_name($as);
                 }
-                // Check if we're fetching all columns
-                else if ($as == '*') {
-                    $cols[] = '*';
-                }
-                // Check if we're fetching a column as an "alias"
-                else if (!is_numeric($col)) {
-                    $cols[] = "`{$col}` AS `{$as}`";
-                }
-                // Normal column
+                // This is an "alias"
                 else {
-                    $cols[] = "`{$as}`";
+                    $cols[] = $this->_parse_field_name($col) . ' AS ' . $this->_parse_field_name($as);
                 }
             }
             $query[] = implode(', ', $cols);
@@ -310,6 +315,11 @@ class Query
         // Select or Delete query
         if (in_array($this->type, ["SELECT", "SELECT DISTINCT", "DELETE"])) {
             $query[] = "FROM `{$this->prefix}{$this->table}`";
+
+            // Joins
+            foreach($this->joins as $table => $constraint) {
+                $query[] = "LEFT JOIN `{$this->prefix}{$table}` ON $constraint";
+            }
 
             // Where
             $query = array_merge($query, $this->_build_where());
@@ -320,17 +330,17 @@ class Query
             }
 
             // Custom SQL
-            if (count($this->custom_sql)) {
-                $query[] = implode(" ", $this->custom_sql);
-            }
+            $query = array_merge($query, $this->custom_sql);
 
             // Order by
             if (count($this->order_by) > 0) {
-                $query[] = "ORDER BY `{$this->prefix}{$this->table}`.`{$this->order_by[0]}` {$this->order_by[1]}";
+                list($column, $direction) = $this->order_by;
+                $column = $this->_parse_field_name($column);
+                $query[] = "ORDER BY $column $direction";
             }
 
             // Limit
-            if ($this->limit != null) {
+            if ($this->limit !== null) {
                 $query[] = "LIMIT {$this->limit}";
             }
         }
@@ -368,6 +378,14 @@ class Query
         return implode(" ", $query);
     }
 
+    private function _parse_field_name($field)
+    {
+        if (strpos($field, '.')) { // Check for `table.column`
+            $field = $this->prefix.$field;
+        }
+        return str_replace('`*`', '*', str_replace('.', '`.`', "`$field`"));
+    }
+
     private function _build_where()
     {
         if (empty($this->where)) {
@@ -377,14 +395,16 @@ class Query
         $where = [];
 
         foreach ($this->where as $i => list($column, $value, $cond)) {
+            $placeholder = preg_replace('/[^a-zA-Z0-9_:]/', '_', ":w{$i}_{$column}");
+            $column = $this->_parse_field_name($column);
             if (strtoupper($cond) === 'IN') {
                 foreach((array)$value as $j => $value) {
-                    $this->bind($IN[] = ":w{$i}_{$column}_in_$j", $value);
+                    $this->bind($IN[] = "{$placeholder}_in_$j", $value);
                 }
-                $where[] = "`{$column}` IN (" . implode(',', $IN) . ")";
+                $where[] = "{$column} IN (" . implode(',', $IN) . ")";
             } else {
-                $where[] = "`{$column}` {$cond} :w{$i}_{$column}";
-                $this->bind(":w{$i}_{$column}", $value);
+                $where[] = "{$column} {$cond} {$placeholder}";
+                $this->bind($placeholder, $value);
             }
         }
 

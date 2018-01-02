@@ -121,9 +121,9 @@ class Tickets extends AppController
         // Fetch tickets
         
         $rows = Ticket::select(['tickets.*', 'users.name' => 'owner'])
-            ->custom_sql('LEFT JOIN users ON users.id = tickets.user_id')
+            ->join('users', 'users.id = tickets.user_id')
             ->custom_sql($filter_query->sql())
-            ->custom_sql("ORDER BY `$column` $direction");
+            ->order_by($column, $direction);
 
         $page = (int)Request::req('page') ?: 1;
         $per_page = settings('tickets_per_page');

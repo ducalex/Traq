@@ -18,28 +18,26 @@
  * along with Traq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace traq\helpers;
+namespace traq\libraries;
+
+use avalon\output\Response;
 
 /**
  * Atom feed generator.
  *
- * @author Jack P.
- * @copyright 2012 Jack P.
  */
-class Atom
+class AtomResponse extends Response
 {
-    private $title;
-    private $entries;
+    public $title;
+    public $link;
+    public $feed_link;
+    public $updated;
+    public $entries;
 
-    /**
-     * Feed constructor.
-     *
-     * @param array $options
-     */
-    public function __construct(array $options) {
-        foreach ($options as $option => $value) {
-            $this->{$option} = $value;
-        }
+    public function __construct($status, $options = [])
+    {
+        $options['format'] = 'application/atom+xml';
+        parent::__construct($status, $options);
     }
 
     /**
@@ -47,7 +45,7 @@ class Atom
      *
      * @return string
      */
-    public function build()
+    public function body()
     {
         $feed = array();
 

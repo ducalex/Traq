@@ -52,12 +52,19 @@ function array_remove_keys(array $array, array $keys, $recursive = true)
  *
  * @param array $array
  * @param array $keys Keys to get
+ * @param bool  $merge Merge values
  *
  * @return array
  */
-function array_get_keys(array $array, array $keys)
+function array_get_keys(array $array, array $keys, $merge = true)
 {
-    return array_intersect_key($array, array_flip($keys));
+    $array = array_intersect_key($array, array_flip($keys));
+
+    if ($merge && $array) {
+        $array = call_user_func_array('array_merge', $array);
+    }
+
+    return $array;
 }
 
 /**

@@ -130,9 +130,9 @@ class Repositories extends AppController
             $commit->user = $users[$commit->email];
         }
 
-        $this->response['revisions'] = $revisions;
+        $this->response->objects = compact('revisions', 'pagination');
 
-        View::set(compact('revisions', 'pagination', 'nav_title'));
+        View::set(compact('nav_title'));
     }
 
 

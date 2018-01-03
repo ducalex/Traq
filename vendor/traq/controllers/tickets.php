@@ -116,33 +116,25 @@ class Tickets extends AppController
 
         $direction = (strtolower($direction) === 'asc') ? 'asc' : 'desc';
         $column = ($column === 'ticket_id') ? 'id' : $column; // It is better to use the primary key
+        $order = "$column.$direction";
 
+        $page = Request::req('page') ?: 1;
+        $per_page = settings('tickets_per_page');
 
         // Fetch tickets
-        
         $rows = Ticket::select(['tickets.*', 'users.name' => 'owner'])
             ->join('users', 'users.id = tickets.user_id')
             ->custom_sql($filter_query->sql())
-            ->order_by($column, $direction);
-
-        $page = (int)Request::req('page') ?: 1;
-        $per_page = settings('tickets_per_page');
-
-        // We get one more record than we need to see if there's a next page.
-        $rows->limit(($page - 1) * $per_page, $per_page + 1);
+            ->order_by($column, $direction)
+            ->limit(($page - 1) * $per_page, $per_page + 1); // We get one more record than we need to see if there's a next page.
 
         $tickets = $rows->exec()->fetch_all();
-        $next_page = array_splice($tickets, $per_page);
+        $more_pages = array_splice($tickets, $per_page) ? 1 : 0;
 
         // Paginate tickets
-        $pagination = new Pagination(
-            $page, // Page
-            $per_page, // Per page
-            ($page * $per_page) + ($next_page ? 1 : 0) // Total
-        );
+        $pagination = new Pagination($page, $per_page, $total = ($page * $per_page) + $more_pages);
 
         $filters = $filter_query->filters();
-
 
         // Add custom fields
         foreach ($this->custom_fields as $field) {
@@ -166,13 +158,10 @@ class Tickets extends AppController
             $columns = ticket_columns();
         }
 
+        // Send the tickets array to the response object..
+        $this->response->objects = compact('tickets', 'filters', 'order', 'pagination');
 
-        $this->response['tickets'] = $tickets;
-        $this->response['filters'] = $filters;
-        $this->response['order'] = "$column.$direction";
-
-        // Send the tickets array to the view..
-        View::set(compact('pagination', 'columns'));
+        View::set(compact('columns'));
     }
 
     /**

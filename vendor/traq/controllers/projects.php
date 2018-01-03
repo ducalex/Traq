@@ -221,13 +221,12 @@ class Projects extends AppController
             return $this->show_no_permission();
         }
 
-        $event = Timeline::find($event_id);
-        $event->delete();
-
-        if (!Request::isAjax()) {
-            Request::redirectTo($this->project->href('timeline'));
+        if ($event = Timeline::find($event_id)) {
+            $event->delete();
+        } else {
+            return $this->show_404();
         }
 
-        View::set(compact('event'));
+        $this->response->redirect = $this->project->href('timeline');
     }
 }

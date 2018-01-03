@@ -380,6 +380,10 @@ class Query
 
     private function _parse_field_name($field)
     {
+        if (strpos($field, '(')) { // This is likely a FUNCTION()
+            return $field;
+        }
+
         if (strpos($field, '.')) { // Check for `table.column`
             $field = $this->prefix.$field;
         }

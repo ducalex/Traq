@@ -174,12 +174,12 @@ class Projects extends AppController
         // Atom feed
         $this->feeds[] = array(Request::requestUri() . ".atom", l('x_timeline_feed', $this->project->name));
 
-        $days_query = $this->db->prepare("
-            SELECT DISTINCT DATE(`created_at`) as `date`
-            FROM {$this->db->prefix}timeline
-            WHERE project_id = {$this->project->id} AND `action` IN ('" . implode("','", $events) . "')
-            ORDER BY created_at DESC
-        ")->exec()->fetch_all();
+        $days_query = $this->db->select(['DATE(`created_at`)' => 'date'])->distinct()
+            ->from('timeline')
+            ->where('project_id', $this->project->id)
+            ->where('action', $events, 'IN')
+            ->order_by('created_at', 'desc')
+            ->exec()->fetch_all();
 
         // Pagination
         $pagination = new Pagination(Request::req('page', 1), settings('timeline_days_per_page'), count($days_query));
@@ -196,13 +196,14 @@ class Projects extends AppController
                 ->where('project_id', $this->project->id)
                 ->where('created_at', "{$info['date']} %", "LIKE")
                 ->where('action', $events, "IN")
-                ->order_by('created_at', 'DESC');
+                ->order_by('created_at', 'DESC')
+                ->exec()->fetch_all();
 
             // Push the days data to the
             // rows array,
             $days[] = array(
                 'created_at' => $info['date'],
-                'activity' => $fetch_activity->exec()->fetch_all()
+                'activity' => $fetch_activity
             );
         }
 

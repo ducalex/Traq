@@ -56,7 +56,7 @@ class Query
      *
      * @return object
      */
-    public function __construct($type, $data = null, $connection_name = 'main')
+    public function __construct($type, $data = null, $connection = null)
     {
         if ($type === 'SELECT') {
             $this->cols = (array)($data ?: '*');
@@ -66,7 +66,7 @@ class Query
             $this->table = $data;
         }
 
-        $this->connection = Database::connection($connection_name);
+        $this->connection = $connection;
         $this->prefix = $this->connection->prefix;
         $this->type = $type;
     }
@@ -133,9 +133,9 @@ class Query
      *
      * @return object
      */
-    public function join($table, $one, $operator = null, $two = null, $type = 'left')
+    public function join($table, $one, $operator = null, $two = null, $type = 'LEFT', $where = null)
     {
-        $this->joins[] = [$table, $one, $operator, $two, $type];
+        $this->joins[] = [$table, $one, $operator, $two, $type, $where];
         return $this;
     }
 
@@ -320,22 +320,30 @@ class Query
 
         // Select or Delete query
         if ($this->type === 'SELECT' || $this->type === 'DELETE') {
-            $query[] = "FROM `{$this->prefix}{$this->table}`";
+            $query[] = 'FROM ' . $this->_parse_field_name($this->prefix.$this->table);
 
             // Joins
-            foreach($this->joins as list($table, $one, $operator, $two, $type)) {
+            foreach($this->joins as list($table, $one, $operator, $two, $type, $where)) {
                 $one = $this->_parse_field_name($one);
                 $two = $this->_parse_field_name($two);
+                $table = $this->_parse_field_name($this->prefix.$table);
                 $type = strtoupper($type);
+
+                if ($where) {
+                    $where = 'AND ' . $this->_build_where($where);
+                }
+
                 if ($operator === null) { // USING
-                    $query[] = "$type JOIN `{$this->prefix}{$table}` USING ($one)";
+                    $query[] = "$type JOIN $table USING ($one)";
                 } else {
-                    $query[] = "$type JOIN `{$this->prefix}{$table}` ON $one $operator $two";
+                    $query[] = "$type JOIN $table ON ($one $operator $two $where)";
                 }
             }
 
             // Where
-            $query = array_merge($query, $this->_build_where());
+            if ($this->where) {
+                $query[] = 'WHERE ' . $this->_build_where($this->where);
+            }
 
             // Group by
             if (count($this->group_by) > 0) {
@@ -366,7 +374,7 @@ class Query
                 $columns[] = "`{$column}`";
             }
 
-            $query[] = "INTO `{$this->prefix}{$this->table}`";
+            $query[] = 'INTO ' . $this->_parse_field_name($this->prefix.$this->table);
             $query[] = '('.implode(', ', $columns).') VALUES('.implode(', ', $values).')';
         }
         // Update query
@@ -378,14 +386,16 @@ class Query
                 $set[] = "`$column` = $key";
             }
 
-            $query[] = "`{$this->prefix}{$this->table}`";
+            $query[] = $this->_parse_field_name($this->prefix.$this->table);
             $query[] = 'SET '.implode(', ', $set);
 
             // Where
-            $query = array_merge($query, $this->_build_where());
+            if ($this->where) {
+                $query[] = 'WHERE ' . $this->_build_where($this->where);
+            }
         }
 
-        return implode(" ", $query);
+        return implode(' ', $query);
     }
 
 
@@ -398,33 +408,29 @@ class Query
         // Add table prefix to table.column
         $field = strpos($field, '.') ? $this->prefix.$field : $field;
 
-        return preg_replace('/[a-zA-Z0-9_]+/', '`$0`', $field);
+        return preg_replace('/(?!\bas\b )\b\w+/', '`$0`', $field); // try to not break "column as alias"
     }
 
 
-    private function _build_where()
+    public function _build_where(array $where, $union = 'AND')
     {
-        if (empty($this->where)) {
-            return [];
-        }
+        $_where = [];
 
-        $where = [];
-
-        foreach ($this->where as $i => list($column, $value, $cond)) {
+        foreach ($where as $i => list($column, $value, $cond)) {
             $placeholder = preg_replace('/[^a-zA-Z0-9_:]/', '_', ":w{$i}_{$column}");
             $column = $this->_parse_field_name($column);
-            if (strtoupper($cond) === 'IN') {
+            if ($cond === 'IN' || $cond === 'NOT IN') {
                 foreach((array)$value as $j => $value) {
                     $this->bind($IN[] = "{$placeholder}_in_$j", $value);
                 }
-                $where[] = "{$column} IN (" . implode(',', $IN) . ")";
+                $_where[] = "{$column} {$cond} (" . implode(',', $IN) . ")";
             } else {
-                $where[] = "{$column} {$cond} {$placeholder}";
+                $_where[] = "{$column} {$cond} {$placeholder}";
                 $this->bind($placeholder, $value);
             }
         }
 
-        return ["WHERE " . implode(' AND ', $where)];
+        return '('.implode(" $union ", $_where).')';
     }
 
     /**

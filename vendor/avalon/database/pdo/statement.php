@@ -48,7 +48,7 @@ class Statement implements \Countable
      *
      * @return void
      */
-    public function __construct($statement, $connection)
+    public function __construct($statement, $connection = null)
     {
         $this->statement = $statement;
         $this->connection = $connection;

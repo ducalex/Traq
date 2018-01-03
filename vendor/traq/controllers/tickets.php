@@ -91,7 +91,7 @@ class Tickets extends AppController
         $allowed_columns = ticketlist_allowed_columns();
 
         // Create ticket filter query
-        $filter_query = new TicketFilterQuery($this->project);
+        $filter_query = new TicketFilterQuery();
 
         $filters = Request::req() ?: Session::get("ticket_filters.{$this->project->id}");
         $filters = $filters ? array_intersect_key($filters, ticket_filters_for($this->project)) : array();
@@ -99,7 +99,6 @@ class Tickets extends AppController
         foreach($filters as $filter => $value) {
             $filter_query->process($filter, $value);
         }
-
 
         // Check query's order_by, then use project's default
         list($column, $direction) = explode('.', Request::req('order_by', $this->project->default_ticket_sorting));
@@ -122,13 +121,12 @@ class Tickets extends AppController
         $per_page = settings('tickets_per_page');
 
         // Fetch tickets
-        $rows = Ticket::select(['tickets.*', 'users.name' => 'owner'])
-            ->join('users', 'users.id', '=', 'tickets.user_id')
-            ->custom_sql($filter_query->sql())
+        $tickets = $filter_query
+            ->query()
+            ->limit(($page - 1) * $per_page, $per_page + 1) // We get one more record than we need to see if there's a next page.
             ->order_by($column, $direction)
-            ->limit(($page - 1) * $per_page, $per_page + 1); // We get one more record than we need to see if there's a next page.
+            ->exec()->fetch_all();
 
-        $tickets = $rows->exec()->fetch_all();
         $more_pages = array_splice($tickets, $per_page) ? 1 : 0;
 
         // Paginate tickets
@@ -152,16 +150,14 @@ class Tickets extends AppController
             $columns = $this->project->default_ticket_columns;
         }
 
-        $columns = \array_intersect($columns, $allowed_columns);
+        $columns = array_intersect($columns, $allowed_columns);
 
         if (empty($columns)) {
             $columns = ticket_columns();
         }
 
         // Send the tickets array to the response object..
-        $this->response->objects = compact('tickets', 'filters', 'order', 'pagination');
-
-        View::set(compact('columns'));
+        $this->response->objects = compact('tickets', 'filters', 'order', 'pagination', 'columns');
     }
 
     /**
@@ -171,11 +167,8 @@ class Tickets extends AppController
      */
     public function action_view($ticket_id)
     {
-        // Fetch the ticket from the database and send it to the view.
-        $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
-
         // Does ticket exist?
-        if (!$ticket) {
+        if (!$ticket = $this->_get_ticket($ticket_id)) {
             return $this->show_404();
         }
 
@@ -207,8 +200,10 @@ class Tickets extends AppController
      */
     public function action_vote($ticket_id)
     {
-        // Get the ticket
-        $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
+        // Does ticket exist?
+        if (!$ticket = $this->_get_ticket($ticket_id)) {
+            return $this->show_404();
+        }
 
         // Don't let the owner vote on their own ticket
         if ($this->user->id == $ticket->user_id) {
@@ -273,8 +268,10 @@ class Tickets extends AppController
      */
     public function action_voters($ticket_id)
     {
-        // Get the ticket
-        $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
+        // Does ticket exist?
+        if (!$ticket = $this->_get_ticket($ticket_id)) {
+            return $this->show_404();
+        }
 
         // Have there been any votes?
         if (empty($ticket->extra['voted'])) {
@@ -428,8 +425,10 @@ class Tickets extends AppController
      */
     public function action_update($ticket_id)
     {
-        // Get the ticket
-        $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
+        // Does ticket exist?
+        if (!$ticket = $this->_get_ticket($ticket_id)) {
+            return $this->show_404();
+        }
 
         // Set the title
         $this->title($ticket->summary);
@@ -592,8 +591,10 @@ class Tickets extends AppController
      */
     public function action_edit($ticket_id)
     {
-        // Get the ticket
-        $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
+        // Does ticket exist?
+        if (!$ticket = $this->_get_ticket($ticket_id)) {
+            return $this->show_404();
+        }
 
         // Set the title
         $this->title($ticket->summary);
@@ -621,7 +622,11 @@ class Tickets extends AppController
      */
     public function action_move($ticket_id)
     {
-        $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
+        // Does ticket exist?
+        if (!$ticket = $this->_get_ticket($ticket_id)) {
+            return $this->show_404();
+        }
+
         $next_step = 2;
 
         // Step 2
@@ -684,8 +689,10 @@ class Tickets extends AppController
      */
     public function action_delete($ticket_id)
     {
-        // Get ticket, delete it then redirect to ticket listing
-        $ticket = Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
+        // Does ticket exist?
+        if (!$ticket = $this->_get_ticket($ticket_id)) {
+            return $this->show_404();
+        }
         $ticket->delete();
         Request::redirectTo($this->project->href('tickets'));
     }
@@ -696,9 +703,7 @@ class Tickets extends AppController
     public function action_template($type_id)
     {
         $this->render['layout'] = false;
-        $template = Type::find($type_id);
-
-        return $template ? $template->template : '';
+        return $template = Type::find($type_id) ? $template->template : '';
     }
 
     /**
@@ -768,7 +773,11 @@ class Tickets extends AppController
         $filters = array_intersect_key($filters, ticket_filters_for($this->project));
 
         foreach ($filters as $name => $filter) {
-            if (!isset($filter['values'])) $filter['values'] = array();
+            if (!empty($filter['values'])) {
+                $filter['values'] = array_filter($filter['values'], 'strlen');
+            } else {
+                $filter['values'] = array();
+            }
 
             // Process filters
             switch ($name) {
@@ -779,11 +788,8 @@ class Tickets extends AppController
                 case 'owner':
                 case 'assigned_to':
                 case 'search':
-                    $values = array();
-                    foreach ($filter['values'] as $value) {
-                        $values[] = urlencode($value);
-                    }
-                    $query[$name] = $filter['prefix'] . implode(',', $values);
+                    $filter['values'][] = '';
+                    $query[$name] = $filter['prefix'] . implode(',', $filter['values']);
                     break;
 
                 // Milestone, version, type,
@@ -797,22 +803,12 @@ class Tickets extends AppController
                 case 'severity':
                     // Class name
                     $class = '\\traq\\models\\' . ucfirst($name == 'version' ? 'milestone' : $name);
-
-                    switch ($name) {
-                        case 'milestone':
-                        case 'version':
-                            $field = 'slug';
-                            break;
-
-                        default:
-                            $field = 'name';
-                            break;
-                    }
+                    $field = ($name === 'milestone' || $name === 'version') ? 'slug' : 'name';
 
                     // Values
                     $values = array();
                     foreach ($filter['values'] as $value) {
-                        $values[] = urlencode($class::find($value)->{$field});
+                        $values[] = $class::find($value)->{$field};
                     }
 
                     $query[$name] = $filter['prefix'] . implode(',', $values);
@@ -830,49 +826,35 @@ class Tickets extends AppController
         Request::redirect(Request::url($this->project->href('tickets'), $query));
     }
 
+    
+    /**
+     * Get the ticket
+     */
+
+    public function _get_ticket($ticket_id)
+    {
+        return Ticket::select()->where("ticket_id", $ticket_id)->where("project_id", $this->project->id)->exec()->fetch();
+    }
+
     /**
      * Used to check the permission for the requested action.
      */
     public function _check_permission($method)
     {
         // Set the proper action depending on the method
-        switch($method) {
-            // View ticket
-            case 'view':
-                $action = 'view_tickets';
-                break;
-
-            // View templates
-            case 'template':
-                $action = 'create_tickets';
-                break;
-
-            // Create ticket
-            case 'new':
-                $action = 'create_tickets';
-                break;
-
-            // Edit ticket description
-            case 'edit':
-                $action = 'edit_ticket_description';
-                break;
-
-            // Update ticket properties
-            case 'update':
-                $action = 'update_tickets';
-                break;
-
-            // Delete tickets
-            case 'delete':
-                $action = 'delete_tickets';
-                break;
-        }
+        $actions = [
+            'view'     => 'view_tickets',
+            'template' => 'create_tickets',
+            'new'      => 'create_tickets',
+            'edit'     => 'edit_ticket_description',
+            'update'   => 'update_tickets',
+            'delete'   => 'delete_tickets',
+        ];
 
         // Check if the user has permission
-        if (!$this->user->permission($this->project->id, $action)) {
+        if (!isset($actions[$method]) || !$this->user->permission($this->project->id, $actions[$method])) {
             // oh noes! display the no permission page.
-            $this->show_no_permission();
-            return false;
+            return $this->show_no_permission();
         }
     }
 }

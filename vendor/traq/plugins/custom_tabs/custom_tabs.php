@@ -95,8 +95,8 @@ class CustomTabs extends \traq\libraries\Plugin
 
         $auto_increment = $conn->type === 'sqlite' ? '' : 'AUTO_INCREMENT';
 
-        $conn->query("DROP TABLE IF EXISTS `{$conn->prefix}custom_tabs`");
-        $conn->query("
+        $conn->exec("DROP TABLE IF EXISTS `{$conn->prefix}custom_tabs`");
+        $conn->exec("
             CREATE TABLE `{$conn->prefix}custom_tabs` (
               `id` INTEGER NOT NULL $auto_increment,
               `label` varchar(255) NOT NULL DEFAULT '',
@@ -114,6 +114,6 @@ class CustomTabs extends \traq\libraries\Plugin
      */
     public static function __uninstall()
     {
-        Database::connection()->query("DROP TABLE IF EXISTS `" . Database::connection()->prefix . "custom_tabs`;");
+        Database::connection()->exec("DROP TABLE IF EXISTS `" . Database::connection()->prefix . "custom_tabs`;");
     }
 }

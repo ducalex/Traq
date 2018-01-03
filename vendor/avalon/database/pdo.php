@@ -97,27 +97,31 @@ class PDO extends Driver
      *
      * @return mixed
      */
-    public function query($query)
+    public function exec($query)
     {
         $this->query_count++;
         $this->last_query = $query;
 
-        return $this->connection->query($query);
+        return $this->connection->exec($query);
     }
 
     /**
      * Prepares a statement for execution and returns a statement object.
      *
      * @param string $query
-     * @param array $options Driver options (not used)
      *
      * @return object
      */
-    public function prepare($query, array $options = [])
+    public function prepare($query)
     {
         $this->query_count++;
         $this->last_query = $query;
-        return new Statement($this->connection->prepare($query, $options), $this->connection_name);
+        return new Statement($this->connection->prepare($query), $this->connection_name);
+    }
+
+    public function query($query)
+    {
+        return $this->prepare($query);
     }
 
     /**

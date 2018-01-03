@@ -152,7 +152,7 @@ post('/step/3', function(){
             // Run the install queries.
             foreach($queries as $query) {
                 if(!empty($query) && strlen($query) > 5) {
-                    $conn->query($query);
+                    $conn->exec($query);
                 }
             }
 

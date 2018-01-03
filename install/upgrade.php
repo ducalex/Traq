@@ -64,7 +64,7 @@ post('/step/1', function(){
     v3xUpgrades::run($db, DB_VER);
 
     // Update database version setting
-    $db->query("UPDATE `{$db->prefix}settings` SET `value` = '" . TRAQ_VER_CODE . "' WHERE `setting` = 'db_version' LIMIT 1");
+    $db->exec("UPDATE `{$db->prefix}settings` SET `value` = '" . TRAQ_VER_CODE . "' WHERE `setting` = 'db_version' LIMIT 1");
 
     render('upgrade/complete');
 });

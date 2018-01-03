@@ -86,14 +86,13 @@ class Statement
 
     /**
      * Fetches the next row from a result set.
+     * Array is returned if the statement isn't associated to a model or $prefer_assoc is true
      *
-     * @param integer $style Fetch style
-     * @param integer $orientation Cursor orientation
-     * @param integer $offset Cursor offset
+     * @param bool $prefer_assoc 
      *
-     * @return object
+     * @return object|array
      */
-    public function fetch($style = \PDO::FETCH_ASSOC, $orientation = \PDO::FETCH_ORI_NEXT, $offset = 0)
+    public function fetch($prefer_assoc = false)
     {
         if (!isset($this->results[$this->cursor])) {
             return false;
@@ -101,11 +100,11 @@ class Statement
 
         $result = $this->results[$this->cursor++];
 
-        if ($this->_model !== null) {
+        if ($this->_model === null || $prefer_assoc) {
+            return $result;
+        } else {
             $model = $this->_model;
             return new $model($result, false);
-        } else {
-            return $result;
         }
     }
 

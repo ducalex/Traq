@@ -176,6 +176,7 @@ class AppController extends Controller
      */
     public function show_error($title, $message, $status = 0)
     {
+        $this->response->status = $status;
         $this->response->errors = [$message];
         $this->render['view'] = 'error/generic';
         $this->render['action'] = false;

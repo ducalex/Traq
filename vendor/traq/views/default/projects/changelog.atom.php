@@ -1,5 +1,5 @@
 <?php
-use traq\helpers\AtomResponse;
+use traq\libraries\AtomResponse;
 
 $entries = array();
 $updated = 0;

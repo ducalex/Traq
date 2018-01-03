@@ -1,5 +1,5 @@
 <?php
-use traq\helpers\Atom;
+use traq\libraries\AtomResponse;
 
 // Get entries
 $entries = array();
@@ -53,7 +53,7 @@ foreach ($days as $day) {
 }
 
 // Make feed
-$feed = new Atom(array(
+$app->response = new AtomResponse(200, array(
     'title' => l('x_timeline_feed', $app->project->name),
     'link' => Request::base('', true),
     'feed_link' => Request::base(Request::uri(), true),
@@ -62,4 +62,4 @@ $feed = new Atom(array(
 ));
 
 // Output feed
-print($feed->build());
+print($app->response->body());

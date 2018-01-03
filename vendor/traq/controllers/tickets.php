@@ -123,7 +123,7 @@ class Tickets extends AppController
 
         // Fetch tickets
         $rows = Ticket::select(['tickets.*', 'users.name' => 'owner'])
-            ->join('users', 'users.id = tickets.user_id')
+            ->join('users', 'users.id', '=', 'tickets.user_id')
             ->custom_sql($filter_query->sql())
             ->order_by($column, $direction)
             ->limit(($page - 1) * $per_page, $per_page + 1); // We get one more record than we need to see if there's a next page.

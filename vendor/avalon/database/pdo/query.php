@@ -36,6 +36,7 @@ class Query
 {
     private $connection;
     private $type;
+    private $distinct;
     private $cols;
     private $table;
     private $limit;
@@ -45,7 +46,6 @@ class Query
     private $order_by = [];
     private $custom_sql = [];
     private $bind = [];
-    private $set;
     private $_model;
 
     /**
@@ -58,11 +58,11 @@ class Query
      */
     public function __construct($type, $data = null, $connection_name = 'main')
     {
-        if ($type == 'SELECT') {
-            $this->cols = (is_array($data) ? $data : ['*']);
-        } else if ($type == 'INSERT INTO' || $type == 'REPLACE INTO') {
+        if ($type === 'SELECT') {
+            $this->cols = (array)($data ?: '*');
+        } else if ($type === 'INSERT' || $type === 'REPLACE') {
             $this->data = $data;
-        } else if ($type == 'UPDATE') {
+        } else if ($type === 'UPDATE') {
             $this->table = $data;
         }
 
@@ -89,9 +89,9 @@ class Query
      *
      * @return object
      */
-    public function distinct()
+    public function distinct($distinct = true)
     {
-        $this->type = $this->type.' DISTINCT';
+        $this->distinct = $distinct;
         return $this;
     }
 
@@ -121,18 +121,21 @@ class Query
         return $this;
     }
 
-
     /**
-     * SQL LEFT JOIN
+     * SQL JOIN
+     * Constraint will be built with USING if $operator is null otherwise ON $col1 $op $col2
      *
      * @param string $table
-     * @param string $constraint
-     * @return void
+     * @param string $one first column for ON clause
+     * @param string $one operator for ON clause
+     * @param string $two second column for ON clause
+     * @param string $type LEFT|RIGHT|INNER
+     *
+     * @return object
      */
-    public function join($table, $constraint = '1')
+    public function join($table, $one, $operator = null, $two = null, $type = 'left')
     {
-        $this->joins[$table] = $constraint;
-
+        $this->joins[] = [$table, $one, $operator, $two, $type];
         return $this;
     }
 
@@ -174,6 +177,20 @@ class Query
     public function order_by($col, $dir = 'ASC')
     {
         $this->order_by = [$col, $dir];
+        return $this;
+    }
+
+    /**
+     * Limits the query rows.
+     *
+     * @param integer $from
+     * @param integer $to
+     *
+     * @return object
+     */
+    public function limit($from, $to = null)
+    {
+        $this->limit = implode(',', func_get_args());
         return $this;
     }
 
@@ -231,20 +248,6 @@ class Query
     }
 
     /**
-     * Limits the query rows.
-     *
-     * @param integer $from
-     * @param integer $to
-     *
-     * @return object
-     */
-    public function limit($from, $to = null)
-    {
-        $this->limit = implode(',', func_get_args());
-        return $this;
-    }
-
-    /**
      * Executes the query and return the statement.
      *
      * @return object
@@ -298,10 +301,10 @@ class Query
     {
         $query[] = $this->type;
 
-        if (in_array($this->type, ["SELECT", "SELECT DISTINCT"])) {
+        if ($this->type === 'SELECT') {
             $cols = [];
             foreach ($this->cols as $col => $as) {
-                if (is_numeric($col)) {
+                if (is_int($col)) {
                     $cols[] = $this->_parse_field_name($as);
                 }
                 // This is an "alias"
@@ -309,16 +312,26 @@ class Query
                     $cols[] = $this->_parse_field_name($col) . ' AS ' . $this->_parse_field_name($as);
                 }
             }
+            if ($this->distinct) {
+                $query[] = 'DISTINCT';
+            }
             $query[] = implode(', ', $cols);
         }
 
         // Select or Delete query
-        if (in_array($this->type, ["SELECT", "SELECT DISTINCT", "DELETE"])) {
+        if ($this->type === 'SELECT' || $this->type === 'DELETE') {
             $query[] = "FROM `{$this->prefix}{$this->table}`";
 
             // Joins
-            foreach($this->joins as $table => $constraint) {
-                $query[] = "LEFT JOIN `{$this->prefix}{$table}` ON $constraint";
+            foreach($this->joins as list($table, $one, $operator, $two, $type)) {
+                $one = $this->_parse_field_name($one);
+                $two = $this->_parse_field_name($two);
+                $type = strtoupper($type);
+                if ($operator === null) { // USING
+                    $query[] = "$type JOIN `{$this->prefix}{$table}` USING ($one)";
+                } else {
+                    $query[] = "$type JOIN `{$this->prefix}{$table}` ON $one $operator $two";
+                }
             }
 
             // Where
@@ -345,31 +358,28 @@ class Query
             }
         }
         // Insert query
-        else if($this->type == "INSERT INTO" || $this->type == "REPLACE INTO" ) {
-            $query[] = "`{$this->prefix}{$this->table}`";
-
-            $columns = [];
-            $values = [];
+        else if($this->type === 'INSERT' || $this->type === 'REPLACE') {
+            $columns = $values = [];
 
             foreach($this->data as $column => $value) {
                 $this->bind($values[] = ":i_{$column}", $value);
                 $columns[] = "`{$column}`";
             }
 
-            $query[] = '(' . implode(', ', $columns) . ')';
-            $query[] = 'VALUES(' . implode(', ', $values) . ')';
+            $query[] = "INTO `{$this->prefix}{$this->table}`";
+            $query[] = '('.implode(', ', $columns).') VALUES('.implode(', ', $values).')';
         }
         // Update query
-        else if($this->type == "UPDATE") {
-            $query[] = "`{$this->prefix}{$this->table}`";
-
-            $query[] = "SET";
+        else if($this->type === 'UPDATE') {
             $set = [];
+
             foreach ($this->data as $column => $value) {
                 $this->bind($key = ":u_{$column}", $value);
                 $set[] = "`$column` = $key";
             }
-            $query[] = implode(', ', $set);
+
+            $query[] = "`{$this->prefix}{$this->table}`";
+            $query[] = 'SET '.implode(', ', $set);
 
             // Where
             $query = array_merge($query, $this->_build_where());
@@ -378,17 +388,19 @@ class Query
         return implode(" ", $query);
     }
 
+
     private function _parse_field_name($field)
     {
-        if (strpos($field, '(')) { // This is likely a FUNCTION()
+        if (preg_match('/^[A-Z_]+\(.*\)$/', $field)) { // This is likely a FUNCTION()
             return $field;
         }
 
-        if (strpos($field, '.')) { // Check for `table.column`
-            $field = $this->prefix.$field;
-        }
-        return str_replace('`*`', '*', str_replace('.', '`.`', "`$field`"));
+        // Add table prefix to table.column
+        $field = strpos($field, '.') ? $this->prefix.$field : $field;
+
+        return preg_replace('/[a-zA-Z0-9_]+/', '`$0`', $field);
     }
+
 
     private function _build_where()
     {

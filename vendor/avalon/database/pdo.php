@@ -166,7 +166,7 @@ class PDO extends Driver
      */
     public function insert(array $data)
     {
-        return new Query("INSERT INTO", $data, $this->connection_name);
+        return new Query("INSERT", $data, $this->connection_name);
     }
 
     /**
@@ -178,7 +178,7 @@ class PDO extends Driver
      */
     public function replace(array $data)
     {
-        return new Query("REPLACE INTO", $data, $this->connection_name);
+        return new Query("REPLACE", $data, $this->connection_name);
     }
 
     /**

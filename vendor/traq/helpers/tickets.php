@@ -305,7 +305,7 @@ function ticketlist_data($column, $ticket) {
 
         // Updates column
         case 'updates':
-            return $ticket->history->exec()->row_count();
+            return $ticket->history->exec()->count();
             break;
 
         // Created at

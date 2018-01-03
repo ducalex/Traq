@@ -71,7 +71,7 @@ class Wiki extends AppController
         $page = $this->project->wiki_pages->where('slug', $slug)->exec();
 
         // Check if the page exists
-        if (!$page->row_count()) {
+        if (!$page->count()) {
             // it doesnt, show the new page form if the user has permission
             // otherwise display the 404 page.
             return $this->user->permission($this->project->id, 'create_wiki_page') ? $this->_new_page($slug) : $this->show_404();

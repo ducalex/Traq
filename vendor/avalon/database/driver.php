@@ -30,25 +30,17 @@ use avalon\core\Error;
  * @author Jack P. <nrx@nirix.net>
  * @copyright Copyright (c) Jack P.
  */
-class Driver
+abstract class Driver
 {
-    /**
-     * Shortcut to the Error::halt method.
-     *
-     * @param string $error DB error message
-     */
-    public function halt($error = 'Unknown error')
-    {
-        if (is_array($error) and isset($error[2]) and !empty($error[2])) {
-            $error = $error[2];
-        }
-        else if (!is_array($error)) {
-            $error = $error;
-        }
-        else {
-            $error = 'Unknown error. ' . implode('/', $error);
-        }
-
-        Error::halt("Database Error", $error . '<br />' . $this->last_query);
-    }
+    public abstract function halt($error = 'Unknown error');
+    public abstract function quote($string, $type = \PDO::PARAM_STR);
+    public abstract function exec($query);
+    public abstract function prepare($query);
+    public abstract function query($query);
+    public abstract function select($cols = ['*']);
+    public abstract function update($table);
+    public abstract function delete();
+    public abstract function insert(array $data);
+    public abstract function replace(array $data);
+    public abstract function last_insert_id();
 }

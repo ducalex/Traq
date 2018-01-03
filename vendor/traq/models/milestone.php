@@ -101,8 +101,8 @@ class Milestone extends Model
         // the ticket counts.
         if (!isset($counts[$this->id])) {
             $counts[$this->id] = array(
-                'open' => $this->tickets->where('is_closed', 0)->exec()->row_count(),
-                'closed' => $this->tickets->where('is_closed', 1)->exec()->row_count()
+                'open' => $this->tickets->where('is_closed', 0)->exec()->count(),
+                'closed' => $this->tickets->where('is_closed', 1)->exec()->count()
             );
             $counts[$this->id]['total'] = $counts[$this->id]['open'] + $counts[$this->id]['closed'];
             $counts[$this->id]['open_percent'] = $counts[$this->id]['open'] ? get_percent($counts[$this->id]['open'], $counts[$this->id]['total']) : 0;
@@ -149,7 +149,7 @@ class Milestone extends Model
         $milestone_slug = Milestone::select('slug')->where('id', $this->_is_new() ? 0 : $this->_data['id'], '!=')
             ->where('slug', $this->_data['slug'])->where('project_id', $this->project_id);
 
-        if ($milestone_slug->exec()->row_count()) {
+        if ($milestone_slug->exec()->count()) {
             $errors['slug'] = l('errors.slug_in_use');
         }
 

@@ -32,12 +32,12 @@ use avalon\database\PDO;
  * @author Jack P. <nrx@nirix.net>
  * @copyright Copyright (c) Jack P.
  */
-class Statement
+class Statement implements \Countable
 {
     private $connection;
     private $statement;
     private $_model;
-    private $results = [];
+    private $results = null;
     private $count = 0;
     private $cursor = 0;
 
@@ -46,12 +46,12 @@ class Statement
      *
      * @param $statement
      *
-     * @return object
+     * @return void
      */
-    public function __construct($statement, $connection_name = 'main')
+    public function __construct($statement, $connection)
     {
         $this->statement = $statement;
-        $this->connection = Database::connection($connection_name);
+        $this->connection = $connection;
     }
 
     /**
@@ -86,21 +86,24 @@ class Statement
 
     /**
      * Fetches the next row from a result set.
-     * Array is returned if the statement isn't associated to a model or $prefer_assoc is true
      *
-     * @param bool $prefer_assoc 
+     * @param int $offset
      *
      * @return object|array
      */
-    public function fetch($prefer_assoc = false)
+    public function fetch($offset = null)
     {
-        if (!isset($this->results[$this->cursor])) {
+        if ($offset === null) {
+            $offset = &$this->cursor;
+        }
+
+        if (!isset($this->results[$offset])) {
             return false;
         }
 
-        $result = $this->results[$this->cursor++];
+        $result = $this->results[$offset++];
 
-        if ($this->_model === null || $prefer_assoc) {
+        if ($this->_model === null) {
             return $result;
         } else {
             $model = $this->_model;
@@ -162,7 +165,7 @@ class Statement
      *
      * @return integer
      */
-    public function row_count()
+    public function count()
     {
         return $this->count;
     }

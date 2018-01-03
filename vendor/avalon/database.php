@@ -30,7 +30,6 @@ namespace avalon;
 class Database
 {
     private static $connections = [];
-    private static $initiated = [];
 
     /**
      * Create a new database connection based off the passed
@@ -44,7 +43,7 @@ class Database
     public static function factory(array $config, $name = 'main')
     {
         // Make sure the connection name is available
-        if (static::initiated($name)) {
+        if (static::connection($name)) {
             throw new Exception("Database connection name '{$name}' already initiated");
         }
 
@@ -53,7 +52,6 @@ class Database
 
         // Create the connection and mark it as initiated.
         static::$connections[$name] = new $class_name($config, $name);
-        static::$initiated[$name] = true;
 
         return static::$connections[$name];
     }
@@ -68,17 +66,5 @@ class Database
     public static function connection($name = 'main')
     {
         return isset(static::$connections[$name]) ? static::$connections[$name] : false;
-    }
-
-    /**
-     * Returns true if the database has been initiated, false if not.
-     *
-     * @param string $name Connection name
-     *
-     * @return bool
-     */
-    public static function initiated($name = 'main')
-    {
-        return !empty(static::$initiated[$name]);
     }
 }

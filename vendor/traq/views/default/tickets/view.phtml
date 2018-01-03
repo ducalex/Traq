@@ -121,7 +121,7 @@
 		</ul>
 	</section>
 	<?php } ?>
-	<?php if ($app->user->permission($ticket->project_id, 'view_attachments') and $attachments = $ticket->attachments->exec() and $attachments->row_count() > 0) { ?>
+	<?php if ($app->user->permission($ticket->project_id, 'view_attachments') and $attachments = $ticket->attachments->exec() and $attachments->count() > 0) { ?>
 	<section id="attachments">
 		<h3><?php echo l('attachments'); ?></h3>
 		<ul>

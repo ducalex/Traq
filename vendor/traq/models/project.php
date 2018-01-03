@@ -194,7 +194,7 @@ class Project extends Model
 
         // Make sure the slug isnt in use
         $project_slug = Project::select('id')->where('id', ($this->_is_new() ? 0 : $this->id), '!=')->where('slug', $this->_data['slug']);
-        if ($project_slug->exec()->row_count()) {
+        if ($project_slug->exec()->count()) {
             $errors['slug'] = l('errors.slug_in_use');
         }
 

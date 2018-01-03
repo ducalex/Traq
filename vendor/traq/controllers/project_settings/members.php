@@ -61,7 +61,7 @@ class Members extends AppController
             $errors['username'] = l('errors.users.username_blank');
         }
         // Already a project member?
-        elseif (UserRole::select('id')->where(array(array('project_id', $this->project->id), array('user_id', $user->id)))->exec()->row_count()) {
+        elseif (UserRole::select('id')->where(array(array('project_id', $this->project->id), array('user_id', $user->id)))->exec()->count()) {
             $errors['username'] = l('errors.users.already_a_project_member');
         }
 

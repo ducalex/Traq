@@ -116,7 +116,7 @@ class PDO extends Driver
     {
         $this->query_count++;
         $this->last_query = $query;
-        return new Statement($this->connection->prepare($query), $this->connection_name);
+        return new Statement($this->connection->prepare($query), $this);
     }
 
     public function query($query)
@@ -136,7 +136,7 @@ class PDO extends Driver
         if (!is_array($cols)) {
             $cols = func_get_args();
         }
-        return new Query("SELECT", $cols, $this->connection_name);
+        return new Query("SELECT", $cols, $this);
     }
 
     /**
@@ -148,7 +148,7 @@ class PDO extends Driver
      */
     public function update($table)
     {
-        return new Query("UPDATE", $table, $this->connection_name);
+        return new Query("UPDATE", $table, $this);
     }
 
     /**
@@ -158,7 +158,7 @@ class PDO extends Driver
      */
     public function delete()
     {
-        return new Query("DELETE", null, $this->connection_name);
+        return new Query("DELETE", null, $this);
     }
 
     /**
@@ -170,7 +170,7 @@ class PDO extends Driver
      */
     public function insert(array $data)
     {
-        return new Query("INSERT", $data, $this->connection_name);
+        return new Query("INSERT", $data, $this);
     }
 
     /**
@@ -182,7 +182,7 @@ class PDO extends Driver
      */
     public function replace(array $data)
     {
-        return new Query("REPLACE", $data, $this->connection_name);
+        return new Query("REPLACE", $data, $this);
     }
 
     /**
@@ -193,5 +193,10 @@ class PDO extends Driver
     public function last_insert_id()
     {
         return $this->connection->lastInsertId();
+    }
+
+    public function halt($error = 'unknown')
+    {
+
     }
 }

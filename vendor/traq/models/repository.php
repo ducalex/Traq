@@ -90,7 +90,7 @@ class Repository extends Model
         $repo = Repository::select('id')->where('id', $this->_is_new() ? 0 : $this->_data['id'], '!=')
             ->where('slug', $this->_data['slug'])->where('project_id', $this->_data['project_id']);
 
-        if ($repo->exec()->row_count()) {
+        if ($repo->exec()->count()) {
             $errors['slug'] = l('errors.slug_in_use');
         }
 

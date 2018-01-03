@@ -64,8 +64,8 @@ class Projects extends AppController
 
         // Get open and closed ticket counts.
         View::set('ticket_count', array(
-            'open' => Ticket::select()->where('project_id', $this->project->id)->where('is_closed', 0)->exec()->row_count(),
-            'closed' => Ticket::select()->where('project_id', $this->project->id)->where('is_closed', 1)->exec()->row_count()
+            'open' => Ticket::select()->where('project_id', $this->project->id)->where('is_closed', 0)->exec()->count(),
+            'closed' => Ticket::select()->where('project_id', $this->project->id)->where('is_closed', 1)->exec()->count()
         ));
     }
 

@@ -9,13 +9,13 @@
 				<dd><?php echo $profile->group->name; ?></dd>
 
 				<dt><?php echo l('assigned_tickets'); ?></dt>
-				<dd><?php echo $profile->assigned_tickets->exec()->row_count(); ?></dd>
+				<dd><?php echo $profile->assigned_tickets->exec()->count(); ?></dd>
 
 				<dt><?php echo l('tickets_created'); ?></dt>
-				<dd><?php echo $profile->tickets->exec()->row_count(); ?></dd>
+				<dd><?php echo $profile->tickets->exec()->count(); ?></dd>
 
 				<dt><?php echo l('ticket_updates'); ?></dt>
-				<dd><?php echo $profile->ticket_updates->exec()->row_count(); ?></dd>
+				<dd><?php echo $profile->ticket_updates->exec()->count(); ?></dd>
 
 				<dt><?php echo l('member_since'); ?></dt>
 				<dd><?php echo ($profile->created_at ? ldate('date.short', $profile->created_at) : l('unknown')); ?></dd>

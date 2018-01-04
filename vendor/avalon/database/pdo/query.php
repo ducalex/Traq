@@ -39,7 +39,7 @@ class Query
     private $distinct;
     private $cols;
     private $table;
-    private $limit;
+    private $limit, $offset;
     private $group_by = [];
     private $where = [];
     private $joins = [];
@@ -183,14 +183,26 @@ class Query
     /**
      * Limits the query rows.
      *
-     * @param integer $from
-     * @param integer $to
+     * @param integer $count
      *
      * @return object
      */
-    public function limit($from, $to = null)
+    public function limit($limit)
     {
-        $this->limit = implode(',', func_get_args());
+        $this->limit = (int)$limit;
+        return $this;
+    }
+
+    /**
+     * Offset the query rows.
+     *
+     * @param integer $offset
+     *
+     * @return object
+     */
+    public function offset($offset)
+    {
+        $this->offset = (int)$offset;
         return $this;
     }
 
@@ -225,24 +237,27 @@ class Query
      *
      * @return object
      */
-    public function where($column, $value = null, $cond = '=')
+    public function where($column, $value = null, $cond = '=', $union = 'AND')
     {
+        $where = [];
         // Check if this is a mass add
         if (is_array($column)) {
             $cond = $value ?: $cond;
             foreach($column as $column => $value) {
                 if (is_int($column) && is_array($value)) { // (Example 2-3)
-                    $this->where[] = $value + [null, null, $cond];
+                    $where[] = $value + [null, null, $cond];
                 }
                 else { // (Example 4)
-                    $this->where[] = [$column, $value, $cond];
+                    $where[] = [$column, $value, $cond];
                 }
             }
         }
         // Just one, add it. (Example 1)
         else {
-            $this->where[] = [$column, $value, $cond];
+            $where[] = [$column, $value, $cond];
         }
+
+        $this->where[] = $this->_build_where($where, $union);
 
         return $this;
     }
@@ -342,7 +357,7 @@ class Query
 
             // Where
             if ($this->where) {
-                $query[] = 'WHERE ' . $this->_build_where($this->where);
+                $query[] = 'WHERE ' . implode(' AND ', $this->where);
             }
 
             // Group by
@@ -361,8 +376,13 @@ class Query
             }
 
             // Limit
-            if ($this->limit !== null) {
+            if ($this->limit > 0) {
                 $query[] = "LIMIT {$this->limit}";
+            }
+
+            // Offset
+            if ($this->offset > 0) {
+                $query[] = "OFFSET {$this->limit}";
             }
         }
         // Insert query
@@ -391,7 +411,7 @@ class Query
 
             // Where
             if ($this->where) {
-                $query[] = 'WHERE ' . $this->_build_where($this->where);
+                $query[] = 'WHERE ' . implode(' AND ', $this->where);
             }
         }
 
@@ -401,14 +421,14 @@ class Query
 
     private function _parse_field_name($field)
     {
-        if (preg_match('/^[A-Z_]+\(.*\)$/', $field)) { // This is likely a FUNCTION()
-            return $field;
-        }
-
         // Add table prefix to table.column
-        $field = strpos($field, '.') ? $this->prefix.$field : $field;
+        $field = preg_replace('/\b[A-Z_]\w+\.(\w+|\*)\b/i', $this->prefix.'$0', $field);
+        // Quote words `table`.`column` but avoid "as" if present in the middle
+        $field = preg_replace('/\b([A-Z_]\w+)\b(\s+as\s+)?/i', '`$1`$2', $field);
+        // The following will undo mistakes like `MID`(`table`.`column`, 1) and :`placeholder`
+        $field = preg_replace('/(?:(\:)`(\w+)`|`+(`\w+`)`+|`([A-Z0-9_]+)`(\())/', '$1$2$3$4$5', $field);
 
-        return preg_replace('/(?!\bas\b )\b\w+/', '`$0`', $field); // try to not break "column as alias"
+        return $field;
     }
 
 
@@ -430,7 +450,11 @@ class Query
             }
         }
 
-        return '('.implode(" $union ", $_where).')';
+        if (count($_where) > 1) {
+            return '('.implode(" $union ", $_where).')';
+        } else {
+            return $_where[0];
+        }
     }
 
     /**

@@ -91,3 +91,27 @@ function array_merge_recursive2(array &$first, array &$second)
 
     return $merged;
 }
+
+/**
+ * Extract a column from a 2D array. The behavior is identical to array_column
+ * except that it also accepts objects on PHP 5.
+ *
+ * @param array $input
+ * @param mixed $column_key
+ * @param mixed $index_key
+ * @return array
+ */
+function array_get_column(array $input, $column_key, $index_key = null)
+{
+    foreach($input as $key => $value) {
+        if (is_object($value)) {
+            $key = $index_key === null ? $key : $value->$index_key;
+            $array[$key] = $value->$column_key;
+        } else {
+            $key = $index_key === null ? $key : $value[$index_key];
+            $array[$key] = $value[$column_key];
+        }
+    }
+
+    return $array;
+}

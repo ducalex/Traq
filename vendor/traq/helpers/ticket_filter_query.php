@@ -44,8 +44,8 @@ class TicketFilterQuery
     public function __construct($cols = ['tickets.*', 'users.name' => 'owner'])
     {
         $this->project = Avalon::app()->project;
-        $this->sql[] = "`project_id` = {$this->project->id}";
         $this->query = Ticket::select($cols)->join('users', 'users.id', '=', 'tickets.user_id');
+        $this->query->where('project_id', $this->project->id);
     }
 
     /**
@@ -69,7 +69,7 @@ class TicketFilterQuery
             // Add to filters array
             $this->filters[$field] = ['prefix' => $is_not ? '!' : '', 'values' => $values];
 
-            $this->add($field, $is_not, $values);
+            $this->add($field, $is_not, array_filter($values));
         }
     }
 
@@ -119,7 +119,7 @@ class TicketFilterQuery
 
             // Add to query if there's any values
             if ($query_values) {
-                $this->sql[] = $this->query->_build_where([["{$field}_id", $query_values, $is_not ? '<>' : '=']]);
+                $this->query->where(["{$field}_id", $query_values, $is_not ? 'NOT IN' : 'IN']);
             }
 
             $this->filters[$field]['values'] = $query_values;
@@ -127,11 +127,16 @@ class TicketFilterQuery
         // Summary and description
         elseif (in_array($field, array('summary', 'description'))) {
             foreach ($values as $value) {
-                $field_name = ($field === 'summary' ? 'summary' : 'body');
-                $query_values[] = [$field_name, '%' . str_replace('*', '%', $value) . '%', $is_not ? 'NOT LIKE' : 'LIKE'];
+                $query_values[] = [($field === 'summary' ? 'summary' : 'body'), strtr("%$value%", '*', '%')];
             }
 
-            $this->sql[] = $this->query->_build_where($query_values, 'OR');
+            if ($is_not) {
+                $this->query->where($query_values, null, 'NOT LIKE', 'AND');
+            } else {
+                $this->query->where($query_values, null, 'LIKE', 'OR');
+            }
+            
+            echo $this->query;
         }
         // Owner and Assigned to
         elseif (in_array($field, array('owner', 'assigned_to'))) {
@@ -143,16 +148,17 @@ class TicketFilterQuery
                 $query_values[] = $user->id;
             }
 
-            // Add to query if there's any values
-            if ($query_values) {
-                $this->sql[] = $this->query->_build_where([["{$column}_id", $query_values, $is_not ? 'NOT IN' : 'IN']]);
-            }
+            // If no valid user was found but the query wasn't empty
+            $this->query->where([["{$column}_id", $query_values ?: [0], $is_not ? 'NOT IN' : 'IN']]);
         }
         // Search
         elseif ($field === 'search') {
             $value = str_replace('*', '%', implode('%', $values));
-            $condition = $is_not ? 'NOT LIKE' : 'LIKE';
-            $this->sql[] =  $this->query->_build_where([['summary', "%$value%", $condition], ['body', "%$value%", $condition]], 'OR');
+            if ($is_not) {
+                $this->query->where([['summary', "%$value%"], ['body', "%$value%"]], null, 'NOT LIKE', 'AND');
+            } else {
+                $this->query->where([['summary', "%$value%"], ['body', "%$value%"]], null, 'LIKE', 'OR');
+            }
         }
         // Custom fields
         elseif (in_array($field, array_keys(custom_field_filters_for($this->project)))) {
@@ -188,6 +194,6 @@ class TicketFilterQuery
      */
     public function query()
     {
-        return $this->query->custom_sql("WHERE ". implode(" AND ", $this->sql));
+        return $this->query;
     }
 }

@@ -152,7 +152,7 @@ class Permissions extends AppController
         // Role
         elseif ($type == 'role')
         {
-            $groups = ProjectRole::select()->custom_sql("WHERE project_id = 0 OR project_id = {$this->project->id}")->exec()->fetch_all();
+            $groups = ProjectRole::select()->where('project_id', [0, $this->project->id], 'IN')->exec()->fetch_all();
             $groups = array_merge(array(new ProjectRole(array('id' => 0, 'name' => l('defaults'), 'project_id' => 0))), $groups);
         }
         $permissions = array();

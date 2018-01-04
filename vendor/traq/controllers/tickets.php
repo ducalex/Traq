@@ -123,7 +123,8 @@ class Tickets extends AppController
         // Fetch tickets
         $tickets = $filter_query
             ->query()
-            ->limit(($page - 1) * $per_page, $per_page + 1) // We get one more record than we need to see if there's a next page.
+            ->offset(($page - 1) * $per_page)
+            ->limit($per_page + 1) // We get one more record than we need to see if there's a next page.
             ->order_by($column, $direction)
             ->exec()->fetch_all();
 
@@ -826,7 +827,7 @@ class Tickets extends AppController
         Request::redirect(Request::url($this->project->href('tickets'), $query));
     }
 
-    
+
     /**
      * Get the ticket
      */

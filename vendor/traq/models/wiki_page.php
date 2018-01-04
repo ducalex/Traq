@@ -126,7 +126,7 @@ class WikiPage extends Model
         }
 
         // Make sure the slug isnt in use..
-        $select_slug = static::select('id')->where('id', ($this->_is_new() ? 0 : $this->id), '!=')
+        $select_slug = static::select('id')->where('id', ($this->_is_new ? 0 : $this->id), '!=')
             ->where('slug', $this->_data['slug'])->where('project_id', $this->_data['project_id']);
 
         if ($select_slug->exec()->count()) {

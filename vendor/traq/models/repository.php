@@ -87,7 +87,7 @@ class Repository extends Model
         }
 
         // Make sure slug isn't in use
-        $repo = Repository::select('id')->where('id', $this->_is_new() ? 0 : $this->_data['id'], '!=')
+        $repo = Repository::select('id')->where('id', $this->_is_new ? 0 : $this->_data['id'], '!=')
             ->where('slug', $this->_data['slug'])->where('project_id', $this->_data['project_id']);
 
         if ($repo->exec()->count()) {

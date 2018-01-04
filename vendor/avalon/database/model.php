@@ -38,18 +38,19 @@ class Model implements \JsonSerializable
     // Static information
     protected static $_name; // Table name
     protected static $_primary_key = 'id'; // Primary key
-    protected static $_has_many; // Has many relationship array
-    protected static $_properties = ['*']; // Table columns
-    protected static $_belongs_to; // Belongs to relationship array
+    protected static $_properties = []; // Table columns
+    protected static $_has_many = []; // Has many relationship array
+    protected static $_belongs_to = []; // Belongs to relationship array
     protected static $_filters_before = []; // Before filters
     protected static $_filters_after = []; // After filters
     protected static $_connection_name = 'main'; // Name of the connection to use
-    protected static $_serialize = []; // Fields to serialize to json when reading/writing database
-    protected static $_escape = []; // Fields to escape when reading from database
+    protected static $_serialize = []; // Columns to serialize to json when reading/writing database
+    protected static $_escape = []; // Columns to escape when reading from database
+    protected static $_timestamp = ['created_at', 'updated_at', 'published_at']; // Columns to convert to GMT timestamp
 
     // Information different per table row
-    protected $_changed_properties = []; // Properties that have been changed
-    protected $_data = [];
+    protected $_original = []; // The original data coming from the database
+    protected $_data = []; // The working dataset containing both old and new data
     protected $_is_new = true; // Used to determine if this is a new row or not.
     protected $errors = [];
 
@@ -59,48 +60,37 @@ class Model implements \JsonSerializable
      * @param array $data The row data
      */
     public function __construct(array $data = [], $is_new = true) {
-        $this->_data = $data;
-        $this->_is_new = $is_new;
-
         // Is there any data?
         // If so get the columns and add them to
         // the properties array
-        foreach ($data as $column => $value) {
-            if (!in_array($column, static::$_properties)) {
-                static::$_properties[] = $column;
-            }
+        static::$_properties = array_merge(static::$_properties, array_keys($data));
 
-            // Unserialize only if it comes from the database
-            if ($is_new == false and in_array($column, static::$_serialize)) {
-                $this->_data[$column] = json_decode($value, true);
+        // Some special cases
+        foreach ($data as $column => $value) {
+            if (!$is_new and in_array($column, static::$_serialize)) { // Unserialize only if it comes from the database
+                $data[$column] = json_decode($value, true);
             } elseif (in_array($column, static::$_escape)) {
-                $this->_data[$column] = htmlspecialchars($value);
+                $data[$column] = htmlspecialchars($value);
+            } elseif (!$is_new and in_array($column, static::$_timestamp)) {
+                $data[$column] = Time::gmt_to_local($data[$column]);
             }
         }
 
+        $this->_is_new = $is_new;
+        $this->_data = $data;
+        $this->_original = $is_new ? [] : $data;
+
         // Create filter arrays if they aren't already
-        foreach (['construct', 'create', 'save'] as $filter) {
+        foreach (['construct', 'create', 'save', 'delete'] as $filter) {
             // Before filters
-            if (!isset(static::$_filters_before[$filter])) {
+            if (empty(static::$_filters_before[$filter])) {
                 static::$_filters_before[$filter] = [];
             }
 
             // After filters
-            if (!isset(static::$_filters_after[$filter])) {
+            if (empty(static::$_filters_after[$filter])) {
                 static::$_filters_after[$filter] = [];
             }
-        }
-
-        if (!in_array('_date_time_convert', static::$_filters_after['construct'])) {
-            static::$_filters_after['construct'][] = '_date_time_convert';
-        }
-
-        if (!in_array('_timestamps', static::$_filters_before['create'])) {
-            static::$_filters_before['create'][] = '_timestamps';
-        }
-
-        if (!in_array('_timestamps', static::$_filters_before['save'])) {
-            static::$_filters_before['save'][] = '_timestamps';
         }
 
         // And run the after construct filter array...
@@ -145,40 +135,54 @@ class Model implements \JsonSerializable
         }
 
         $primary_key = static::$_primary_key;
-        $action = $this->_is_new() ? 'create' : 'save';
+        $action = $this->_is_new ? 'create' : 'save';
         $data = [];
-
+ 
         // Before save filters
-        if (!empty(static::$_filters_before[$action])) {
-            foreach (static::$_filters_before[$action] as $filter) {
-                $this->$filter();
-            }
+        foreach (static::$_filters_before[$action] as $filter) {
+            $this->$filter();
         }
-
-        foreach (static::$_properties as $column) {
-            if (is_scalar($column) && isset($this->_data[$column])) {
+        
+        // Created at field
+        if ($this->_is_new and in_array('created_at', static::$_properties) and !isset($data['created_at'])) {
+            $this->_data['created_at'] = Time::date('Y-m-d H:i:s');
+        }
+        // Updated at field
+        if (in_array('updated_at', static::$_properties) and !isset($data['updated_at'])) {
+            $this->_data['updated_at'] = Time::date('Y-m-d H:i:s');
+        }
+        
+        foreach ($this->_data as $column => $value) {
+            if (!array_key_exists($column, $this->_original) || $this->_original[$column] !== $value) {
                 if (in_array($column, static::$_escape)) {
                     $data[$column] = htmlspecialchars_decode($this->_data[$column]);
                 } elseif (in_array($column, static::$_serialize)) {
                     $data[$column] = json_encode($this->_data[$column]);
+                } elseif (in_array($column, static::$_timestamp)) {
+                    $data[$column] = Time::gmt('Y-m-d H:i:s', $this->data[$column]);
                 } else {
                     $data[$column] = $this->_data[$column];
                 }
             }
         }
-
+        
         FishHook::run('model::save/'.$action, [static::class, &$data]);
 
         // Save
-        if ($this->_is_new() === false) {
-            unset($data[$primary_key]);
-            static::db()->update(static::$_name)->set($data)->where($primary_key, $this->_data[$primary_key])->exec();
+        if ($this->_is_new === false) {
+            static::db()->update(static::$_name)->set($data)->where($primary_key, $this->_original[$primary_key])->exec();
         }
         // Create
         else {
             static::db()->insert($data)->into(static::$_name)->exec();
-            $this->_data[$primary_key] = static::db()->last_insert_id();
+            if (0 < $id = static::db()->last_insert_id()) {
+                $this->_data[$primary_key] = $id;
+            }
         }
+        
+        // Sync our original data reference
+        $this->_original = $this->_data;
+        
         return true;
     }
 
@@ -186,14 +190,12 @@ class Model implements \JsonSerializable
      * Deletes the row.
      */
     public function delete() {
-        if ($this->_is_new() === true) {
+        if ($this->_is_new) {
             return false;
         }
         // Before delete filters
-        if (!empty(static::$_filters_before['delete'])) {
-            foreach (static::$_filters_before['delete'] as $filter) {
-                $this->$filter();
-            }
+        foreach (static::$_filters_before['delete'] as $filter) {
+            $this->$filter();
         }
         return static::db()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
     }
@@ -203,9 +205,9 @@ class Model implements \JsonSerializable
      *
      * @return bool
      */
-    public function _is_new($is_new = null) {
+    public function is_new($is_new = null) {
         if ($is_new !== null) {
-            $this->_is_new =  $is_new;
+            $this->_is_new = (bool)$is_new;
         }
         return $this->_is_new;
     }
@@ -226,7 +228,6 @@ class Model implements \JsonSerializable
             }
         } else {
             $this->_data[$col] = $val;
-            $this->_set_changed($col);
 
             if (!in_array($val, static::$_properties)) {
                 static::$_properties[] = $val;
@@ -238,13 +239,18 @@ class Model implements \JsonSerializable
     }
 
     /**
-     * Adds the property to the changed properties array.
+     * Checks if a property is dirty (isn't saved)
      *
      * @param string $property
+     * 
+     * @return bool
      */
-    protected function _set_changed($property) {
-        if (in_array($property, static::$_properties) and !in_array($property, $this->_changed_properties)) {
-            $this->_changed_properties[] = $property;
+    public function is_dirty($property = null) {
+        if ($property === null) {
+            return $this->_original !== $this->_data;
+        } else {
+            return (!isset($this->_original[$property], $this->_data[$property])
+                    || $this->_original[$property] !== $this->_data[$property]);
         }
     }
 
@@ -255,7 +261,7 @@ class Model implements \JsonSerializable
      *
      * @return object
      */
-    public static function select($cols = null) {
+    public static function select($cols = '*') {
         return static::db()->select($cols ?: static::$_properties)->from(static::$_name)->_model(static::class);
     }
 
@@ -291,7 +297,7 @@ class Model implements \JsonSerializable
             $val = isset($this->_data[$var]) ? $this->_data[$var] : '';
         }
         // Has many
-        elseif (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var]))) {
+        elseif (in_array($var, static::$_has_many) or isset(static::$_has_many[$var])) {
             $has_many = [ // Defaults
                 'model' => rtrim($var, 's'),
                 'foreign_key' => substr(static::$_name, 0, -1) . '_id',
@@ -306,7 +312,7 @@ class Model implements \JsonSerializable
             $val = $this->$var = $model::select()->where($has_many['foreign_key'], $this->{$has_many['column']});
         }
         // Belongs to
-        else if (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var]))) {
+        else if (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var])) {
             $belongs_to = [ // Defaults
                 'model' => $var,
                 'column' => $var . '_id'
@@ -337,7 +343,6 @@ class Model implements \JsonSerializable
         if (in_array($var, static::$_properties)) {
             FishHook::run('model::__set', [static::class, $var, &$val]);
             $this->_data[$var] = $val;
-            $this->_set_changed($var);
         } else {
             $this->$var = $val;
         }
@@ -385,33 +390,6 @@ class Model implements \JsonSerializable
     {
         if (!in_array($name, static::$_properties)) {
             static::$_properties[] = $name;
-        }
-    }
-
-    /**
-     * Sets the created_at and updated_at fields when saving.
-     */
-    private function _timestamps() {
-        // Created at field
-        if ($this->_is_new() and in_array('created_at', static::$_properties) and !isset($this->_data['created_at'])) {
-            $this->_data['created_at'] = Time::gmt();
-        }
-
-        // Updated at field
-        if (!$this->_is_new() and in_array('updated_at', static::$_properties)) {
-            $this->updated_at = Time::gmt();
-        }
-    }
-
-    /**
-     * Converts the created_at, updated_at and published_at properties
-     * to local time from gmt time.
-     */
-    private function _date_time_convert() {
-        foreach (['created_at', 'updated_at', 'published_at'] as $var) {
-            if (!$this->_is_new() and isset($this->_data[$var])) {
-                $this->_data[$var] = Time::gmt_to_local($this->_data[$var]);
-            }
         }
     }
 

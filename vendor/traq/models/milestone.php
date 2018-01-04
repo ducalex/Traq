@@ -146,7 +146,7 @@ class Milestone extends Model
         }
 
         // Check if the slug is in use
-        $milestone_slug = Milestone::select('slug')->where('id', $this->_is_new() ? 0 : $this->_data['id'], '!=')
+        $milestone_slug = Milestone::select('slug')->where('id', $this->is_new() ? 0 : $this->_data['id'], '!=')
             ->where('slug', $this->_data['slug'])->where('project_id', $this->project_id);
 
         if ($milestone_slug->exec()->count()) {
@@ -220,7 +220,7 @@ class Milestone extends Model
         }
 
         // Completed on date from GMT to local
-        if (!$this->_is_new() and $this->_data['completed_on'] != null) {
+        if (!$this->_is_new and $this->_data['completed_on'] != null) {
             $this->_data['completed_on'] = Time::gmt_to_local($this->_data['completed_on']);
         }
     }

@@ -119,7 +119,6 @@ class User extends Model
     {
         if (func_num_args() === 2) {
             $this->_data['options'][$option] = $value;
-            $this->_set_changed('options');
         }
 
         return (isset($this->_data['options'][$option])) ? $this->_data['options'][$option] : false;
@@ -237,7 +236,7 @@ class User extends Model
      */
     protected function prepare_password()
     {
-        if ($this->_is_new() or in_array('password', $this->_changed_properties)) {
+        if ($this->is_dirty('password')) {
             $this->_data['password'] = password_hash($this->_data['password'], PASSWORD_DEFAULT);
         }
     }
@@ -260,7 +259,7 @@ class User extends Model
         }
 
         // Check if the username is taken
-        if ($this->_is_new() and static::find('username', $this->_data['username'])) {
+        if ($this->_is_new and static::find('username', $this->_data['username'])) {
             $this->errors['username'] = l('errors.users.username_in_use');
         }
 
@@ -301,7 +300,7 @@ class User extends Model
         }
 
         // Require unique email
-        if ($this->_is_new() and static::find('email', $this->_data['email'])) {
+        if ($this->_is_new and static::find('email', $this->_data['email'])) {
             $this->errors['email'] = l('errors.users.email_in_use');
         }
 

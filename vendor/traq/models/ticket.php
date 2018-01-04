@@ -120,7 +120,6 @@ class Ticket extends Model
         if (!in_array($user_id, $this->_data['extra']['voted'])) {
             $this->votes++;
             $this->_data['extra']['voted'][] = $user_id;
-            $this->_set_changed('extra');
             return true;
         } else {
             return false;
@@ -152,7 +151,7 @@ class Ticket extends Model
     public function save()
     {
         // Is this a new ticket?
-        if ($this->_is_new()) {
+        if ($this->_is_new) {
             // Get the next ticket id and update
             // the value for the next ticket.
             $this->ticket_id = $this->project->next_tid;
@@ -181,7 +180,7 @@ class Ticket extends Model
             $this->_custom_field_queue = array();
 
             // New ticket?
-            if ($this->_is_new()) {
+            if ($this->_is_new) {
                 // Timeline entry
                 $timeline = new Timeline(array(
                     'project_id' => $this->project_id,
@@ -423,6 +422,8 @@ class Ticket extends Model
             }
         }
 
+        $assignment_changed = $this->is_dirty('assigned_to_id');
+
         // Save
         if ($this->save()) {
             $this->project = Project::find($this->project_id);
@@ -441,7 +442,7 @@ class Ticket extends Model
             }
 
             // Assigned to notification
-            if (in_array('assigned_to_id', $this->_changed_properties) and $this->_data['assigned_to_id'] != 0) {
+            if ($assignment_changed and $this->assigned_to_id != 0) {
                 Notification::send_to($this->_data['assigned_to_id'], 'ticket_assigned', array('ticket' => $this, 'project' => $this->project));
             }
 
@@ -596,7 +597,6 @@ class Ticket extends Model
     public function toggle_task($task_id, $status = null)
     {
         $this->_data['tasks'][$task_id]['completed'] = $status !== null ? $status : !$this->_data['tasks'][$task_id]['completed'];
-        $this->_set_changed('tasks');
     }
 
     /**

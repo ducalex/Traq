@@ -20,9 +20,10 @@
 
 namespace avalon\database;
 
-use avalon\core\Error;
+use avalon\database;
 use avalon\database\pdo\Query;
 use avalon\database\pdo\Statement;
+use avalon\core\Error;
 
 /**
  * PDO Database wrapper
@@ -33,7 +34,7 @@ use avalon\database\pdo\Statement;
  * @author Jack P. <nrx@nirix.net>
  * @copyright Copyright (c) Jack P.
  */
-class PDO extends Driver
+class PDO implements Driver
 {
     private $connection;
     private $connection_name;

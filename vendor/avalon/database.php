@@ -37,13 +37,14 @@ class Database
      *
      * @param array $config
      * @param string $name
+     * @param bool $overwrite
      *
      * @return object
      */
-    public static function factory(array $config, $name = 'main')
+    public static function factory(array $config, $name = 'main', $overwrite = false)
     {
         // Make sure the connection name is available
-        if (static::connection($name)) {
+        if (!$overwrite && static::connection($name)) {
             throw new Exception("Database connection name '{$name}' already initiated");
         }
 
@@ -61,10 +62,16 @@ class Database
      *
      * @param string $name Connection name
      *
-     * @return object
+     * @return object|false
      */
     public static function connection($name = 'main')
     {
         return isset(static::$connections[$name]) ? static::$connections[$name] : false;
+    }
+
+
+    public static function __callStatic($name, $arguments)
+    {
+        return call_user_func_array([self::connection(), $name], $arguments);
     }
 }

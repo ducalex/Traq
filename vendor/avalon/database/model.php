@@ -117,24 +117,22 @@ class Model implements \JsonSerializable
      *
      * @param string $find Either the value of the primary key, or the field name.
      * @param value $value The value of the field to find if the $find param is the field name.
+     * @param int $count if specified returns an array of all matches up to count
      *
-     * @return Object
+     * @return object|array
      */
-    public static function find($find, $value = null) {
-        if ($value == null) {
+    public static function find($find, $value = null, $count = 1) {
+        if ($value === null) {
             list($find, $value) = [static::$_primary_key, $find];
         }
 
-        $data = static::select()->where($find, $value)->limit(1)->exec()->fetch();
+        $data = static::select()->where($find, $value)->limit($count)->exec()->fetch_all();
 
-        if (!$data) {
-            return false;
+        if (func_num_args() === 3) {
+            return $data ? $data : [];
+        } else {
+            return $data ? $data[0] : false;    
         }
-
-        // Plugin hook
-        FishHook::run('model::find', [static::class, $find, $value]);
-
-        return $data;
     }
 
     /**
@@ -291,91 +289,45 @@ class Model implements \JsonSerializable
         // Model data
         if (in_array($var, static::$_properties)) {
             $val = isset($this->_data[$var]) ? $this->_data[$var] : '';
-
-            // Plugin hook
-            FishHook::run('model::__get', [static::class, $var, $this->_data, &$val]);
-
-            return $val;
         }
         // Has many
         elseif (is_array(static::$_has_many) and (in_array($var, static::$_has_many) or isset(static::$_has_many[$var]))) {
-            $has_many = [];
+            $has_many = [ // Defaults
+                'model' => rtrim($var, 's'),
+                'foreign_key' => substr(static::$_name, 0, -1) . '_id',
+                'column' => static::$_primary_key
+            ];
+
             if (isset(static::$_has_many[$var])) {
-                $has_many = static::$_has_many[$var];
-            }
-            // Model
-            if (!isset($has_many['model'])) {
-                $namespace = explode('\\', static::class);
-                unset($namespace[count($namespace) - 1]);
-
-                $model = ucfirst((substr($var, -1) == 's' ? substr($var, 0, -1) : $var));
-                $class = '\\' . implode('\\', $namespace) . '\\' . $model;
-
-                $has_many['model'] = $class;
-            } else {
-                $model = explode('\\', $var);
-
-                if (count($model) == 1) {
-                    $namespace = explode('\\', static::class);
-                    $namespace[count($namespace) -1] = ucfirst($has_many['model']);
-                    $has_many['model'] = implode('\\', $namespace);
-                }
-            }
-            // Different foreign key?
-            if (!isset($has_many['foreign_key'])) {
-                $has_many['foreign_key'] = substr(static::$_name, 0, -1) . '_id';
-            }
-            // Different column?
-            if (!isset($has_many['column'])) {
-                $has_many['column'] = static::$_primary_key;
+                $has_many = array_merge($has_many, static::$_has_many[$var]);
             }
 
-            $model = $has_many['model'];
-            $column = $has_many['column'];
-            return $this->$var = $model::select()->where($has_many['foreign_key'], $this->$column);
+            $model = preg_replace('/[^\\\\]+$/', ucfirst($has_many['model']), static::class);
+            $val = $this->$var = $model::select()->where($has_many['foreign_key'], $this->{$has_many['column']});
         }
         // Belongs to
         else if (is_array(static::$_belongs_to) and (in_array($var, static::$_belongs_to) or isset(static::$_belongs_to[$var]))) {
-            $belongs_to = [];
+            $belongs_to = [ // Defaults
+                'model' => $var,
+                'column' => $var . '_id'
+            ];
+
             if (isset(static::$_belongs_to[$var])) {
-                $belongs_to = static::$_belongs_to[$var];
+                $belongs_to = array_merge($belongs_to, static::$_belongs_to[$var]);
             }
-            // Model
-            if (!isset($belongs_to['model'])) {
-                $namespace = explode('\\', static::class);
-                unset($namespace[count($namespace) - 1]);
 
-                $model = ucfirst($var);
-                $class = '\\' . implode('\\', $namespace) . '\\' . $model;
+            $model = preg_replace('/[^\\\\]+$/', ucfirst($belongs_to['model']), static::class);
+            $belongs_to += ['foreign_key' => $model::$_primary_key];
 
-                $belongs_to['model'] = $class;
-            } else {
-                $model = explode('\\', $belongs_to['model']);
-
-                if (count($model) == 1) {
-                    $namespace = explode('\\', static::class);
-                    $namespace[count($namespace) -1] = ucfirst($belongs_to['model']);
-                    $belongs_to['model'] = implode('\\', $namespace);
-                }
-            }
-            // Different foreign key?
-            if (!isset($belongs_to['foreign_key'])) {
-                $belongs_to['foreign_key'] = $belongs_to['model']::$_primary_key;
-            }
-            // Different column?
-            if (!isset($belongs_to['column'])) {
-                $belongs_to['column'] = $var . '_id';
-            }
-            $model = $belongs_to['model'];
-            return $this->$var = $model::find($belongs_to['foreign_key'], $this->{$belongs_to['column']});
+            $val = $this->$var = $model::find($belongs_to['foreign_key'], $this->{$belongs_to['column']});
         } else {
             $val = $this->$var;
-
-            // Plugin hook
-            FishHook::run('model::__get', [static::class, $var, $this->_data, &$val]);
-
-            return $val;
         }
+
+        // Plugin hook
+        FishHook::run('model::__get', [static::class, $var, $this->_data, &$val]);
+
+        return $val;
     }
 
     /**

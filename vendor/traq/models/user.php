@@ -339,9 +339,9 @@ class User extends Model
      *
      * @return array
      */
-    public function __toArray($fields = null, $exclude = array())
+    public function toArray($fields = array('id', 'username', 'name', 'group_id', 'locale', 'created_at'), $exclude = array())
     {
-        return parent::__toArray($fields, array('password', 'email', 'login_hash', 'api_key', 'options'));
+        return parent::toArray($fields, $exclude);
     }
 
     /**

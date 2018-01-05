@@ -106,9 +106,9 @@ class WikiPage extends Model
      * @param array $exclude
      * @return array
      */
-    public function __toArray($fields = array(), $exclude = array())
+    public function toArray($fields = array('id', 'project_id', 'title', 'slug', 'main', 'revision'), $exclude = array())
     {
-        return parent::__toArray($fields ?: array_merge(static::$_properties, ['revision']), $exclude);
+        return parent::toArray($fields, $exclude);
     }
 
     /**

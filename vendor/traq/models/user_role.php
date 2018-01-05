@@ -69,11 +69,8 @@ class UserRole extends Model
         return true;
     }
 
-    public function __toArray($fields = null, $exclude = array())
+    public function toArray($fields = array('user', 'role'), $exclude = array())
     {
-        $data = parent::__toArray($fields);
-        $data['user'] = $this->user->__toArray();
-        $data['role'] = $this->role->__toArray();
-        return $data;
+        return parent::toArray($fields, $exclude);
     }
 }

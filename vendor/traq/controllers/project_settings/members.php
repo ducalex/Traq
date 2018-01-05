@@ -41,7 +41,7 @@ class Members extends AppController
 {
     public function action_index()
     {
-        View::set('user_roles', UserRole::select()->where('project_id', $this->project->id)->exec()->fetch_all());
+        $this->response['user_roles'] = UserRole::select()->where('project_id', $this->project->id)->exec()->fetch_all();
     }
 
     public function action_new()
@@ -101,10 +101,9 @@ class Members extends AppController
     public function action_delete($user_id)
     {
         if ($user_role = UserRole::select('id')->where(array(array('project_id', $this->project->id), array('user_id', $user_id)))->exec()->fetch()) {
-            $user_role->delete();
+            $this->response->status = $user_role->delete();
         }
 
-        $this->response->status = (int)$user_role;
         $this->response->redirect = $this->project->href('settings/members');
     }
 }

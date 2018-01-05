@@ -298,8 +298,8 @@ class Project extends Model
      *
      * @return array
      */
-    public function __toArray($fields = null, $exclude = array())
+    public function toArray($fields = array(), $exclude = array('private_key', 'next_tid', 'extra'))
     {
-        return parent::__toArray($fields, array('private_key', 'next_tid', 'extra'));
+        return parent::toArray($fields, $exclude);
     }
 }

@@ -485,40 +485,20 @@ class Ticket extends Model
      *
      * @return array
      */
-    public function __toArray($fields = null, $exclude = array())
+    public function toArray($include = array(), $exclude = array('id', 'extra'))
     {
-        $data = parent::__toArray($fields);
-        $data['id'] = $data['ticket_id'];
+        $relationships = array('project', 'user', 'assigned_to', 'milestone', 'version', 'component', 'status', 'priority', 'severity', 'type');
+        $include = $include ?: array_merge(static::$_properties, $relationships);
 
-        // Set vote count and remove the IDs of
-        // users who have voted.
-        if (isset($data['extra']['voted'])) {
-            $data['votes'] = count($data['extra']['voted']);
-            unset($data['extra']['voted']);
-        } else {
-            $data['votes'] = 0;
-        }
+        $data = parent::toArray($include, $exclude);
 
-        // Extra data to fetch
-        $relations = array(
-            'project'     => array('id', 'name'),
-            'user'        => array('id', 'username', 'name'),
-            'assigned_to' => array('id', 'username', 'name'),
-            'milestone'   => array('id', 'name'),
-            'version'     => array('id', 'name'),
-            'component'   => array('id', 'name'),
-            'status'      => array('id', 'name'),
-            'priority'    => array('id', 'name'),
-            'severity'    => array('id', 'name'),
-            'type'        => array('id', 'name'),
-        );
+        $data['votes'] = isset($this->extra['voted']) ? count($this->extra['voted']) : 0;
 
-        // Loop over the relations
-        foreach ($relations as $name => $fields) {
-            // Add the relation data and remove its ID
-            // from the main array
-            $data[$name] = $this->$name ? $this->$name->__toArray($fields) : null;
-            unset($data[$name . '_id']);
+        foreach($relationships as $relation) {
+            if (is_array($data[$relation])) {
+                $data[$relation] = array_get_keys($data[$relation], array('id', 'username', 'name'));
+                unset($data[$relation.'_id']);
+            }
         }
 
         return $data;

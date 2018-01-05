@@ -230,7 +230,7 @@ class Model implements \JsonSerializable
             }
         } else {
             // Plugin hook
-            FishHook::run('model::set', [static::class, $col, &$val]);
+            FishHook::run('model::set', [static::class, $col, $this->_data, &$val]);
 
             $this->_data[$col] = $val;
 
@@ -350,11 +350,11 @@ class Model implements \JsonSerializable
     }
 
     public function __sleep() {
-        return array_keys($this->__toArray());
+        return array_keys($this->toArray());
     }
 
     public function jsonSerialize() {
-        return $this->__toArray();
+        return $this->toArray();
     }
 
     /**
@@ -362,16 +362,20 @@ class Model implements \JsonSerializable
      *
      * @return array
      */
-    public function __toArray($include = [], $exclude = []) {
+    public function toArray($include = [], $exclude = []) {
         $fields = array_diff($include ?: static::$_properties, $exclude);
         // This is necessary because some data isn't in _data (belongs_to and has_many)
         $data = [];
         foreach($fields as $field) {
             $data[$field] = $this->$field;
             if ($data[$field] instanceOf self) {
-                $data[$field] = $data[$field]->__toArray();
+                $data[$field] = $data[$field]->toArray();
             }
         }
+
+        // Plugin hook
+        FishHook::run('model::serialize', [static::class, $include, $exclude, $this->_data, &$data]);
+
         return $data;
     }
 

@@ -67,7 +67,8 @@ class Plugins extends AppController
 
             if ($plugin->is_valid()) {
                 $key = !empty($installed[$plugin->file]) ? 'enabled' : 'disabled';
-                $plugins[$key][$plugin->file] = array_merge(($plugin->get_class())::info(), array(
+                $class_name = $plugin->get_class();
+                $plugins[$key][$plugin->file] = array_merge($class_name::info(), array(
                     'installed' => isset($installed[$plugin->file]),
                     'enabled' => !empty($installed[$plugin->file]),
                     'file' => $plugin->file

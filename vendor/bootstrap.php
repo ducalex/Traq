@@ -79,7 +79,8 @@ foreach(Plugin::select('file')->where('enabled', '1')->fetch_all() as $plugin) {
     Load::register_path(APPPATH . '/plugins/' . $plugin->file);
 
     if ($plugin->is_valid()) {
-        ($plugin->get_class())::init();
+        $plugin = $plugin->get_class();
+        $plugin::init();
     }
 }
 unset($plugin);

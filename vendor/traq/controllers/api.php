@@ -20,9 +20,6 @@
 
 namespace traq\controllers;
 
-use avalon\output\View;
-
-use avalon\core\Load;
 use traq\models\Status;
 use traq\models\Priority;
 use traq\models\Type;
@@ -37,15 +34,10 @@ use traq\models\Type;
  */
 class API extends AppController
 {
-    public function __construct()
-    {
-        $this->is_api = true;
-        parent::__construct();
-    }
+    public $is_api = true;
+
     /**
      * Ticket statuses.
-     *
-     * @return string
      */
     public function action_statuses()
     {
@@ -54,8 +46,6 @@ class API extends AppController
 
     /**
      * Ticket priorities.
-     *
-     * @return string
      */
     public function action_priorities()
     {
@@ -64,8 +54,6 @@ class API extends AppController
 
     /**
      * Ticket types.
-     *
-     * @return string
      */
     public function action_types()
     {

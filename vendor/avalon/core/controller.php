@@ -62,10 +62,7 @@ class Controller
         }
 
         // Set HTTP code
-        $http_code = $this->response->status ?: 400;
-        if (in_array($http_code, [200, 400, 401, 402, 403, 404])) {
-            http_response_code($http_code);
-        }
+        http_response_code($this->response->status());
 
         // Set mime type if the output format is known
         if ($this->response->format) {

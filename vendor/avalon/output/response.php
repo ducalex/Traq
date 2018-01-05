@@ -47,6 +47,15 @@ class Response implements \ArrayAccess
         }
     }
 
+    public function status()
+    {
+        if (in_array($this->status, [200, 400, 401, 402, 403, 404, 500])) {
+            return $this->status;
+        }
+
+        return $this->status ? 200 : 400;
+    }
+
     public function offsetExists($offset)
     {
         return isset($this->objects[$offset]);

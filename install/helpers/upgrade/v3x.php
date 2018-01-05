@@ -128,11 +128,11 @@ class v3x extends Base
                 }
             }
 
-            $db->query("UPDATE `{$db->prefix}tickets` SET `extra` = '" . json_encode($extra) . "' WHERE `id` = '{$ticket['id']}' LIMIT 1");
+            $db->exec("UPDATE `{$db->prefix}tickets` SET `extra` = '" . json_encode($extra) . "' WHERE `id` = '{$ticket['id']}' LIMIT 1");
         }
 
         // Fix severities table ID column to auto increment
-        $db->query("ALTER TABLE `{$db->prefix}severities` CHANGE `id` `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
+        $db->exec("ALTER TABLE `{$db->prefix}severities` CHANGE `id` `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
     }
 
     /**
@@ -141,20 +141,20 @@ class v3x extends Base
     public static function v30100($db)
     {
         // Default value for project display order.
-        $db->query("ALTER TABLE `{$db->prefix}projects` CHANGE `displayorder` `displayorder` BIGINT(20) NOT NULL DEFAULT '0'");
+        $db->exec("ALTER TABLE `{$db->prefix}projects` CHANGE `displayorder` `displayorder` BIGINT(20) NOT NULL DEFAULT '0'");
 
         // Add api_key column to users table
-        $db->query(" ALTER TABLE `{$db->prefix}users` ADD COLUMN `api_key` VARCHAR(255) AFTER `login_hash`;");
+        $db->exec("ALTER TABLE `{$db->prefix}users` ADD COLUMN `api_key` VARCHAR(255) AFTER `login_hash`;");
 
         // Add setting for registration/email validation
-        $db->query("
+        $db->exec("
             INSERT INTO `{$db->prefix}settings` (`setting`, `value`)
             VALUES
               ('email_validation',0);
         ");
 
         // Add permissions for moving tickets
-        $db->query("
+        $db->exec("
             INSERT INTO `{$db->prefix}permissions` (`project_id`, `type`, `type_id`, `action`, `value`)
             VALUES
               (0,'usergroup',0,'move_tickets',0),
@@ -163,7 +163,7 @@ class v3x extends Base
         ");
 
         // Add permissions for ticket properties
-        $db->query("
+        $db->exec("
             INSERT INTO `{$db->prefix}permissions` (`project_id`, `type`, `type_id`, `action`, `value`)
             VALUES
               (0,'usergroup',0,'ticket_properties_set_assigned_to',0),
@@ -207,10 +207,10 @@ class v3x extends Base
     public static function v30200($db)
     {
         // Add tasks column to tickets table
-        $db->query("ALTER TABLE `" . $db->prefix . "tickets` ADD COLUMN `tasks` longtext AFTER `votes`;");
+        $db->exec("ALTER TABLE `" . $db->prefix . "tickets` ADD COLUMN `tasks` longtext AFTER `votes`;");
 
         // Add new permissions
-        $db->query("
+        $db->exec("
             INSERT INTO `" . $db->prefix . "permissions` (`project_id`, `type`, `type_id`, `action`, `value`)
             VALUES
               (0,'usergroup',0,'delete_timeline_events',0),
@@ -234,7 +234,7 @@ class v3x extends Base
     public static function v30201($db)
     {
         // Add default ticket type ID column to projects table
-        $db->query("ALTER TABLE `". $db->prefix . "projects` ADD COLUMN `default_ticket_type_id` int AFTER `enable_wiki`;");
+        $db->exec("ALTER TABLE `". $db->prefix . "projects` ADD COLUMN `default_ticket_type_id` int AFTER `enable_wiki`;");
     }
 
     /**
@@ -243,7 +243,7 @@ class v3x extends Base
     public static function v30202($db)
     {
         // Add assignable column to project role table.
-        $db->query("ALTER TABLE `{$db->prefix}project_roles` ADD COLUMN `assignable` TINYINT(1) NOT NULL DEFAULT '1' AFTER `name`;");
+        $db->exec("ALTER TABLE `{$db->prefix}project_roles` ADD COLUMN `assignable` TINYINT(1) NOT NULL DEFAULT '1' AFTER `name`;");
     }
 
     /**
@@ -252,7 +252,7 @@ class v3x extends Base
     public static function v30300($db)
     {
         // Custom field values table
-        $db->query("
+        $db->exec("
             CREATE TABLE `". $db->prefix . "custom_field_values` (
               `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
               `custom_field_id` bigint(20) NOT NULL,
@@ -280,14 +280,14 @@ class v3x extends Base
 
             unset($extra['custom_fields']);
 
-            $db->query("UPDATE `{$db->prefix}tickets` SET `extra` = '" . json_encode($extra) . "' WHERE `id` = '{$ticket['id']}' LIMIT 1");
+            $db->exec("UPDATE `{$db->prefix}tickets` SET `extra` = '" . json_encode($extra) . "' WHERE `id` = '{$ticket['id']}' LIMIT 1");
         }
 
         // Add default value for milestone_id field in the tickets table
-        $db->query("ALTER TABLE `{$db->prefix}tickets` CHANGE `milestone_id` `milestone_id` BIGINT(20) NOT NULL DEFAULT '0';");
+        $db->exec("ALTER TABLE `{$db->prefix}tickets` CHANGE `milestone_id` `milestone_id` BIGINT(20) NOT NULL DEFAULT '0';");
 
         // Site name/URL and ticket history sorting setting rows
-        $db->query("
+        $db->exec("
           INSERT INTO `{$db->prefix}settings` (`setting`, `value`)
           VALUES
             ('site_name', ''),
@@ -296,16 +296,16 @@ class v3x extends Base
         ");
 
         // Add custom fields slug field.
-        $db->query("ALTER TABLE `{$db->prefix}custom_fields` ADD `slug` VARCHAR(255) NOT NULL AFTER `name`;");
+        $db->exec("ALTER TABLE `{$db->prefix}custom_fields` ADD `slug` VARCHAR(255) NOT NULL AFTER `name`;");
 
         // Update current custom fields and create the slug.
-        foreach ($db->query("SELECT `id`, `name` FROM `{$db->prefix}custom_fields`")->fetchAll(\PDO::FETCH_ASSOC) as $field) {
+        foreach ($db->query("SELECT `id`, `name` FROM `{$db->prefix}custom_fields`")->fetch_all() as $field) {
             $slug = create_slug($field['name']);
-            $db->query("UPDATE `{$db->prefix}custom_fields` SET `slug` = '{$slug}' WHERE `id` = {$field['id']}");
+            $db->exec("UPDATE `{$db->prefix}custom_fields` SET `slug` = '{$slug}' WHERE `id` = {$field['id']}");
         }
 
         // Default ticket sorting
-        $db->query("ALTER TABLE `{$db->prefix}projects` ADD `default_ticket_sorting` VARCHAR(255) NOT NULL DEFAULT 'priority.asc' AFTER `default_ticket_type_id`;");
+        $db->exec("ALTER TABLE `{$db->prefix}projects` ADD `default_ticket_sorting` VARCHAR(255) NOT NULL DEFAULT 'priority.asc' AFTER `default_ticket_type_id`;");
 
         Fixes::deletedUsers();
     }
@@ -315,7 +315,7 @@ class v3x extends Base
      */
     public static function v30304($db)
     {
-        $db->query("INSERT INTO `{$db->prefix}settings` (`setting`, `value`) VALUES('ticket_creation_delay', '30');");
+        $db->exec("INSERT INTO `{$db->prefix}settings` (`setting`, `value`) VALUES('ticket_creation_delay', '30');");
     }
 
     /**
@@ -323,7 +323,7 @@ class v3x extends Base
      */
     public static function v30400($db)
     {
-        $db->query("
+        $db->exec("
             CREATE TABLE IF NOT EXISTS `{$db->prefix}ticket_relationships` (
               `id` bigint(20) NOT NULL AUTO_INCREMENT,
               `ticket_id` bigint(20) NOT NULL,
@@ -332,7 +332,7 @@ class v3x extends Base
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
         ");
 
-        $db->query("
+        $db->exec("
             INSERT INTO `{$db->prefix}permissions` (`project_id`, `type`, `type_id`, `action`, `value`)
             VALUES
               (0,'usergroup',0,'ticket_properties_set_related_tickets',0),
@@ -341,7 +341,7 @@ class v3x extends Base
               (0,'role',0,'ticket_properties_change_related_tickets',1);
         ");
 
-        $db->query("ALTER TABLE `{$db->prefix}custom_fields` ADD `ticket_type_ids` VARCHAR(255) NOT NULL;");
+        $db->exec("ALTER TABLE `{$db->prefix}custom_fields` ADD `ticket_type_ids` VARCHAR(255) NOT NULL;");
     }
 
     /**
@@ -352,7 +352,7 @@ class v3x extends Base
         $anon_user_setting = $db->select()->from('settings')->where('setting', 'anonymous_user_id')->exec()->fetch();
 
         // Create wiki page revisions table
-        $db->query("
+        $db->exec("
             CREATE TABLE `{$db->prefix}wiki_revisions` (
               `id` bigint(20) NOT NULL AUTO_INCREMENT,
               `wiki_page_id` bigint(20) NOT NULL,
@@ -366,10 +366,10 @@ class v3x extends Base
         ");
 
         // Add `revision_id` to wiki pages table.
-        $db->query("ALTER TABLE `{$db->prefix}wiki` ADD `revision_id` BIGINT(20) NOT NULL;");
+        $db->exec("ALTER TABLE `{$db->prefix}wiki` ADD `revision_id` BIGINT(20) NOT NULL;");
 
         // Create revisions for current page content
-        foreach ($db->query("SELECT * FROM `{$db->prefix}wiki`")->fetchAll(\PDO::FETCH_ASSOC) as $page) {
+        foreach ($db->query("SELECT * FROM `{$db->prefix}wiki`")->fetch_all() as $page) {
             $data = array(
                 'wiki_page_id' => $page['id'],
                 'revision'     => 1,
@@ -385,10 +385,10 @@ class v3x extends Base
         }
 
         // Drop body column
-        $db->query("ALTER TABLE `{$db->prefix}wiki` DROP `body`;");
+        $db->exec("ALTER TABLE `{$db->prefix}wiki` DROP `body`;");
 
         // Permissions
-        $db->query("
+        $db->exec("
             INSERT INTO `{$db->prefix}permissions` (`project_id`, `type`, `type_id`, `action`, `value`)
             VALUES
               (0,'usergroup',0,'view_tickets',1),
@@ -401,10 +401,10 @@ class v3x extends Base
      */
     public static function v30700($db)
     {
-        $db->query("ALTER TABLE `{$db->prefix}tickets` ADD `time_proposed` VARCHAR(255) AFTER `extra`;");
-        $db->query("ALTER TABLE `{$db->prefix}tickets` ADD `time_worked` VARCHAR(255) AFTER `time_proposed`;");
+        $db->exec("ALTER TABLE `{$db->prefix}tickets` ADD `time_proposed` VARCHAR(255) AFTER `extra`;");
+        $db->exec("ALTER TABLE `{$db->prefix}tickets` ADD `time_worked` VARCHAR(255) AFTER `time_proposed`;");
 
-        $db->query("
+        $db->exec("
             INSERT INTO `{$db->prefix}permissions` (`project_id`, `type`, `type_id`, `action`, `value`)
             VALUES
               (0,'usergroup',0,'ticket_properties_set_time_proposed',0),
@@ -423,9 +423,9 @@ class v3x extends Base
      */
     public static function v30701($db)
     {
-        $db->query("ALTER TABLE `{$db->prefix}timeline` MODIFY `data` longtext NULL");
-        $db->query("ALTER TABLE `{$db->prefix}wiki` MODIFY `revision_id` bigint(20) NULL");
-        $db->query("ALTER TABLE `{$db->prefix}wiki_revisions` MODIFY `updated_at` datetime NULL");
-        $db->query("ALTER TABLE `{$db->prefix}milestones` MODIFY `changelog` longtext COLLATE utf8_unicode_ci NULL");
+        $db->exec("ALTER TABLE `{$db->prefix}timeline` MODIFY `data` longtext NULL");
+        $db->exec("ALTER TABLE `{$db->prefix}wiki` MODIFY `revision_id` bigint(20) NULL");
+        $db->exec("ALTER TABLE `{$db->prefix}wiki_revisions` MODIFY `updated_at` datetime NULL");
+        $db->exec("ALTER TABLE `{$db->prefix}milestones` MODIFY `changelog` longtext COLLATE utf8_unicode_ci NULL");
     }
 }

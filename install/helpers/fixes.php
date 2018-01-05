@@ -35,7 +35,7 @@ class Fixes
     {
         global $db;
 
-        $anon_user_id_setting = $db->query("SELECT * FROM `settings` WHERE `setting` = 'anonymous_user_id' LIMIT 1");
+        $anon_user_id_setting = $db->query("SELECT * FROM `settings` WHERE `setting` = 'anonymous_user_id' LIMIT 1")->fetch();
         $anonymous_user_id = $anon_user_id_setting['value'];
 
         // Fix attachments
@@ -46,7 +46,7 @@ class Fixes
             }
         }
 
-        $db->query("UPDATE `{$db->prefix}attachments` SET `user_id` = '{$anonymous_user_id}' WHERE `id` IN (" . implode(',', $attachment_ids) . ")");
+        $db->exec("UPDATE `{$db->prefix}attachments` SET `user_id` = '{$anonymous_user_id}' WHERE `id` IN (" . implode(',', $attachment_ids) . ")");
 
         // Fix tickets
         $ticket_ids = array(0);
@@ -61,8 +61,8 @@ class Fixes
             }
         }
 
-        $db->query("UPDATE `{$db->prefix}tickets` SET `user_id` = '{$anonymous_user_id}' WHERE `id` IN (" . implode(',', $ticket_ids) . ")");
-        $db->query("UPDATE `{$db->prefix}tickets` SET `assigned_to_id` = '{$anonymous_user_id}' WHERE `id` IN (" . implode(',', $assigned_ticket_ids) . ")");
+        $db->exec("UPDATE `{$db->prefix}tickets` SET `user_id` = '{$anonymous_user_id}' WHERE `id` IN (" . implode(',', $ticket_ids) . ")");
+        $db->exec("UPDATE `{$db->prefix}tickets` SET `assigned_to_id` = '{$anonymous_user_id}' WHERE `id` IN (" . implode(',', $assigned_ticket_ids) . ")");
 
         // Fix ticket history
         $history_ids = array(0);
@@ -72,7 +72,7 @@ class Fixes
             }
         }
 
-        $db->query("UPDATE `{$db->prefix}ticket_history` SET `user_id` = '{$anonymous_user_id}' WHERE `id` IN (" . implode(',', $history_ids) . ")");
+        $db->exec("UPDATE `{$db->prefix}ticket_history` SET `user_id` = '{$anonymous_user_id}' WHERE `id` IN (" . implode(',', $history_ids) . ")");
 
         // Fix timeline
         $timeline_ids = array(0);
@@ -82,7 +82,7 @@ class Fixes
             }
         }
 
-        $db->query("UPDATE `{$db->prefix}timeline` SET `user_id` = '{$anonymous_user_id}' WHERE `id` IN (" . implode(',', $timeline_ids) . ")");
+        $db->exec("UPDATE `{$db->prefix}timeline` SET `user_id` = '{$anonymous_user_id}' WHERE `id` IN (" . implode(',', $timeline_ids) . ")");
     }
 
     /**
@@ -113,6 +113,6 @@ class Fixes
     private static function fetch_all($table)
     {
         global $db;
-        return $db->query("SELECT * FROM `{$db->prefix}{$table}`")->fetchAll();
+        return $db->query("SELECT * FROM `{$db->prefix}{$table}`")->fetch_all();
     }
 }

@@ -52,15 +52,15 @@ function array_remove_keys(array $array, array $keys, $recursive = true)
  *
  * @param array $array
  * @param array $keys Keys to get
- * @param bool  $merge Merge values
+ * @param bool  $collapse Collapse values to a single dimension array 
  *
  * @return array
  */
-function array_get_keys(array $array, array $keys, $merge = true)
+function array_get_keys(array $array, array $keys, $collapse = false)
 {
     $array = array_intersect_key($array, array_flip($keys));
 
-    if ($merge && $array) {
+    if ($collapse && $array) {
         $array = call_user_func_array('array_merge', $array);
     }
 

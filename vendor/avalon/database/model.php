@@ -76,9 +76,9 @@ class Model implements \JsonSerializable
             }
         }
 
-        $this->_is_new = $is_new;
         $this->_data = $data;
         $this->_original = $is_new ? [] : $data;
+        $this->_is_new = (bool)$is_new;
 
         // Create filter arrays if they aren't already
         foreach (['construct', 'create', 'save', 'delete'] as $filter) {
@@ -159,7 +159,7 @@ class Model implements \JsonSerializable
                 } elseif (in_array($column, static::$_serialize)) {
                     $data[$column] = json_encode($this->_data[$column]);
                 } elseif (in_array($column, static::$_timestamp)) {
-                    $data[$column] = Time::gmt('Y-m-d H:i:s', $this->data[$column]);
+                    $data[$column] = Time::gmt('Y-m-d H:i:s', $this->_data[$column]);
                 } else {
                     $data[$column] = $this->_data[$column];
                 }
@@ -207,7 +207,9 @@ class Model implements \JsonSerializable
      */
     public function is_new($is_new = null) {
         if ($is_new !== null) {
-            $this->_is_new = (bool)$is_new;
+            if ($this->_is_new = (bool)$is_new) {
+                $this->_original = [];
+            }
         }
         return $this->_is_new;
     }
@@ -227,14 +229,14 @@ class Model implements \JsonSerializable
                 $this->set($var, $val);
             }
         } else {
+            // Plugin hook
+            FishHook::run('model::set', [static::class, $col, &$val]);
+
             $this->_data[$col] = $val;
 
             if (!in_array($val, static::$_properties)) {
                 static::$_properties[] = $val;
             }
-
-            // Plugin hook
-            FishHook::run('model::set', [static::class, $col, $val]);
         }
     }
 
@@ -261,7 +263,7 @@ class Model implements \JsonSerializable
      *
      * @return object
      */
-    public static function select($cols = '*') {
+    public static function select($cols = null) {
         return static::db()->select($cols ?: static::$_properties)->from(static::$_name)->_model(static::class);
     }
 
@@ -294,7 +296,7 @@ class Model implements \JsonSerializable
     public function __get($var) {
         // Model data
         if (in_array($var, static::$_properties)) {
-            $val = isset($this->_data[$var]) ? $this->_data[$var] : '';
+            $val = array_key_exists($var, $this->_data) ? $this->_data[$var] : '';
         }
         // Has many
         elseif (in_array($var, static::$_has_many) or isset(static::$_has_many[$var])) {
@@ -331,7 +333,7 @@ class Model implements \JsonSerializable
         }
 
         // Plugin hook
-        FishHook::run('model::__get', [static::class, $var, $this->_data, &$val]);
+        FishHook::run('model::get', [static::class, $var, $this->_data, &$val]);
 
         return $val;
     }
@@ -341,8 +343,7 @@ class Model implements \JsonSerializable
      */
     public function __set($var, $val) {
         if (in_array($var, static::$_properties)) {
-            FishHook::run('model::__set', [static::class, $var, &$val]);
-            $this->_data[$var] = $val;
+            $this->set($var, $col);
         } else {
             $this->$var = $val;
         }
@@ -367,6 +368,9 @@ class Model implements \JsonSerializable
         $data = [];
         foreach($fields as $field) {
             $data[$field] = $this->$field;
+            if ($data[$field] instanceOf self) {
+                $data[$field] = $data[$field]->__toArray();
+            }
         }
         return $data;
     }

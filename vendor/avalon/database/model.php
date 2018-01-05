@@ -168,16 +168,16 @@ class Model implements \JsonSerializable
         
         FishHook::run('model::save/'.$action, [static::class, &$data]);
 
-        // Save
-        if ($this->_is_new === false) {
-            static::db()->update(static::$_name)->set($data)->where($primary_key, $this->_original[$primary_key])->exec();
-        }
         // Create
-        else {
+        if ($this->_is_new) {
             static::db()->insert($data)->into(static::$_name)->exec();
             if (0 < $id = static::db()->last_insert_id()) {
                 $this->_data[$primary_key] = $id;
             }
+        }
+        // Update if there is something to update
+        elseif ($data) {
+            static::db()->update(static::$_name)->set($data)->where($primary_key, $this->_original[$primary_key])->exec();
         }
         
         // Sync our original data reference
@@ -343,7 +343,7 @@ class Model implements \JsonSerializable
      */
     public function __set($var, $val) {
         if (in_array($var, static::$_properties)) {
-            $this->set($var, $col);
+            $this->set($var, $val);
         } else {
             $this->$var = $val;
         }

@@ -38,8 +38,8 @@ class PDO implements Driver
 {
     private $connection;
     private $connection_name;
-    private $query_count = 0;
-    protected $last_query;
+    public $query_count = 0;
+    public $last_query;
 
     public $prefix;
     public $type;
@@ -122,7 +122,7 @@ class PDO implements Driver
 
     public function query($query)
     {
-        return $this->prepare($query);
+        return $this->prepare($query)->exec();
     }
 
     /**

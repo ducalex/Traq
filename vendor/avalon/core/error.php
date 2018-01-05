@@ -20,6 +20,8 @@
 
 namespace avalon\core;
 
+use avalon\Database;
+
 /**
  * Error class
  *
@@ -46,6 +48,7 @@ class Error
         @http_response_code(500);
 
         $app = Kernel::app();
+        $db = Database::connection();
 
         if (isset($app->response) && $app->response->format === 'application/json') {
             $body = json_encode(['error' => $title, 'description' => $message]);
@@ -56,10 +59,16 @@ class Error
             $body .= '<blockquote style="font-family:\'Helvetica Neue\', Arial, Helvetica, sans-serif;background:#fbe3e4;color:#8a1f11;padding:0.8em;margin-bottom:1em;border:2px solid #fbc2c4;">';
 
             if ($title !== null) {
-                $body .= '<h1 style="margin: 0;">'.htmlentities($title).'</h1>';
+                $body .= '<h1 style="margin: 0; margin-bottom: 10px;">'.htmlentities($title).'</h1>';
+            }
+            
+            $body .= $message;
+            
+            if ($db) {
+                $body .= '<h3 style="margin: 0px; margin-top:10px;">Last SQL query:</h3>';
+                $body .= '<code>'.htmlentities($db->last_query).'</code>';
             }
 
-            $body .= $message;
             $body .= '<div style="margin-top:8px;"><small>Powered by Avalon</small></div>';
             $body .= '</blockquote>';
             $body .= '</body></html>';

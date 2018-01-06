@@ -43,38 +43,41 @@ class Load
      */
     public static function config($file)
     {
-        $file = basename(strtolower($file), '.php');
-        foreach ([APPPATH, SYSPATH] as $dir) {
-            if (file_exists("$dir/config/$file.php")) {
-                return require "$dir/config/$file.php";
-            }
+        if ($file = self::find($file.'.php', 'config', [], false)) {
+            return require $file[0];
         }
-
         //Error::halt("Loader Error", "Unable to load config '{$file}'");
         return false;
     }
 
     /**
-     * Loads the specified configuration file.
+     * Find the specified file in standard locations plus added search paths.
      *
-     * @param string $file
+     * @param string $name File name we're looking for. It can be a glob pattern
+     * @param string $subdir string to append to global search_paths. views/config/libs/helpers...
+     * @param array $extra_path paths to look in first. $subdir has no effect on them
+     * @param boolean $use_search_paths Also search paths registered through register_path(), usually by plugins
      *
-     * @return string
+     * @return array
      */
-    public static function find($name, $paths = [], $default_subdir = '')
+    public static function find($name, $subdir = '', array $extra_paths = [], $use_search_paths = true)
     {
-        $default_paths = array_merge([APPPATH, SYSPATH], self::$search_paths);
+        $paths = [APPPATH, SYSPATH];
         $name = self::lowercase($name);
         $files = [];
 
-        foreach ($paths as $path) {
+        if ($use_search_paths) {
+            $paths = array_merge($paths, self::$search_paths);
+        }
+
+        foreach ($extra_paths as $path) {
             if ($file = glob("$path/$name", GLOB_BRACE)) {
                 $files = array_merge($files, $file);
             }
         }
 
-        foreach ($default_paths as $path) {
-            if ($file = glob("$path/$default_subdir/$name", GLOB_BRACE)) {
+        foreach ($paths as $path) {
+            if ($file = glob("$path/$subdir/$name", GLOB_BRACE)) {
                 $files = array_merge($files, $file);
             }
         }
@@ -87,10 +90,11 @@ class Load
      *
      * @param string $class The class name
      * @param boolean $init Initialize the class or not
+     * @param array $args Values to pass to the lib constructor if $init
      *
-     * @return object
+     * @return object|string
      */
-    public static function lib($class, $init = true)
+    public static function lib($class, $init = true, $args = [])
     {
         // If it already loaded?
         if (isset(static::$libs[$class])) {
@@ -99,32 +103,16 @@ class Load
 
         // Set the class and file name
         $class_name = ucfirst($class);
-        $file_name = static::lowercase($class);
-
-        // App library
-        if (file_exists(APPPATH . '/libs/' . $file_name . '.php')) {
-            require_once APPPATH . '/libs/' . $file_name . '.php';
-        }
-        // Avalon library
-        elseif (file_exists(SYSPATH . '/libs/' . $file_name . '.php')) {
-            require_once SYSPATH . '/libs/' . $file_name . '.php';
-        }
-        // Not found
-        else {
-            Error::halt("Loader Error", "Unable to load library '{$class}'");
-            return false;
+        
+        // Let's find it!
+        if ($file = static::find($class.'.php', 'libs')) {
+            require_once $file[0];
+            static::$libs[$class] = $init ? new $class_name($args) : $class_name;
+            return static::$libs[$class];
         }
 
-        // Initiate the class?
-        if ($init) {
-            static::$libs[$class] = new $class_name();
-        }
-        // No, just load it
-        else {
-            static::$libs[$class] = $class_name;
-        }
-
-        return static::$libs[$class];
+        Error::halt("Loader Error", "Unable to load library '{$class}'");
+        return false;
     }
 
     /**
@@ -141,10 +129,7 @@ class Load
 
         // Multiple helpers
         if (is_array($class)) {
-            foreach ($class as $helper) {
-                static::helper($helper);
-            }
-            return;
+            return array_map('static::helper', $class);
         }
 
         // Is it already loaded?
@@ -152,25 +137,15 @@ class Load
             return true;
         }
 
-        // Lowercase the file name
-        $file_name = static::lowercase($class);
-
-        // App helper
-        if (file_exists(APPPATH . '/helpers/' . $file_name . '.php')) {
-            require_once APPPATH . '/helpers/' . $file_name . '.php';
-        }
-        // Avalon helper
-        elseif (file_exists(SYSPATH . '/helpers/' . $file_name . '.php')) {
-            require_once SYSPATH . '/helpers/' . $file_name . '.php';
-        }
-        // Not found
-        else {
-            Error::halt("Loader Error", "Unable to load helper '{$class}'");
-            return false;
+        // Let's find it!
+        if ($file = static::find($class.'.php', 'helpers')) {
+            require_once $file[0];
+            static::$helpers[] = $class;
+            return true;
         }
 
-        static::$helpers[] = $class;
-        return true;
+        Error::halt("Loader Error", "Unable to load helper '{$class}'");
+        return false;
     }
 
     /**

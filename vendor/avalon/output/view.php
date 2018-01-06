@@ -81,7 +81,7 @@ class View
     {
         // Add the theme and inherit path
         $dirs = array_filter([APPPATH . '/views/' . static::$theme . '/', static::$inherit_from]);
-        $view = Load::find("$name.{phtml,php}", $dirs, 'views');
+        $view = Load::find("$name.{phtml,php}", 'views', $dirs);
 
         return $view ? $view[0] : false;
     }

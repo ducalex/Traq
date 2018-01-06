@@ -60,13 +60,13 @@ class Model implements \JsonSerializable
      * @param array $data The row data
      */
     public function __construct(array $data = [], $is_new = true) {
-        // Is there any data?
-        // If so get the columns and add them to
-        // the properties array
-        static::$_properties = array_merge(static::$_properties, array_keys($data));
-
-        // Some special cases
+        // Let's build an object!
         foreach ($data as $column => $value) {
+            // Is it an unknown property?!
+            if (!in_array($column, static::$_properties)) {
+                static::$_properties[] = $column;
+            }
+            // Some special cases
             if (!$is_new and in_array($column, static::$_serialize)) { // Unserialize only if it comes from the database
                 $data[$column] = json_decode($value, true);
             } elseif (in_array($column, static::$_escape)) {
@@ -234,8 +234,8 @@ class Model implements \JsonSerializable
 
             $this->_data[$col] = $val;
 
-            if (!in_array($val, static::$_properties)) {
-                static::$_properties[] = $val;
+            if (!in_array($col, static::$_properties)) {
+                static::$_properties[] = $col;
             }
         }
     }

@@ -57,89 +57,33 @@ class Subscriptions extends AppController
         switch ($type) {
             // Project
             case 'project':
-                // Delete subscription
-                if (is_subscribed($this->user, $this->project)) {
-                    $sub = Subscription::select()->where(array(
-                        array('project_id', $this->project->id),
-                        array('user_id', $this->user->id),
-                        array('type', 'project')
-                    ))->exec()->fetch();
-                    $sub->delete();
-                }
-                // Create subscription
-                else {
-                    $sub = new Subscription(array(
-                        'type'       => "project",
-                        'project_id' => $this->project->id,
-                        'user_id'    => $this->user->id,
-                        'object_id'  => $this->project->id
-                    ));
-                    $sub->save();
-                }
-                Request::redirectTo($this->project->href());
+                $object = $this->project;
                 break;
 
             // Milestone
             case 'milestone':
                 // Get milestone
-                $milestone = Milestone::select()->where(array(
+                $object = Milestone::select()->where(array(
                     array('project_id', $this->project->id),
                     array('slug', $id)
                 ))->exec()->fetch();
-
-                // Delete subscription
-                if (is_subscribed($this->user, $milestone)) {
-                    $sub = Subscription::select()->where(array(
-                        array('project_id', $this->project->id),
-                        array('user_id', $this->user->id),
-                        array('type', 'milestone'),
-                        array('object_id', $milestone->id)
-                    ))->exec()->fetch();
-                    $sub->delete();
-                }
-                // Create subscription
-                else {
-                    $sub = new Subscription(array(
-                        'type'       => "milestone",
-                        'project_id' => $this->project->id,
-                        'user_id'    => $this->user->id,
-                        'object_id'  => $milestone->id
-                    ));
-                    $sub->save();
-                }
-                Request::redirectTo($milestone->href());
                 break;
 
             // Milestone
             case 'ticket':
                 // Get ticket
-                $ticket = Ticket::select()->where(array(
+                $object = Ticket::select()->where(array(
                     array('project_id', $this->project->id),
                     array('ticket_id', $id)
                 ))->exec()->fetch();
-
-                // Delete subscription
-                if (is_subscribed($this->user, $ticket)) {
-                    $sub = Subscription::select()->where(array(
-                        array('project_id', $this->project->id),
-                        array('user_id', $this->user->id),
-                        array('type', 'ticket'),
-                        array('object_id', $ticket->id)
-                    ))->exec()->fetch();
-                    $sub->delete();
-                }
-                // Create subscription
-                else {
-                    $sub = new Subscription(array(
-                        'type'       => "ticket",
-                        'project_id' => $this->project->id,
-                        'user_id'    => $this->user->id,
-                        'object_id'  => $ticket->id
-                    ));
-                    $sub->save();
-                }
-                Request::redirectTo($ticket->href());
                 break;
+        }
+
+        if ($object) {
+            $sub = Subscription::find_sub($this->user, $object, true);
+            // Toggle
+            $sub->delete() || $sub->save();
+            Request::redirectTo($object->href());
         }
     }
 }

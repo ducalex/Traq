@@ -62,30 +62,48 @@ class Subscription extends Model
     }
 
     /**
+     * Checks if the user is subscribed to the
+     * passed object and return the subscription.
+     * $make_new will return a new (unsaved) one if none exists
+     *
+     * @param object $user
+     * @param object $object
+     * 
+     * @return self
+     */
+    public static function find_sub(User $user, Model $object, $make_new = false)
+    {
+        $type = strtolower(preg_replace('/^.*\\\\([^\\\\]+)$/', '$1', get_class($object)));
+
+        $subscription = [
+            'project_id' => ($type == 'project') ? $object->id : $object->project_id,
+            'user_id' => $user->id,
+            'type' => $type,
+            'object_id' => $object->id,
+        ];
+
+        $sub = static::select()->where($subscription)->exec()->fetch();
+
+        if ($sub === false and $make_new) {
+            return new static($subscription);
+        }
+
+        return $sub;
+    }
+
+    /**
      * Returns the subscribed object.
      *
      * @return object
      */
     public function object() {
-        if ($this->object !== null) {
+        if ($this->object) {
             return $this->object;
+        } elseif (class_exists($class = ucfirst($this->type))) {
+            return $class::find($this->object_id);
+        } else {
+            return false;
         }
-
-        switch ($this->type) {
-            case 'project':
-                $this->object = Project::find($this->object_id);
-                break;
-
-            case 'milestone':
-                $this->object = Milestone::find($this->object_id);
-                break;
-
-            case 'ticket':
-                $this->object = Ticket::find($this->object_id);
-                break;
-        }
-
-        return $this->object;
     }
 
     /**

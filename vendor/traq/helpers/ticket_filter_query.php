@@ -119,7 +119,7 @@ class TicketFilterQuery
 
             // Add to query if there's any values
             if ($query_values) {
-                $this->query->where(["{$field}_id", $query_values, $is_not ? 'NOT IN' : 'IN']);
+                $this->query->where("{$field}_id", $query_values, $is_not ? 'NOT IN' : 'IN');
             }
 
             $this->filters[$field]['values'] = $query_values;
@@ -135,8 +135,6 @@ class TicketFilterQuery
             } else {
                 $this->query->where($query_values, null, 'LIKE', 'OR');
             }
-            
-            echo $this->query;
         }
         // Owner and Assigned to
         elseif (in_array($field, array('owner', 'assigned_to'))) {

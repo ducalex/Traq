@@ -37,10 +37,9 @@ use avalon\core\Error;
 class PDO implements Driver
 {
     private $connection;
-    private $connection_name;
-    public $query_count = 0;
-    public $last_query;
 
+    public $query_count = 0;
+    public $query_log = [];
     public $prefix;
     public $type;
 
@@ -49,35 +48,27 @@ class PDO implements Driver
      *
      * @param array $config Database config array
      */
-    public function __construct(array $config, $name)
+    public function __construct(array $config, $name = null)
     {
-        // Lowercase the database type
-        $this->connection_name = $name;
-        $this->prefix = isset($config['prefix']) ? $config['prefix'] : '';
+        $config += ['username' => null, 'password' => null, 'options' => [], 'prefix' => '', 'type' => ''];
+        $config['options'] += [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
+
+        $this->prefix = $config['prefix'];
         $this->type = strtolower($config['type']);
 
-        // Check if a DSN is already specified
-        if (isset($config['dsn'])) {
-            $dsn = $config['dsn'];
-        }
-        // SQLite
-        elseif ($this->type == 'sqlite') {
-            $dsn = "sqlite:{$config['path']}";
-        }
-        // Something else...
-        else {
-            $dsn = $this->type . ':dbname=' . $config['database'] . ';host=' . $config['host'];
+        // MySQL
+        if ($this->type === 'mysql') {
+            $config['dsn'] = "{$this->type}:dbname={$config['database']};host={$config['host']}";
             if (isset($config['port'])) {
-                $dsn = "{$dsn};port={$config['port']}";
+                $config['dsn'] .= ";port={$config['port']}";
             }
         }
+        // SQLite3
+        elseif ($this->type === 'sqlite') {
+            $config['dsn'] = "sqlite:{$config['path']}";
+        }
 
-        $this->connection = new \PDO(
-            $dsn,
-            isset($config['username']) ? $config['username'] : null,
-            isset($config['password']) ? $config['password'] : null,
-            (isset($config['options']) ? $config['options'] : []) + [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
-        );
+        $this->connection = new \PDO($config['dsn'], $config['username'], $config['password'], $config['options']);
     }
 
     /**
@@ -101,8 +92,7 @@ class PDO implements Driver
     public function exec($query)
     {
         $this->query_count++;
-        $this->last_query = $query;
-
+        $this->query_log[] = $query;
         return $this->connection->exec($query);
     }
 
@@ -116,7 +106,7 @@ class PDO implements Driver
     public function prepare($query)
     {
         $this->query_count++;
-        $this->last_query = $query;
+        $this->query_log[] = $query;
         return new Statement($this->connection->prepare($query), $this);
     }
 

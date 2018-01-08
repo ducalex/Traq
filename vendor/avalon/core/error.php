@@ -64,9 +64,9 @@ class Error
             
             $body .= $message;
             
-            if ($db) {
+            if (!empty($db->query_log)) {
                 $body .= '<h3 style="margin: 0px; margin-top:10px;">Last SQL query:</h3>';
-                $body .= '<code>'.htmlentities($db->last_query).'</code>';
+                $body .= '<code>'.htmlentities(end($db->query_log)).'</code>';
             }
 
             $body .= '<div style="margin-top:8px;"><small>Powered by Avalon</small></div>';

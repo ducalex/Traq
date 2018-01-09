@@ -32,7 +32,7 @@ use avalon\database\PDO;
  * @author Jack P. <nrx@nirix.net>
  * @copyright Copyright (c) Jack P.
  */
-class Statement implements \Countable
+class Statement implements \Countable, \IteratorAggregate
 {
     private $connection;
     private $statement;
@@ -40,6 +40,7 @@ class Statement implements \Countable
     private $results = null;
     private $count = 0;
     private $cursor = 0;
+    private $executed = false;
 
     /**
      * PDO Statement constructor.
@@ -65,6 +66,35 @@ class Statement implements \Countable
     {
         $this->_model = $model;
         return $this;
+    }
+
+    /**
+     * Fetches the next row from a result set.
+     *
+     * @param mixed $column Column can be a 0-based index or a name
+     * @param int $row_offset Defaults to current row
+     *
+     * @return mixed
+     */
+    public function fetch_col($column = 0, $row_offset = null)
+    {
+        if ($row_offset === null) {
+            $row_offset = $this->cursor;
+        }
+
+        if (!isset($this->results[$row_offset])) {
+            return false;
+        }
+
+        $result = $this->results[$row_offset];
+        
+        $keys = array_keys($result);
+
+        if (is_int($column) and isset($keys[$column])) {
+            $column = $keys[$column];
+        }
+
+        return isset($result[$column]) ? $result[$column] : false;
     }
 
     /**
@@ -150,7 +180,7 @@ class Statement implements \Countable
      */
     public function exec()
     {
-        $this->statement->execute();
+        $this->executed = $this->statement->execute();
         if ($this->statement->columnCount() > 0) {
             $this->results = $this->statement->fetchAll(\PDO::FETCH_ASSOC);
             $this->count = count($this->results);
@@ -167,6 +197,17 @@ class Statement implements \Countable
      */
     public function count()
     {
+        if ($this->executed === false) {
+            $this->exec();
+        }
         return $this->count;
     }
+
+	public function getIterator()
+	{
+        if ($this->executed === false) {
+            $this->exec();
+        }
+        return new \ArrayIterator($this->results);
+	}
 }

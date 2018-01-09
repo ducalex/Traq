@@ -140,6 +140,19 @@ class Query
     }
 
     /**
+     * Sets the select columns
+     *
+     * @param array $data
+     *
+     * @return object
+     */
+    public function cols($cols)
+    {
+        $this->cols = (array)$cols;
+        return $this;
+    }
+
+    /**
      * Sets the column => value data.
      *
      * @param array $data
@@ -305,6 +318,16 @@ class Query
     public function fetch_all()
     {
         return $this->exec()->fetch_all();
+    }
+
+    /**
+     * Shortcut to ->exec()->fetch_col()
+     *
+     * @return array
+     */
+    public function fetch_col()
+    {
+        return $this->exec()->fetch_col();
     }
 
     /**

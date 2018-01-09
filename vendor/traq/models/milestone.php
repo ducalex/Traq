@@ -100,9 +100,12 @@ class Milestone extends Model
         // Check if we need to fetch
         // the ticket counts.
         if (!isset($counts[$this->id])) {
+            foreach($this->tickets as $ticket) {
+                $tickets[$ticket->is_closed] = $ticket;
+            }
             $counts[$this->id] = array(
-                'open' => $this->tickets->where('is_closed', 0)->exec()->count(),
-                'closed' => $this->tickets->where('is_closed', 1)->exec()->count()
+                'open' => empty($tickets[0]) ? 0 : count($tickets[0]),
+                'closed' => empty($tickets[1]) ? 0 : count($tickets[1])
             );
             $counts[$this->id]['total'] = $counts[$this->id]['open'] + $counts[$this->id]['closed'];
             $counts[$this->id]['open_percent'] = $counts[$this->id]['open'] ? get_percent($counts[$this->id]['open'], $counts[$this->id]['total']) : 0;

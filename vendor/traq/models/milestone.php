@@ -101,8 +101,9 @@ class Milestone extends Model
         // the ticket counts.
         if (!isset($counts[$this->id])) {
             foreach($this->tickets as $ticket) {
-                $tickets[$ticket->is_closed] = $ticket;
+                $tickets[$ticket->is_closed][] = $ticket;
             }
+
             $counts[$this->id] = array(
                 'open' => empty($tickets[0]) ? 0 : count($tickets[0]),
                 'closed' => empty($tickets[1]) ? 0 : count($tickets[1])
@@ -149,8 +150,7 @@ class Milestone extends Model
         }
 
         // Check if the slug is in use
-        $milestone_slug = Milestone::select('slug')->where('id', $this->is_new() ? 0 : $this->_data['id'], '!=')
-            ->where('slug', $this->_data['slug'])->where('project_id', $this->project_id);
+        $milestone_slug = Milestone::select('slug')->where([['id', $this->id, '!='], ['slug', $this->slug], ['project_id', $this->project_id]]);
 
         if ($milestone_slug->exec()->count()) {
             $errors['slug'] = l('errors.slug_in_use');

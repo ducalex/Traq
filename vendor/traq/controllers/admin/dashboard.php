@@ -45,15 +45,15 @@ class Dashboard extends AppController
 
         // Get information
         $info = array(
-            'users'       => User::select()->exec()->count(),
-            'latest_user' => User::select()->order_by('id', 'DESC')->exec()->fetch(),
-            'projects'    => User::select()->exec()->count(),
+            'users'       => User::select('COUNT(*)')->exec()->fetch_col(0),
+            'latest_user' => User::select()->order_by('id', 'DESC')->exec()->fetch(0),
+            'projects'    => User::select('COUNT(*)')->exec()->fetch_col(0),
         );
 
         // Tickets
         $info['tickets'] = array(
-            'open'   => Ticket::select()->where('is_closed', 0)->exec()->count(),
-            'closed' => Ticket::select()->where('is_closed', 1)->exec()->count(),
+            'open'   => Ticket::select('COUNT(*)')->where('is_closed', 0)->exec()->fetch_col(0),
+            'closed' => Ticket::select('COUNT(*)')->where('is_closed', 1)->exec()->fetch_col(0),
         );
 
         View::set($info);

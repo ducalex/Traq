@@ -92,6 +92,15 @@ class AppController extends Controller
             $this->locale = $locale;
         }
 
+        // Fetch all projects and make sure the user has permission
+        // to access the project then pass them to the view.
+        foreach (Project::select()->order_by('displayorder', 'ASC')->exec()->fetch_all() as $project) {
+            // Check if the user has access to view the project...
+            if ($this->user->permission($project->id, 'view')) {
+                $this->projects[] = $project;
+            }
+        }
+
         // Check if we're on a project page and get the project info
         if (isset(Router::$params['project_slug'])) {
             $this->project = Project::find('slug', Router::$params['project_slug']);
@@ -103,15 +112,6 @@ class AppController extends Controller
                 $this->title($this->project->name);
             } else {
                 $this->show_no_permission();
-            }
-        }
-
-        // Fetch all projects and make sure the user has permission
-        // to access the project then pass them to the view.
-        foreach (Project::select()->order_by('displayorder', 'ASC')->exec()->fetch_all() as $project) {
-            // Check if the user has access to view the project...
-            if ($this->user->permission($project->id, 'view')) {
-                $this->projects[] = $project;
             }
         }
 

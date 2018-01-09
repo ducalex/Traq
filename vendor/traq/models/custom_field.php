@@ -86,16 +86,10 @@ class CustomField extends Model
      */
     public static function get_ids($project = null)
     {
-        $ids = array();
-
         // Get fields for the project if one was passed, otherwise get all.
         $fields = $project ? static::for_project($project->id) : static::fetch_all();
 
-        foreach ($fields as $field) {
-            $ids[] = $field->id;
-        }
-
-        return $ids;
+        return array_get_column($fields, $fields);
     }
 
     /**
@@ -110,7 +104,7 @@ class CustomField extends Model
         $slugs = array();
 
         // Get fields for the project if one was passed, otherwise get all.
-        $fields = $project ? static::for_project($project->id) : static::fetch_all();
+        $fields = $project ? static::for_project($project->id) : static::select();
 
         foreach ($fields as $field) {
             $slugs[] = $field->slug;
@@ -258,7 +252,7 @@ class CustomField extends Model
         }
 
         // Make sure the slug isn't in use
-        $slug = static::select('id')->where('id', ($this->_is_new ? 0 : $this->id), '!=')->where('slug', $this->_data['slug'])->where('project_id', $this->_data['project_id']);
+        $slug = static::select('id')->where([['id', $this->id, '!='], ['slug', $this->slug], ['project_id', $this->project_id]]);
         if ($slug->exec()->count()) {
             $errors['slug'] = l('errors.slug_in_use');
         }

@@ -63,19 +63,13 @@ class Subscriptions extends AppController
             // Milestone
             case 'milestone':
                 // Get milestone
-                $object = Milestone::select()->where(array(
-                    array('project_id', $this->project->id),
-                    array('slug', $id)
-                ))->exec()->fetch();
+                $object = Milestone::select()->where(['project_id' => $this->project->id, 'slug' => $id])->fetch();
                 break;
 
             // Milestone
             case 'ticket':
                 // Get ticket
-                $object = Ticket::select()->where(array(
-                    array('project_id', $this->project->id),
-                    array('ticket_id', $id)
-                ))->exec()->fetch();
+                $object = Ticket::select()->where(['project_id' => $this->project->id, 'ticket_id' => $id])->fetch();
                 break;
         }
 

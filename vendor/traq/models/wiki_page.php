@@ -125,17 +125,16 @@ class WikiPage extends Model
             $errors['title'] = l('errors.page_title_blank');
         }
 
-        // Make sure the slug isnt in use..
-        $select_slug = static::select('id')->where('id', ($this->_is_new ? 0 : $this->id), '!=')
-            ->where('slug', $this->_data['slug'])->where('project_id', $this->_data['project_id']);
-
-        if ($select_slug->exec()->count()) {
-            $errors['slug'] = l('errors.slug_in_use');
-        }
-
         // Check if the slug is set.
         if (empty($this->_data['slug'])) {
             $errors['slug'] = l('errors.slug_blank');
+        }
+
+        // Make sure the slug isnt in use..
+        $select_slug = static::select('id')->where([['id', $this->id, '!='], ['slug', $this->slug], ['project_id', $this->project_id]]);
+
+        if ($select_slug->exec()->count()) {
+            $errors['slug'] = l('errors.slug_in_use');
         }
 
         $this->errors = $errors;

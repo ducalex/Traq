@@ -174,13 +174,12 @@ class Repositories extends AppController
 
         $files = $this->scm->list_dir($path.'/', $target);
 
-        $this->response['files'] = $files;
-
         $nav_title = $path;
 
 		View::set(compact('target', 'files', 'path', 'nav_title'));
 
-		if ($files !== false) { // We found a folder, we can quit now.
+        if ($files !== false) { // We found a folder, we can quit now.
+            $this->response['files'] = $files;
 			return;
 		}
 

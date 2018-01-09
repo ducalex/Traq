@@ -1,7 +1,7 @@
 <div class="milestone content">
 	<h2 id="page_title"><?php echo $milestone->name; ?></h2>
 	<div>
-		<?php echo View::render('subscriptions/_subscribe', array('object' => $milestone)); ?>
+		<?php echo show_subscribe($milestone); ?>
 	</div>
 	<?php echo View::render('milestones/_progress'); ?>
 	<div class="milestone_info">

@@ -1,7 +1,7 @@
 <div class="content">
 	<h2 id="page_title"><?php echo $app->project->name; ?></h2>
 	<div>
-		<?php echo View::render('subscriptions/_subscribe', array('object' => $app->project)); ?>
+		<?php echo show_subscribe($app->project); ?>
 	</div>
 	<div class="project_info">
 		<?php echo format_text($app->project->info); ?>

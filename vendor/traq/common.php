@@ -19,6 +19,7 @@
  */
 
 use avalon\core\Kernel as Avalon;
+use avalon\database\Model;
 use traq\models\Setting;
 use traq\models\Project;
 use traq\libraries\Locale;
@@ -228,7 +229,18 @@ function get_percent($min, $max)
  * @param array $errors
  *
  */
-function show_errors(array $errors)
+function show_errors($errors)
 {
     return View::render('error/_list', array('errors' => is_array($errors) ? $errors : array($errors)));
+}
+
+/**
+ * Used to render an array of errors.
+ *
+ * @param array $errors
+ *
+ */
+function show_subscribe(Model $object)
+{
+    return View::render('subscriptions/_subscribe', compact('object'));
 }

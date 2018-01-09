@@ -728,9 +728,9 @@ class Tickets extends AppController
         $valid_fields = array('type', 'milestone', 'version', 'component', 'severity', 'priority', 'status', 'assigned_to');
 
         // Loop over tickets and process actions
-        foreach ($tickets as $ticket_id) {
-            $ticket = Ticket::select('*')->where('project_id', $this->project->id)->where('ticket_id', $ticket_id)->exec()->fetch();
+        $tickets = Ticket::select()->where('project_id', $this->project->id)->where('ticket_id', $tickets, 'IN')->fetch_all();
 
+        foreach ($tickets as $ticket) {
             $data = array();
 
             foreach ($valid_fields as $field) {

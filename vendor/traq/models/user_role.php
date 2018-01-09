@@ -54,14 +54,7 @@ class UserRole extends Model
      */
     public static function project_members($project_id)
     {
-        $members = array();
-
-        // Loop over the relations and add the user to the array
-        foreach (static::select()->where('project_id', $project_id)->exec()->fetch_all() as $relation) {
-            $members[] = $relation->user;
-        }
-
-        return $members;
+        return array_get_column(static::find('project_id', $project_id, INF), 'user');
     }
 
     public function is_valid()

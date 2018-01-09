@@ -662,26 +662,15 @@ class Ticket extends Model
     public function delete()
     {
         if (parent::delete()) {
-            // Delete attachments
-            foreach ($this->attachments->exec()->fetch_all() as $attachment) {
-                $attachment->delete();
-            }
+            $timeline = Timeline::select()->where('action', 'ticket%', 'LIKE')->where('owner_id', $this->id);
+            $subscriptions = Subscription::select()->where('type', 'ticket')->where('object_id', $this->id);
 
-            // Delete history
-            foreach ($this->history->exec()->fetch_all() as $update) {
-                $update->delete();
-            }
+            $to_delete = [$this->attachments, $this->history, $timeline, $subscription];
 
-            // Delete timeline data
-            $timeline = Timeline::select()->where('action', 'ticket%', 'LIKE')->where('owner_id', $this->id)->exec();
-            foreach ($timeline->fetch_all() as $row) {
-                $row->delete();
-            }
-
-            // Subscriptions
-            $subscriptions = Subscription::select()->where('type', 'ticket')->where('object_id', $this->id)->exec();
-            foreach ($subscriptions->fetch_all() as $row) {
-                $row->delete();
+            foreach ($to_delete as $objects) {
+                foreach ($objects as $object) {
+                    $object->delete();
+                }
             }
 
             return true;

@@ -53,15 +53,8 @@ class Misc extends AppController
      */
     public function action_autocomplete_username()
     {
-        // Get the users, and loop over them
         $users = User::select('username')->where('username', str_replace('*', '%', Request::req('term')) . "%", 'LIKE')->exec()->fetch_all();
-        $options = array();
-        foreach ($users as $user) {
-            // Add the user to the optionls array
-            $options[] = $user->username;
-        }
-
-        return json_encode($options);
+        die(json_encode(array_get_column($users, 'username')));
     }
 
     public function action_preview_text()

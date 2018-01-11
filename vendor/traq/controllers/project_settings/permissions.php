@@ -76,6 +76,10 @@ class Permissions extends AppController
                     // Fetch permission
                     $perm = Permission::find($permission_id);
 
+                    if (!$perm) { // This shouldn't happen but sometimes it does..?
+                        continue;
+                    }
+
                     // Are we dealing with a default?
                     if ($type_id == 0) {
                         // Does it exist?

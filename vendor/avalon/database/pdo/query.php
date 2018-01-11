@@ -180,6 +180,32 @@ class Query
     }
 
     /**
+     * Unbind parameter
+     *
+     * @param string $parameter
+     *
+     * @return object
+     */
+    public function unbind($parameter)
+    {
+        unset($this->bind[':'.ltrim($parameter, ':')]);
+        return $this;
+    }
+
+    /**
+     * Group the query rows.
+     *
+     * @param array|string $fields Fields
+     *
+     * @return object
+     */
+    public function group_by($fields)
+    {
+        $this->group_by = (array)$fields;
+        return $this;
+    }
+
+    /**
      * Orders the query rows.
      *
      * @param string $col Column
@@ -194,28 +220,28 @@ class Query
     }
 
     /**
-     * Limits the query rows.
+     * Limits the query rows. A value of null will unset the limit.
      *
      * @param integer $count
      *
      * @return object
      */
-    public function limit($limit)
+    public function limit($limit = null)
     {
-        $this->limit = (int)$limit;
+        $this->limit = $limit === null ? null : (int)$limit;
         return $this;
     }
 
     /**
-     * Offset the query rows.
+     * Offset the query rows. A value of null will unset the offset.
      *
      * @param integer $offset
      *
      * @return object
      */
-    public function offset($offset)
+    public function offset($offset = null)
     {
-        $this->offset = (int)$offset;
+        $this->offset = $offset === null ? null : (int)$offset;
         return $this;
     }
 
@@ -385,7 +411,7 @@ class Query
 
             // Group by
             if (count($this->group_by) > 0) {
-                $query[] = "GROUP BY " . implode(', ', $this->group_by);
+                $query[] = "GROUP BY " . implode(', ', array_map([$this, '_parse_field_name'], $this->group_by));
             }
 
             // Custom SQL
@@ -399,13 +425,13 @@ class Query
             }
 
             // Limit
-            if ($this->limit > 0) {
+            if ($this->limit !== null) {
                 $query[] = "LIMIT {$this->limit}";
             }
 
             // Offset
-            if ($this->offset > 0) {
-                $query[] = "OFFSET {$this->limit}";
+            if ($this->offset !== null) {
+                $query[] = "OFFSET {$this->offset}";
             }
         }
         // Insert query

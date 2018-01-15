@@ -74,15 +74,15 @@ class TicketHistory extends AppController
     public function action_delete($id)
     {
         // Get the ticket update
-        $history = \traq\models\TicketHistory::find($id);
-
-        // Delete the update
-        $history->delete();
+        if ($history = \traq\models\TicketHistory::find($id)) {
+            // Delete the update
+            $history->delete();
+        }
 
         // Is this an ajax request?
         if (Request::isAjax()) {
-            // Render the view
-            View::set('history', $history);
+            $this->render['layout'] = false;
+            return 1;
         } else {
             // Just redirect back to the ticket
             Request::redirectTo($history->ticket->href());

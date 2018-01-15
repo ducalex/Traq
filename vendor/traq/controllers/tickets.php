@@ -318,37 +318,37 @@ class Tickets extends AppController
 
             // Milestone
             if ($this->user->permission($this->project->id, 'ticket_properties_set_milestone')) {
-                $data['milestone_id'] = Request::post('milestone');
+                $data['milestone_id'] = Request::post('milestone', 0);
             }
 
             // Version
             if ($this->user->permission($this->project->id, 'ticket_properties_set_version')) {
-                $data['version_id'] = Request::post('version');
+                $data['version_id'] = Request::post('version', 0);
             }
 
             // Component
             if ($this->user->permission($this->project->id, 'ticket_properties_set_component')) {
-                $data['component_id'] = Request::post('component');
+                $data['component_id'] = Request::post('component', 0);
             }
 
             // Severity
             if ($this->user->permission($this->project->id, 'ticket_properties_set_severity')) {
-                $data['severity_id'] = Request::post('severity');
+                $data['severity_id'] = Request::post('severity', 0);
             }
 
             // Priority
             if ($this->user->permission($this->project->id, 'ticket_properties_set_priority')) {
-                $data['priority_id'] = Request::post('priority');
+                $data['priority_id'] = Request::post('priority', 3);
             }
 
             // Status
             if ($this->user->permission($this->project->id, 'ticket_properties_set_status')) {
-                $data['status_id'] = Request::post('status');
+                $data['status_id'] = Request::post('status', 1);
             }
 
             // Assigned to
             if ($this->user->permission($this->project->id, 'ticket_properties_set_assigned_to')) {
-                $data['assigned_to_id'] = Request::post('assigned_to');
+                $data['assigned_to_id'] = Request::post('assigned_to', 0);
             }
 
             // Ticket tasks

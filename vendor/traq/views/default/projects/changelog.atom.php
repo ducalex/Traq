@@ -15,7 +15,7 @@ foreach ($milestones as $milestone) {
         )
     );
 
-    foreach ($milestone->tickets->exec()->fetch_all() as $ticket) {
+    foreach ($milestone->tickets as $ticket) {
         // Set updated time for feed
         if (Time::to_unix($ticket->created_at) > $updated) {
             $updated = Time::to_unix($ticket->created_at);

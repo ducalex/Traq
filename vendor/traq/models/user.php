@@ -325,7 +325,7 @@ class User extends Model
         $options = array();
 
         // Get all users and make a Form::select() friendly array
-        foreach (static::fetch_all() as $user) {
+        foreach (static::select() as $user) {
             $options[] = array('label' => $user->name, 'value' => $user->id);
         }
 
@@ -349,7 +349,7 @@ class User extends Model
      */
     public function delete()
     {
-        $anon_id = Setting::find('setting', 'anonymous_user_id')->value;
+        $anon_id = settings('anonymous_user_id');
 
         // Update attachments, tickets, ticket updates and timeline events
         $tables = array('attachments', 'tickets', 'ticket_history', 'timeline');

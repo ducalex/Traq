@@ -52,7 +52,7 @@ class Severity extends Model
         $options = array();
 
         // Get all rows and make a Form::select() friendly array
-        foreach (static::fetch_all() as $severity) {
+        foreach (static::select() as $severity) {
             $options[] = array('label' => $severity->name, 'value' => $severity->id);
         }
 

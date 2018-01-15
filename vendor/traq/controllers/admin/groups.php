@@ -43,8 +43,7 @@ class Groups extends AppController
 
     public function action_index()
     {
-        $groups = Group::fetch_all();
-        View::set('groups', $groups);
+        View::set('groups', Group::select());
     }
 
     /**
@@ -101,7 +100,7 @@ class Groups extends AppController
                 }
             }
         }
-        
+
         $this->response['group'] = $group;
         $this->response->errors = $group->errors;
 

@@ -73,7 +73,7 @@ if ($db = Load::config('database')) {
 }
 
 // Load the plugins
-foreach(Plugin::select('file')->where('enabled', '1')->fetch_all() as $plugin) {
+foreach(Plugin::select()->where('enabled', '1') as $plugin) {
     // Add plugin file path to our loaders
     Autoloader::registerNamespace('traq\plugins', APPPATH . '/plugins/' . $plugin->file);
     Load::register_path(APPPATH . '/plugins/' . $plugin->file);

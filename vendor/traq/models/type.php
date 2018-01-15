@@ -82,7 +82,7 @@ class Type extends Model
         $options = array();
 
         // Get all rows and make a Form::select friendly array
-        foreach (static::fetch_all() as $type) {
+        foreach (static::select() as $type) {
             $options[] = array('label' => $type->name, 'value' => $type->id);
         }
 

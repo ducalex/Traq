@@ -9,13 +9,13 @@
 				<dd><?php echo $profile->group->name; ?></dd>
 
 				<dt><?php echo l('assigned_tickets'); ?></dt>
-				<dd><?php echo $profile->assigned_tickets->exec()->count(); ?></dd>
+				<dd><?php echo count($profile->assigned_tickets); ?></dd>
 
 				<dt><?php echo l('tickets_created'); ?></dt>
-				<dd><?php echo $profile->tickets->exec()->count(); ?></dd>
+				<dd><?php echo count($profile->tickets); ?></dd>
 
 				<dt><?php echo l('ticket_updates'); ?></dt>
-				<dd><?php echo $profile->ticket_updates->exec()->count(); ?></dd>
+				<dd><?php echo count($profile->ticket_updates); ?></dd>
 
 				<dt><?php echo l('member_since'); ?></dt>
 				<dd><?php echo ($profile->created_at ? ldate('date.short', $profile->created_at) : l('unknown')); ?></dd>
@@ -50,7 +50,7 @@
 				<th class="updated"><?php echo l('updated'); ?></th>
 			</thead>
 			<tbody>
-			<?php foreach ($profile->assigned_tickets->order_by('is_closed', 'ASC')->exec()->fetch_all() as $ticket) {
+			<?php foreach ($profile->assigned_tickets->order_by('is_closed', 'ASC') as $ticket) {
 				if (!$app->user->permission($ticket->project_id, 'view')) { continue; }
 				?>
 				<tr>

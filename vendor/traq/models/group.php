@@ -55,7 +55,7 @@ class Group extends Model
     public static function select_options()
     {
         $options = array();
-        foreach (static::fetch_all() as $group) {
+        foreach (static::select() as $group) {
             $options[] = array('value' => $group->id, 'label' => $group->name);
         }
         return $options;
@@ -68,13 +68,7 @@ class Group extends Model
      */
     public static function all_group_ids()
     {
-        $ids = array();
-
-        foreach (static::fetch_all() as $group) {
-            $ids[] = $group->id;
-        }
-
-        return $ids;
+        return array_get_column(static::select()->data(), 'id');
     }
 
     /**

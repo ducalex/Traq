@@ -66,7 +66,7 @@ class ProjectRole extends Model
     public static function select_options()
     {
         $options = array();
-        foreach (static::fetch_all() as $role) {
+        foreach (static::select() as $role) {
             $options[] = array('label' => $role->name, 'value' => $role->id);
         }
         return $options;

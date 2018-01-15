@@ -53,7 +53,7 @@ class Status extends Model
     public static function select_options()
     {
         $options = array(l('open') => array(), l('closed') => array());
-        foreach (static::fetch_all() as $status) {
+        foreach (static::select() as $status) {
             $options[$status->status ? l('open') : l('closed')][] = array('label' => $status->name, 'value' => $status->id);
         }
         return $options;

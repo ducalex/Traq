@@ -57,7 +57,7 @@ class Plugins extends AppController
 
         $installed = array();
 
-        foreach (Plugin::fetch_all() as $plugin) {
+        foreach (Plugin::select() as $plugin) {
             $installed[$plugin->file] = $plugin->enabled;
         }
 

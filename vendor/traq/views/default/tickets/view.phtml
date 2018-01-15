@@ -121,11 +121,11 @@
 		</ul>
 	</section>
 	<?php } ?>
-	<?php if ($app->user->permission($ticket->project_id, 'view_attachments') and $attachments = $ticket->attachments->exec() and $attachments->count() > 0) { ?>
+	<?php if ($app->user->permission($ticket->project_id, 'view_attachments') and $ticket->attachments->count() > 0) { ?>
 	<section id="attachments">
 		<h3><?php echo l('attachments'); ?></h3>
 		<ul>
-		<?php foreach ($attachments->fetch_all() as $attachment) { ?>
+		<?php foreach ($ticket->attachments as $attachment) { ?>
 			<li>
 				<?php echo l('x_uploaded_by_x_x_ago', HTML::link($attachment->name, $attachment->href(), array('class' => 'attachment_filename')), HTML::link(strshorten($attachment->user->name, 20), $attachment->user->href()), time_ago($attachment->created_at, false)); ?>
 				<?php if ($app->user->permission($ticket->project_id, 'delete_attachments')) {

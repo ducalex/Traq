@@ -97,7 +97,7 @@ class Project extends Model
         $options = array();
 
         // Get all the rows and make a Form::select() friendly array
-        foreach (static::fetch_all() as $row) {
+        foreach (static::select() as $row) {
             $options[] = array('label' => $row->name, 'value' => $row->id);
         }
 
@@ -239,54 +239,24 @@ class Project extends Model
     public function delete()
     {
         if (parent::delete()) {
-            // Delete tickets
-            foreach ($this->tickets->exec()->fetch_all() as $ticket) {
-                $ticket->delete();
-            }
+            $to_delete = [
+                $this->tickets,
+                $this->milestones,
+                $this->components,
+                $this->subscriptions,
+                $this->permissions,
+                $this->wiki_pages,
+                $this->roles,
+                $this->user_roles,
+                $this->custom_fields,
+                $this->repositories,
+                Timeline::select()->where('project_id', $this->_data['id'])
+            ];
 
-            // Delete milestones
-            foreach ($this->milestones->exec()->fetch_all() as $milestone) {
-                $milestone->delete();
-            }
-
-            // Delete timeline
-            foreach (Timeline::select('id')->where('project_id', $this->_data['id'])->exec()->fetch_all() as $timeline) {
-                $timeline->delete();
-            }
-
-            // Delete repositories
-            foreach ($this->repositories->exec()->fetch_all() as $repo) {
-                $repo->delete();
-            }
-
-            // Delete components
-            foreach ($this->components->exec()->fetch_all() as $component) {
-                $component->delete();
-            }
-
-            // Delete wiki pages
-            foreach ($this->wiki_pages->exec()->fetch_all() as $wiki) {
-                $wiki->delete();
-            }
-
-            // Delete subscriptions
-            foreach ($this->subscriptions->exec()->fetch_all() as $sub) {
-                $sub->delete();
-            }
-
-            // Delete roles
-            foreach ($this->roles->exec()->fetch_all() as $role) {
-                $role->delete();
-            }
-
-            // Delete members
-            foreach ($this->user_roles->exec()->fetch_all() as $member) {
-                $member->delete();
-            }
-
-            // Delete permissions
-            foreach ($this->permissions->exec()->fetch_all() as $permission) {
-                $permission->delete();
+            foreach ($to_delete as $objects) {
+                foreach ($objects as $object) {
+                    $object->delete();
+                }
             }
         }
     }

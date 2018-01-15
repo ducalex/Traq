@@ -21,6 +21,7 @@
 namespace avalon\database;
 
 use avalon\Database;
+use avalon\database\Dataset;
 use avalon\helpers\Time;
 use \FishHook;
 
@@ -47,6 +48,9 @@ class Model implements \JsonSerializable
     protected static $_serialize = []; // Columns to serialize to json when reading/writing database
     protected static $_escape = []; // Columns to escape when reading from database
     protected static $_timestamp = ['created_at', 'updated_at', 'published_at']; // Columns to convert to GMT timestamp
+
+    protected static $_shared = true; // Whether to share records across identical find() calls or to select() it again
+    protected static $_catalog = [];  // Loaded models reside here. Index is primary key
 
     // Information different per table row
     protected $_original = []; // The original data coming from the database
@@ -100,6 +104,11 @@ class Model implements \JsonSerializable
 
         // Plugin hook
         FishHook::run('model::__construct', [static::class, $this, &static::$_properties, &static::$_escape]);
+
+        // Is it a complete object with all properties filled in? If so we can share it!
+        if (static::$_shared and !$this->_is_new and $this->is_complete()) {
+            static::$_catalog[static::$_name][$data[static::$_primary_key]] = $this; // or clone?
+        }
     }
 
     /**
@@ -107,7 +116,7 @@ class Model implements \JsonSerializable
      *
      * @param string $find Either the value of the primary key, or the field name.
      * @param value $value The value of the field to find if the $find param is the field name.
-     * @param int $count if specified returns an array of all matches up to count
+     * @param int $count if specified returns an array of all matches up to count. -1 means no limit
      *
      * @return object|array
      */
@@ -116,12 +125,22 @@ class Model implements \JsonSerializable
             list($find, $value) = [static::$_primary_key, $find];
         }
 
-        $data = static::select()->where($find, $value)->limit($count)->exec()->fetch_all();
+        // Perhaps we should return a new object from the cached $_original rather than a mutable model with shared state?
+        // Yay it's the primary key, easy to check if we have it in cache!
+        if ($count === 1 and !empty(static::$_catalog[static::$_name])) { // Looking for another column but still a single object!
+            foreach(static::$_catalog[static::$_name] as $object) {
+                if ($object->$find == $value) {
+                    return $object; // or clone?
+                }
+            }
+        }
+
+        $data = static::select()->where($find, $value)->limit($count > 0 ? $count : null)->exec()->fetch_all();
 
         if (func_num_args() === 3) {
             return $data ? $data : [];
         } else {
-            return $data ? $data[0] : false;    
+            return $data ? $data[0] : false;
         }
     }
 
@@ -137,12 +156,12 @@ class Model implements \JsonSerializable
         $primary_key = static::$_primary_key;
         $action = $this->_is_new ? 'create' : 'save';
         $data = [];
- 
+
         // Before save filters
         foreach (static::$_filters_before[$action] as $filter) {
             $this->$filter();
         }
-        
+
         // Created at field
         if ($this->_is_new and in_array('created_at', static::$_properties) and !isset($data['created_at'])) {
             $this->_data['created_at'] = Time::date('Y-m-d H:i:s');
@@ -151,7 +170,7 @@ class Model implements \JsonSerializable
         if (in_array('updated_at', static::$_properties) and !isset($data['updated_at'])) {
             $this->_data['updated_at'] = Time::date('Y-m-d H:i:s');
         }
-        
+
         foreach ($this->_data as $column => $value) {
             if (!array_key_exists($column, $this->_original) || $this->_original[$column] !== $value) {
                 if (in_array($column, static::$_escape)) {
@@ -165,39 +184,73 @@ class Model implements \JsonSerializable
                 }
             }
         }
-        
+
         FishHook::run('model::save/'.$action, [static::class, &$data]);
 
         // Create
         if ($this->_is_new) {
-            static::db()->insert($data)->into(static::$_name)->exec();
-            if (0 < $id = static::db()->last_insert_id()) {
-                $this->_data[$primary_key] = $id;
+            if (static::db()->insert($data)->into(static::$_name)->exec()) {
+                if (0 < $id = static::db()->last_insert_id()) {
+                    $this->_data[$primary_key] = $id;
+                }
+                $this->_is_new = false;
             }
         }
         // Update if there is something to update
         elseif ($data) {
             static::db()->update(static::$_name)->set($data)->where($primary_key, $this->_original[$primary_key])->exec();
         }
-        
+
         // Sync our original data reference
         $this->_original = $this->_data;
-        
+
         return true;
+    }
+
+    /**
+     * Shortcut of the select() function for the database.
+     *
+     * @param mixed $cols The columns to select.
+     *
+     * @return object
+     */
+    public static function select($cols = null) {
+        return new Dataset(static::db()->select($cols ?: static::$_properties)->from(static::$_name)->_model(static::class));
+    }
+
+    /**
+     * Aliases the database's update() method for the current row.
+     */
+    public function update() {
+        return static::db()->update(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key]);
     }
 
     /**
      * Deletes the row.
      */
     public function delete() {
-        if ($this->_is_new) {
+        if ($this->_is_new || !isset($this->_data[static::$_primary_key])) {
             return false;
         }
         // Before delete filters
         foreach (static::$_filters_before['delete'] as $filter) {
             $this->$filter();
         }
+
+        unset(static::$_catalog[static::$_name][$this->_data[static::$_primary_key]]);
+
         return static::db()->delete()->from(static::$_name)->where(static::$_primary_key, $this->_data[static::$_primary_key])->exec();
+    }
+
+    /**
+     * Shortcut of the select()->data() function for the database.
+     *
+     * @param mixed $cols The columns to select.
+     *
+     * @return object
+     */
+    public static function fetch_all($cols = null) {
+        return static::select($cols)->data();
     }
 
     /**
@@ -212,6 +265,24 @@ class Model implements \JsonSerializable
             }
         }
         return $this->_is_new;
+    }
+
+    /**
+     * Checks if all properties are set
+     *
+     * @return bool
+     */
+    public function is_complete() {
+        return !array_diff(static::$_properties, array_keys($this->_data));
+    }
+
+    /**
+     * Checks if the row is new or not.
+     *
+     * @return bool
+     */
+    public function exists() {
+        return !$this->_is_new;
     }
 
     /**
@@ -244,7 +315,7 @@ class Model implements \JsonSerializable
      * Checks if a property is dirty (isn't saved)
      *
      * @param string $property
-     * 
+     *
      * @return bool
      */
     public function is_dirty($property = null) {
@@ -256,32 +327,6 @@ class Model implements \JsonSerializable
         }
     }
 
-    /**
-     * Shortcut of the select() function for the database.
-     *
-     * @param mixed $cols The columns to select.
-     *
-     * @return object
-     */
-    public static function select($cols = null) {
-        return static::db()->select($cols ?: static::$_properties)->from(static::$_name)->_model(static::class);
-    }
-
-    /**
-     * Aliases the database's update() method for the current row.
-     */
-    public function update() {
-        return static::db()->update(static::$_name)->where(static::$_primary_key, $this->data[static::$_primary_key]);
-    }
-
-    /**
-     * Fetches all the rows for the table.
-     *
-     * @return array
-     */
-    public static function fetch_all() {
-        return static::select(static::$_properties)->exec()->fetch_all();
-    }
 
     public function is_valid() {
         // Until the validation stuff is done we will return false,
@@ -311,6 +356,7 @@ class Model implements \JsonSerializable
             }
 
             $model = preg_replace('/[^\\\\]+$/', ucfirst($has_many['model']), static::class);
+
             $val = $this->$var = $model::select()->where($has_many['foreign_key'], $this->{$has_many['column']});
         }
         // Belongs to
@@ -329,7 +375,7 @@ class Model implements \JsonSerializable
 
             $val = $this->$var = $model::find($belongs_to['foreign_key'], $this->{$belongs_to['column']});
         } else {
-            $val = $this->$var;
+            $val = isset($this->$var) ? $this->$var : null;
         }
 
         // Plugin hook
@@ -347,6 +393,13 @@ class Model implements \JsonSerializable
         } else {
             $this->$var = $val;
         }
+    }
+
+    /**
+     * Magical function to check if the property exists or not.
+     */
+    public function __isset($var) {
+        return $this->$var !== null;
     }
 
     public function __sleep() {

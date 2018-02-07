@@ -97,10 +97,10 @@ class Git extends \traq\libraries\SCM
     public function revisions($revision = null, $path = null, $skip = 0, $count = 50)
     {
         $arg_filters = ' --skip='.intval($skip).' --max-count='.intval($count);
-        
+
         $output = $this->_shell("log -z $arg_filters --format='Commit:%h %H%x1f%p%x1f%an%x1f%ae%x1f%ad%x1f%s%x1f%B%x1f'", $revision, $path);
         $history = [];
-        
+
         foreach(explode("\x00", $output) as $revision_string) {
             if ($revision = $this->_parse_log_entry($revision_string)) {
                 $history[$revision->id] = $revision;
@@ -183,28 +183,32 @@ class Git extends \traq\libraries\SCM
     public function list_dir($path, $revision = null)
     {
         $output = $this->_shell("ls-tree --full-tree -l", $revision, $path);
+        $files = $dirs = [];
 
         if (preg_match_all('/^(\d+)\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)\s+(.+)$/m', $output, $matches)) {
+            natcasesort($matches[5]); // Sort the paths
+
             foreach($matches[5] as $i => $path) {
                 // This will probably need caching
                 $last_revision = $this->revisions($revision, $path, 0, 1);
 
-                $files[$path] = new File([
+                $file = new File([
+                    'path' => $matches[5][$i],
                     'mode' => $matches[1][$i],
                     'type' => $matches[2][$i] === 'tree' ? 'dir' : 'blob',
                     'id'   => $matches[3][$i],
                     'size' => $matches[4][$i],
                     'revision' => reset($last_revision),
                 ]);
-            }
-            uasort($files, function($a, $b) {
-                if ($a->is_dir() === $b->is_dir()) {
-                    return 0;
+
+                if ($file->is_dir()) {
+                    $dirs[$path] = $file;
                 } else {
-                    return $a->is_dir() ? -1 : 1;
+                    $files[$path] = $file;
                 }
-            });
-            return $files;
+            }
+
+            return array_merge($dirs, $files);
         }
 
         return false;
@@ -309,7 +313,7 @@ class Git extends \traq\libraries\SCM
                 header(rtrim($line), true);
             }
         }
-        
+
         fpassthru($git_stdout);
         fclose($git_stdout);
         proc_close($git);

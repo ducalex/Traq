@@ -129,7 +129,7 @@ class Wiki extends AppController
 
                 // Set pages revision ID
                 $page->revision_id = $page->revision->id;
-                $page->_is_new(false);
+                $page->is_new(false);
                 $page->save();
 
                 // Insert timeline event
@@ -199,7 +199,7 @@ class Wiki extends AppController
                 $this->response->redirect = $page->href();
             }
         }
-        
+
         $this->response['page'] = $page;
         $this->response->errors = $page->errors;
     }

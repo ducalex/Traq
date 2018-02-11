@@ -47,7 +47,7 @@ class Request
     private static $scheme;
     private static $host;
     private static $remote_addr;
-    
+
     /**
      * Initialize the class to get request
      * information statically.
@@ -82,7 +82,7 @@ class Request
         static::$request_uri = static::requestPath();
 
         // Set relative uri without query string
-        static::$uri = preg_replace(['#^'.preg_quote(static::$base).'#', '/\?.*$/'], '', static::$request_uri);
+        static::$uri = preg_replace('#^'.preg_quote(static::$base).'#', '', static::$request_uri);
 
         // Request segments
         static::$segments = explode('/', trim(static::$uri, '/'));
@@ -407,10 +407,14 @@ class Request
     private function requestPath()
     {
         $try = ['HTTP_X_ORIGINAL_URL', 'HTTP_X_REWRITE_URL', 'UNENCODED_URL', 'REQUEST_URI', 'ORIG_PATH_INFO'];
+        $remove = [
+            '#^'.preg_quote(static::$scheme.'://'.static::$host).'#', // Some proxies add this
+            '/\?.*$/' // QUERY_STRING
+        ];
 
         foreach ($try as $key) {
             if (!empty(static::$server[$key])) {
-                return preg_replace('#^'.preg_quote(static::$scheme.'://'.static::$host).'#', '', static::$server[$key]);
+                return urldecode(preg_replace($remove, '', static::$server[$key]));
             }
         }
     }

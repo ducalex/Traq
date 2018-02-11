@@ -145,10 +145,17 @@ class AppController extends Controller
         if (!LOGGEDIN && $http_auth) {
             header('WWW-Authenticate: Basic realm="Traq"');
         }
+
         $this->response->status = 401;
         $this->response->errors = [l('errors.no_permission.title')];
-        $this->render['view'] = 'error/no_permission';
-        $this->render['action'] = false;
+
+        if (LOGGEDIN) {
+            $this->render['view'] = 'error/no_permission';
+            $this->render['action'] = false;
+        } else {
+            $this->title[] = l('errors.must_be_logged_in');
+            $this->show_login();
+        }
     }
 
     /**

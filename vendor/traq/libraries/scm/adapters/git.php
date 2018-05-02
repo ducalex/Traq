@@ -46,7 +46,7 @@ class Git extends \traq\libraries\SCM
     {
         $info->location = realpath($info->location);
         // Check if the location is a repository or not...
-        if (!$this->_shell('branch')) {
+        if ($this->_shell('branch') === false) {
             $info->_add_error('location', l('errors.scm.location_not_a_repository'));
             $info->_add_error('cmd', $this->last_error);
         }
@@ -271,9 +271,9 @@ class Git extends \traq\libraries\SCM
     public function last_modified()
     {
         if (file_exists($this->info->location.'/index')) {
-            return filemtime($this->info->location.'/index');
+            return @filemtime($this->info->location.'/index');
         } else {
-            return filemtime($this->info->location.'/.git/index');
+            return @filemtime($this->info->location.'/.git/index');
         }
     }
 

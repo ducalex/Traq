@@ -35,21 +35,33 @@ class Git extends \traq\libraries\SCM
     private $_binary = 'git'; // In the future this might be configurable
 
     /**
-     * Used when saving repository information.
+     * Checks if the current repository exists on disk
      *
-     * @param array $info Repository model object.
-     * @param bool $is_new
-     *
-     * @return object
+     * @return boolean
      */
-    public function _before_save_info(&$info, $is_new = false)
+    public function exists()
     {
-        $info->location = realpath($info->location);
-        // Check if the location is a repository or not...
-        if ($this->_shell('branch') === false) {
-            $info->_add_error('location', l('errors.scm.location_not_a_repository'));
-            $info->_add_error('cmd', $this->last_error);
+        return $this->_shell('rev-parse --is-inside-git-dir') === 'true';
+    }
+
+    /**
+     * Create the current repository on disk
+     *
+     * @return boolean
+     */
+    public function create($overwrite = false)
+    {
+        @mkdir($this->info->location, 0755, true);
+
+        $contents = glob($this->info->location.'/*');
+
+        if (!empty($contents)) {
+            throw new \Exception('Directory not empty');
+        } else if ($contents === false) {
+            throw new \Exception('Can\'t read location');
         }
+
+        return $this->_shell('init --bare') != '';
     }
 
     /**
@@ -334,7 +346,7 @@ class Git extends \traq\libraries\SCM
         $stdout = stream_get_contents($git_stdout);
         $this->last_error = stream_get_contents($git_stderr) ?: null;
 
-        return proc_close($git) ? false : $stdout;
+        return proc_close($git) ? false : rtrim($stdout, "\n");
     }
 
     private function _parse_log_entry($revision)

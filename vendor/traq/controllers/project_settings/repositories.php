@@ -41,6 +41,7 @@ class Repositories extends AppController
     {
         parent::__construct();
         View::set('scm_types', SCM::adapters());
+        View::set('scm_base_directory', settings('scm_base_directory'));
         $this->title(l('repositories'));
 
         if (!$this->user->permission($this->project->id, 'scm_manage_repositories')) {
@@ -127,9 +128,25 @@ class Repositories extends AppController
 
         // Get the SCM class
         $scm = SCM::factory($repo->type, $repo);
+        $target = settings('scm_base_directory');
 
-        // Runs its before save info method
-        $scm->_before_save_info($repo, false);
+        if (!$repo->location && $target) {
+            if (!is_dir($target) || !is_writable($target)) {
+                throw new Exception('Repository base directory invalid, check Traq\'s settings');
+            }
+
+            $repo->location = settings('scm_base_directory') . '/' . $this->project->slug . '/' . basename($repo->slug);
+
+            if ($repo->is_valid() && !$scm->create()) {
+                $repo->_add_error('creation', l('errors.scm.unable_to_create_directory'));
+                $repo->location = '';
+            }
+        }
+
+        if (!$scm->exists()) {
+            $repo->_add_error('location', l('errors.scm.location_not_a_repository'));
+            $repo->_add_error('cmd', $scm->last_error());
+        }
 
         // Check if data is good
         if (!$repo->is_valid() || !$repo->save()) {

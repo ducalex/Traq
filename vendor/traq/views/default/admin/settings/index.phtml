@@ -93,6 +93,15 @@
 			</div>
 		</fieldset>
 
+
+		<fieldset class="tabular section box">
+			<legend><?php echo l('Repositories'); ?></legend>
+			<div class="group">
+				<label><?php echo l('Base directory'); ?></label>
+				<?php echo Form::text('settings[scm_base_directory]', array('value' => settings('scm_base_directory'))); ?>
+				This is where new repositories will be placed when created by Traq
+			</div>
+		</fieldset>
 		<div class="actions">
 			<input type="submit" value="<?php echo l('save'); ?>" />
 		</div>

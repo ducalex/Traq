@@ -472,8 +472,8 @@ class enUS extends \traq\libraries\Locale
             'help.custom_fields.values'     => "Options for select, one per line.",
             'help.custom_fields.multiple'   => "Allows multiple options to be selected.",
             'help.ticket_creation_delay'    => "Seconds users must wait before creating a new ticket.",
-            'help.scm.location'             => "Repository path (example: /local/path/to/git/base)",
-            'help.scm.serve'                => "Repository path (example: /local/path/to/git/base)",
+            'help.scm.location'             => "Repository path (example: /local/path/to/git/base)\nLeave empty to create (if enabled in Traq settings)",
+            'help.scm.serve'                => "Allow Traq to serve the repository through HTTP",
 
             // Ticket property hints
             'help.milestone' => "The version in which the ticket should be completed for.",

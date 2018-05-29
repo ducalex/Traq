@@ -124,6 +124,26 @@ class SCM
     }
 
     /**
+     * Checks if the current repository exists on disk
+     *
+     * @return boolean
+     */
+    public function exists()
+    {
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
+    }
+
+    /**
+     * Create the current repository on disk
+     *
+     * @return boolean
+     */
+    public function create($overwrite = false)
+    {
+        throw new Exception("Method " . __CLASS__ . "::" . __FUNCTION__ . "() not implemented");
+    }
+
+    /**
      * Returns the default/main branch of the repository.
      *
      * @return string
@@ -171,7 +191,7 @@ class SCM
      *
      * @param string $revision Revision identifier.
      * @param string $path Directory path for the revision.
-     * 
+     *
      * @return Revision
      */
     public function revision($revision, $path = null)
@@ -183,7 +203,7 @@ class SCM
      * Check if the revision exists.
      *
      * @param string $revision Revision identifier.
-     * 
+     *
      * @return bool
      */
     public function revision_exists($revision)
@@ -196,7 +216,7 @@ class SCM
      *
      * @param string $revision Revision identifier.
      * @param string $path Directory path for the revision.
-     * 
+     *
      * @return integer
      */
     public function revision_count($revision, $path = null)
@@ -230,7 +250,7 @@ class SCM
      *
      * @param string $path Directory path.
      * @param string $revision Revision identifier.
-     * 
+     *
      * @return array
      */
     public function list_dir($path, $revision = null)
@@ -243,7 +263,7 @@ class SCM
      *
      * @param string $path Directory path.
      * @param string $revision Revision identifier.
-     * 
+     *
      * @return blob
      */
     public function read_file($path, $revision = null)
@@ -255,7 +275,7 @@ class SCM
      * Return a patch in unified diff format of the specified revision
      *
      * @param string $revision Revision identifier.
-     * 
+     *
      * @return string
      */
     public function patch($revision)
@@ -278,7 +298,7 @@ class SCM
      *
      * @param string $revision Revision identifier.
      * @param string $format archive format
-     * 
+     *
      * @return blob
      */
     public function archive($revision, $format = 'zip')

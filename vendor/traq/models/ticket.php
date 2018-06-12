@@ -63,7 +63,7 @@ class Ticket extends Model
         'created_at',
         'updated_at'
     );
-    
+
     protected static $_serialize = array('extra', 'tasks');
 
     protected static $_has_many = array(
@@ -668,8 +668,10 @@ class Ticket extends Model
             $to_delete = [$this->attachments, $this->history, $timeline, $subscription];
 
             foreach ($to_delete as $objects) {
-                foreach ($objects as $object) {
-                    $object->delete();
+                if (!empty($objects)) {
+                    foreach ($objects as $object) {
+                        $object->delete();
+                    }
                 }
             }
 

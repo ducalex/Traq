@@ -1,7 +1,7 @@
 <form action="<?php echo Request::base($app->project->href('tickets/update_filters')); ?>" method="post" id="ticket_filters">
 	<fieldset>
-		<legend><a href="#"><?php echo l('filters'); ?></a> (<?php echo count($filters) ?>)</legend>
-		<div id="ticket_filters_content"<?php echo (Cookie::get('hide_filters') && !Request::req('search')) ? ' style="display:none;"' : ''; ?>>
+		<legend><a href="#" class="toggle-and-remember" data-target="#ticket_filters_content"><?php echo l('filters'); ?></a> (<?php echo count($filters) ?>)</legend>
+		<div id="ticket_filters_content"<?php if (!strpos(Cookie::get('show_elements'), 'ticket_filters_content') && !Request::req('search')) echo ' style="display:none;"'; ?>>
 			<table>
 				<tbody>
 				<?php foreach ($filters as $filter => $info) { ?>

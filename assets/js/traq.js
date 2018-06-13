@@ -211,18 +211,20 @@ $(document).ready(function(){
 		});
 	});
 
-	// Ticket filter form toggle
-	$(document).on('click', '#ticket_filters legend a', function(){
-		var filters_table = $('#ticket_filters_content');
+	$(document).on('click', '.toggle-and-remember', function() {
+		var selector = $(this).data('target');
+		var element = $(selector);
 
-		if (filters_table.is(':visible')) {
-			filters_table.slideUp('fast');
-			$.cookie('hide_filters', 1);
+		var cookie = $.cookie('show_elements');
+
+		if (element.is(':visible')) {
+			element.slideUp('fast');
+			cookie = cookie.replace(selector + "|", '');
 		} else {
-
-			filters_table.slideDown('fast');
-			$.cookie('hide_filters', 0);
+			element.slideDown('fast');
+			cookie += selector + "|";
 		}
+		$.cookie('show_elements', cookie);
 	});
 
 	// Select all options in ticket filter optgroups when clicked.

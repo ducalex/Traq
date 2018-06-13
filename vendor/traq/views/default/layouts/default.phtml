@@ -56,12 +56,16 @@
 				</div>
 				<?php endif ?>
 
-<?php echo $content; ?>
+				<?php echo $content; ?>
 			</div>
 			<footer id="footer">
 				<?php echo l('copyright', TRAQ_VER, date("Y")); ?>
 			</footer>
 			<?php printf('<!-- %.2fs, %.3fMB, %dq  -->', (microtime(true) - START_TIME), memory_get_peak_usage() / pow(1024, 2), $app->db->query_count); ?>
+			<?php if ($app->user->group->is_admin) { ?>
+				<a href="#" class="toggle-and-remember" data-target="#query_log">Toggle query log</a>
+				<pre <?php if (!strpos(Cookie::get('show_elements'), 'query_log')) echo ' hidden'; ?> id="query_log" style="color:black;background:white;white-space:pre-wrap;"><?php print_r(array_map('htmlentities', $app->db->query_log)); ?></pre>
+			<?php } ?>
 		</div>
 	</body>
 </html>

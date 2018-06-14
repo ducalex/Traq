@@ -235,7 +235,11 @@ class Repositories extends AppController
             return $this->show_no_permission();
         }
 
+<<<<<<< HEAD
         if (!$this->user->permission($this->project->id, 'scm_http_client_write') && strpos($path, 'git-receive-pack') !== false) {
+=======
+        if (!$this->user->permission($this->project->id, 'scm_http_client_write') && strpos(Request::uri(), 'git-receive-pack') !== false) {
+>>>>>>> e84b29a4cb13f98e4960d6c14f01d295a40db584
             return $this->show_no_permission();
         }
 

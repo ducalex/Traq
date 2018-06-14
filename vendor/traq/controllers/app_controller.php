@@ -56,6 +56,7 @@ class AppController extends Controller
     public $is_api = false;
     public $title = array();
     public $feeds = array();
+    public $use_http_auth = false;
 
     public function __construct()
     {
@@ -140,9 +141,9 @@ class AppController extends Controller
     /**
      * Used to display the no permission page.
      */
-    public function show_no_permission($http_auth = false)
+    public function show_no_permission()
     {
-        if (!LOGGEDIN && $http_auth) {
+        if (!LOGGEDIN && $this->use_http_auth) {
             header('WWW-Authenticate: Basic realm="Traq"');
         }
 

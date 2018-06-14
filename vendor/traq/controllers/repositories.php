@@ -32,12 +32,14 @@ use traq\helpers\Pagination;
 
 class Repositories extends AppController
 {
+    public $use_http_auth = true;
+
     public function __construct()
     {
         parent::__construct();
 
         if (!$this->user->permission($this->project->id, 'scm_browse_repositories')) {
-            return $this->show_no_permission(true);
+            return $this->show_no_permission();
         }
 
         $repositories = Repository::select()->where('project_id', $this->project->id)->order_by('is_default', 'desc')->exec()->fetch_all();
@@ -230,8 +232,12 @@ class Repositories extends AppController
     public function action_serve($path)
     {
         if (!$this->repository->serve || !$this->user->permission($this->project->id, 'scm_http_client_read')) {
-            return $this->show_no_permission(true);
-		}
+            return $this->show_no_permission();
+        }
+
+        if (!$this->user->permission($this->project->id, 'scm_http_client_write') && strpos($path, 'git-receive-pack') !== false) {
+            return $this->show_no_permission();
+        }
 
 		$this->scm->http_serve_backend($path);
     }

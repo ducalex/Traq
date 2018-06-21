@@ -19,7 +19,7 @@
 	</thead>
 	<tbody>
 	<?php foreach ($tickets as $ticket) { ?>
-		<tr class="priority_<?php echo $ticket->priority_id; ?>">
+		<tr class="priority_<?php echo $ticket->priority_id; ?> <?php echo $ticket->is_closed ? 'closed' : 'open'; ?>">
 <?php if ($app->user->permission($app->project->id, 'perform_mass_actions')) { ?>
 				<td class="mass_actions"><?php echo Form::checkbox('tickets[]', $ticket->ticket_id, array('id' => "mass_action_ticket_{$ticket->ticket_id}"))?></td>
 <?php } ?>

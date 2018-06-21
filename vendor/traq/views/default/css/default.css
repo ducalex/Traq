@@ -35,6 +35,7 @@
  #ticket_info .properties .property {width: 24%; min-width: 200px;}
  #project_list > li {border:1px solid #bbb; margin: 5px 0px; padding: 10px;}
  #project_list > li > h3 {margin: 0px 0px 5px 0px;}
+ #page img, #overlay img {max-width: 100%;}
 
 .diff-file-header {color:white;background:#3478AA;padding:5px;}
 .diff-file-code {border-collapse: collapse;width:100%;table-layout: fixed;margin:0px;}

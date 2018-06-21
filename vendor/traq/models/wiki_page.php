@@ -140,4 +140,25 @@ class WikiPage extends Model
         $this->errors = $errors;
         return empty($errors);
     }
+
+    /**
+     * Delete ticket and all data
+     */
+    public function delete()
+    {
+        if (parent::delete()) {
+            $revisions = WikiRevision::select()->where('wiki_page_id', $this->id)->exec()->fetch_all();
+            $timeline = Timeline::select()->where('action', 'wiki%', 'LIKE')->where('owner_id', $this->id)->exec()->fetch_all();
+
+            $to_delete = array_merge($timeline, $revisions);
+
+            foreach ($to_delete as $object) {
+                $object->delete();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
 }

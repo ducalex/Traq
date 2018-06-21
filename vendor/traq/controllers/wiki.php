@@ -213,7 +213,11 @@ class Wiki extends AppController
         $slug = \avalon\http\Router::$params['slug'];
 
         // Delete the page
-        $this->project->wiki_pages->where('slug', $slug)->exec()->fetch()->delete();
+        $page = $this->project->wiki_pages->where('slug', $slug)->exec()->fetch();
+
+        if ($page) {
+            $page->delete();
+        }
 
         $this->response->redirect = $this->project->href('wiki');
     }

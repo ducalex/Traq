@@ -1,7 +1,7 @@
 <?= View::render('repositories/_nav') ?>
 <div class="content">
 	<div style="float:right;">
-		<?php 
+		<?php
 		if ($repository->serve) {
 			$can_read = $app->user->permission($repository->project->id, 'scm_http_client_read');
 			$can_write = $app->user->permission($repository->project->id, 'scm_http_client_write');
@@ -44,6 +44,12 @@
 					<?= HTML::link($commit->subject, $repository->href('commit/'.$commit->id), array('data-overlay----' => true)) ?>
 					<?php if (trim($commit->message) != trim($commit->subject)) {
 						echo '<code title="'.htmlentities($commit->message, ENT_QUOTES).'">...</code>';
+					} ?>
+					&nbsp;
+					<?php if (!empty($commit->refs)) {
+						foreach($commit->refs as $ref) {
+							echo '<code>'.htmlentities($ref, ENT_QUOTES).'</code> ';
+						}
 					} ?>
 				</td>
 				<td class="nowrap">

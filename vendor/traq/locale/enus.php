@@ -314,6 +314,7 @@ class enUS extends \traq\libraries\Locale
             'hash'         => "Hash",
             'parent'       => "Parent",
             'parents'      => "Parents",
+            'refs'         => "Refs",
             'navigate'     => "Navigate",
             'browse'       => "Browse",
             'branch'       => "Branch",

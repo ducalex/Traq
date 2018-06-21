@@ -110,7 +110,7 @@ class Git extends \traq\libraries\SCM
     {
         $arg_filters = ' --skip='.intval($skip).' --max-count='.intval($count);
 
-        $output = $this->_shell("log -z $arg_filters --format='Commit:%h %H%x1f%p%x1f%an%x1f%ae%x1f%ad%x1f%s%x1f%B%x1f'", $revision, $path);
+        $output = $this->_shell("log -z $arg_filters --format='Commit:%h %H%x1f%D%x1f%p%x1f%an%x1f%ae%x1f%ad%x1f%s%x1f%B%x1f' --decorate=full", $revision, $path);
         $history = [];
 
         foreach(explode("\x00", $output) as $revision_string) {
@@ -131,7 +131,7 @@ class Git extends \traq\libraries\SCM
      */
     public function revision($revision, $path = null)
     {
-        $output = $this->_shell("show --format='Commit:%h %H%x1f%p%x1f%an%x1f%ae%x1f%ad%x1f%s%x1f%B%x1f'", $revision, $path);
+        $output = $this->_shell("show --format='Commit:%h %H%x1f%D%x1f%p%x1f%an%x1f%ae%x1f%ad%x1f%s%x1f%B%x1f' --decorate=full", $revision, $path);
         $commit = $this->_parse_log_entry($output);
 
         if ($commit) {
@@ -351,7 +351,7 @@ class Git extends \traq\libraries\SCM
 
     private function _parse_log_entry($revision)
     {
-        $regex = "/^Commit:(?<id>[a-f0-9]+) (?<hash>[a-f0-9]+)\x1f(?<parents>[a-f0-9\s]+|)\x1f(?<author>[^\x1f]+)\x1f(?<email>[^\x1f]+)\x1f(?<date>[^\x1f]+)\x1f(?<subject>[^\x1f]+)\x1f(?<message>[^\x1f]+)\x1f\s*(?<diff>.*)$/ms";
+        $regex = "/^Commit:(?<id>[a-f0-9]+) (?<hash>[a-f0-9]+)\x1f(?<refs>[^\x1f]*)\x1f(?<parents>[a-f0-9\s]*)\x1f(?<author>[^\x1f]+)\x1f(?<email>[^\x1f]+)\x1f(?<date>[^\x1f]+)\x1f(?<subject>[^\x1f]+)\x1f(?<message>[^\x1f]+)\x1f\s*(?<diff>.*)$/ms";
 
         if (!preg_match($regex, $revision, $match)) {
             return false;
@@ -359,10 +359,14 @@ class Git extends \traq\libraries\SCM
 
         $parents = array_filter(explode(' ', $match['parents']));
 
+        preg_match_all('#refs\/(head|remote|tag)s\/([^\s,]+)#', $match['refs'], $refs);
+        $refs = array_combine($refs[0], $refs[2]);
+
         return new Revision([
             'id'        => $match['id'],
             'full_id'   => $match['hash'],
             'parents'   => $parents,
+            'refs'      => $refs,
             'author'    => $match['author'],
             'email'     => $match['email'],
             'date'      => strtotime($match['date']),

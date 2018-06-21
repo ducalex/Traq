@@ -25,6 +25,7 @@ class Revision
     // This class should store the following information
     public $id;       // string  Revision ID/hash
     public $full_id;  // string  Long form of revision ID/hash
+    public $refs;     // array   Array of heads/tags pointing to this commit full/refs/name => short_name
     public $parents;  // array   Array of $id of parents
     public $author;   // string  Name of author
     public $email;    // string  Email of author

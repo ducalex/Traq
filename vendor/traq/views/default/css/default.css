@@ -53,4 +53,3 @@
 .diff-changes-list {width: auto;}
 .diff-view-file {overflow-x:auto;background:white;font-family: consolas, monospace,lucida;margin-top:20px;border-radius:3px;border:1px solid #3478AA;}
 .commits .commit-merge a {color: #8d9bae;font-style: italic;}
-.commits .commit-first a {font-weight: bold;}

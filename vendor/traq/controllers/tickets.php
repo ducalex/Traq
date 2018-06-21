@@ -774,10 +774,10 @@ class Tickets extends AppController
         $filters = array_intersect_key($filters, ticket_filters_for($this->project));
 
         foreach ($filters as $name => $filter) {
-            if (!empty($filter['values'])) {
-                $filter['values'] = array_filter($filter['values'], 'strlen');
+            if (!isset($filter['values'])) {
+                continue;
             } else {
-                $filter['values'] = array();
+                $filter['values'] = array_filter((array)$filter['values'], 'strlen');
             }
 
             // Process filters

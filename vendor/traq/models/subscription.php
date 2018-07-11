@@ -68,7 +68,7 @@ class Subscription extends Model
      *
      * @param object $user
      * @param object $object
-     * 
+     *
      * @return self
      */
     public static function find_sub(User $user, Model $object, $make_new = false)
@@ -99,7 +99,7 @@ class Subscription extends Model
     public function object() {
         if ($this->object) {
             return $this->object;
-        } elseif (class_exists($class = ucfirst($this->type))) {
+        } elseif (class_exists($class = "traq\\models\\{$this->type}")) {
             return $class::find($this->object_id);
         } else {
             return false;

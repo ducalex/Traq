@@ -93,9 +93,16 @@ class Tickets extends AppController
         // Create ticket filter query
         $filter_query = new TicketFilterQuery();
 
-        $filters = Request::req() ?: Session::get("ticket_filters.{$this->project->id}");
-        $filters = $filters ? array_intersect_key($filters, ticket_filters_for($this->project)) : array();
+        $filters = (array)(Request::req() ?: Session::get("ticket_filters.{$this->project->id}"));
+        $filters += ['status' => 'allopen']; // default is showing only open tickets
+        $filters = array_intersect_key($filters, ticket_filters_for($this->project));
+        
+        $raw_filters = $filters;
 
+        if ($filters['status'] === 'all') {
+            unset($filters['status']);
+        }
+        
         foreach($filters as $filter => $value) {
             $filter_query->process($filter, $value);
         }
@@ -158,7 +165,7 @@ class Tickets extends AppController
         }
 
         // Send the tickets array to the response object..
-        $this->response->objects = compact('tickets', 'filters', 'order', 'pagination', 'columns');
+        $this->response->objects = compact('tickets', 'filters', 'raw_filters', 'order', 'pagination', 'columns');
     }
 
     /**

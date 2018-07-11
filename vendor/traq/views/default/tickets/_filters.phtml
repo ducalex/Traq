@@ -1,6 +1,15 @@
 <form action="<?php echo Request::base($app->project->href('tickets/update_filters')); ?>" method="post" id="ticket_filters">
 	<fieldset>
-		<legend><a href="#" class="toggle-and-remember" data-target="#ticket_filters_content"><?php echo l('filters'); ?></a> (<?php echo count($filters) ?>)</legend>
+		<legend><a href="#" class="toggle-and-remember" data-target="#ticket_filters_content"><?php echo l('filters'); ?></a> (<?php echo count($filters) ?>)
+		<style>.selected-link {background-color:#76acd3; }.selected-link a{color: white;text-decoration: none;}</style>
+		&nbsp;
+		<small>(<?= l('Quick filter:') ?>
+			  <span<?= ($raw_filters['status'] === 'all') ? ' class="selected-link"' : '' ?>>&nbsp;<a href="?status=all"><?= l('All') ?></a>&nbsp;</span>
+			| <span<?= ($raw_filters['status'] === 'allopen') ? ' class="selected-link"' : '' ?>>&nbsp;<a href="?status=allopen"><?= l('Open') ?></a>&nbsp;</span>
+			| <span<?= ($raw_filters['status'] === 'allclosed') ? ' class="selected-link"' : '' ?>>&nbsp;<a href="?status=allclosed"><?= l('Closed') ?></a>&nbsp;</span>
+		)</small>
+
+	</legend>
 		<div id="ticket_filters_content"<?php if (!strpos(Cookie::get('show_elements'), 'ticket_filters_content') && !Request::req('search')) echo ' style="display:none;"'; ?>>
 			<table>
 				<tbody>

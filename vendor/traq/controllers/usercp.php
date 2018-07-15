@@ -65,7 +65,7 @@ class Usercp extends AppController
 
             // Save the user
             if ($this->response->status = $user->save()) {
-                $this->response->redirect = Request::requestUri();
+                $this->response->redirect = '/usercp';
             }
         }
 

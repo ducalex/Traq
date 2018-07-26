@@ -68,7 +68,11 @@ function ticket_links($text, $project)
             // switch project project#123
             $_project = $slug ? Project::find('slug', $slug) : $project;
 
-            return HTML::link($matches[0], $_project->href("tickets/{$ticket}"));
+            if ($_project) {
+                return HTML::link($matches[0], $_project->href("tickets/{$ticket}"));
+            }
+            
+            return $matches[0];
         },
         $text
     );

@@ -25,7 +25,7 @@
 <?php } ?>
 			<?php foreach ($columns as $column) { ?>
 				<?php if ($column == 'summary') { ?>
-				<td><?php echo HTML::link(htmlspecialchars($ticket->summary), "{$app->project->slug}/tickets/{$ticket->ticket_id}"); ?></td>
+				<td><?php echo HTML::link($ticket->summary, "{$app->project->slug}/tickets/{$ticket->ticket_id}"); ?></td>
 				<?php } elseif ($column == 'owner') { ?>
 				<td><?php echo HTML::link(strshorten($ticket->user->name, 20), $ticket->user->href()); ?></td>
 				<?php } elseif ($column == 'assigned_to') { ?>

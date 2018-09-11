@@ -257,7 +257,7 @@ class AppController extends Controller
                 $this->render['view'] .= '.overlay';
             }
             // a popover?
-            elseif (Request::post('popover')) {
+            elseif (Request::req('popover')) {
                 $this->render['view'] .= '.popover';
             }
 

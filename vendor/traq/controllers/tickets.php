@@ -285,7 +285,7 @@ class Tickets extends AppController
         if (empty($ticket->extra['voted'])) {
             $voters = array();
         } else {
-            $voters = array_map('User::find', $ticket->extra['voted']);
+            $voters = array_map('traq\models\User::find', $ticket->extra['voted']);
         }
 
         View::set('voters', $voters);

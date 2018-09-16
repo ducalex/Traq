@@ -193,6 +193,6 @@ class Notification
         );
 
         // Send
-        return mail($user->email, $subject, $message, implode(PHP_EOL, $headers));
+        return mail($user->email, $subject, $message, implode(PHP_EOL, $headers), '-f '.settings('notification_from_email'));
     }
 }

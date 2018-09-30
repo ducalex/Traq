@@ -151,7 +151,9 @@ class Ticket extends Model
     public function save()
     {
         // Is this a new ticket?
-        if ($this->_is_new) {
+        $is_new = $this->is_new();
+
+        if ($is_new) {
             // Get the next ticket id and update
             // the value for the next ticket.
             $this->ticket_id = $this->project->next_tid;
@@ -180,7 +182,7 @@ class Ticket extends Model
             $this->_custom_field_queue = array();
 
             // New ticket?
-            if ($this->_is_new) {
+            if ($is_new) {
                 // Timeline entry
                 $timeline = new Timeline(array(
                     'project_id' => $this->project_id,

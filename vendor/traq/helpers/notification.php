@@ -67,6 +67,7 @@ class Notification
             case 'ticket_created':
             case 'ticket_closed':
             case 'ticket_reopened':
+            // case 'ticket_updated':
                 // Project
                 if ($sub->type == 'project' and $data['ticket']->project_id == $sub->project_id) {
                     return true;

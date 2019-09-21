@@ -1,21 +1,21 @@
--- 
+--
 -- Traq
 -- Copyright (C) 2009-2016 Traq.io
--- 
+--
 -- This file is part of Traq.
--- 
+--
 -- Traq is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation; version 3 only.
--- 
+--
 -- Traq is distributed in the hope that it will be useful,
 -- but WITHOUT ANY WARRANTY; without even the implied warranty of
 -- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 -- GNU General Public License for more details.
--- 
+--
 -- You should have received a copy of the GNU General Public License
 -- along with Traq. If not, see <http://www.gnu.org/licenses/>.
--- 
+--
 
 -- Dump of table traq_attachments
 -- ------------------------------------------------------------
@@ -302,9 +302,9 @@ CREATE TABLE `traq_projects` (
   `enable_wiki` INTEGER NOT NULL DEFAULT '0',
   `default_ticket_type_id` INTEGER DEFAULT NULL,
   `default_ticket_sorting` VARCHAR(255) NOT NULL DEFAULT 'priority.asc',
-  `default_ticket_columns` TEXT NOT NULL DEFAULT '',
+  `default_ticket_columns` TEXT DEFAULT NULL,
   `displayorder` INTEGER NOT NULL DEFAULT '0',
-  `extra` TEXT NOT NULL DEFAULT '',
+  `extra` TEXT DEFAULT NULL,
   `private_key` VARCHAR(255) NOT NULL DEFAULT ''
 );
 
